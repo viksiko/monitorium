@@ -8,10 +8,8 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import { User } from '@prisma/client';
 import {
     DB_OPERATION_FAILED,
-    EMAIL_VERIFICATION_FAILED,
     LOGOUT_SUCCESS_MSG,
     REFRESH_TOKEN_INVALID,
     REGISTRATION_CONFIRMED_MESSAGE,
@@ -22,6 +20,8 @@ import {
 import { UserService } from '@src/user/user.service';
 import { Request, Response } from 'express';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { v4 as uuidv4 } from 'uuid';
+import { ForgotPasswordDto } from './dto/forgotPassword.dto';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 import { CookieTokenService } from './services/cookieToken.service';
@@ -44,8 +44,6 @@ export class AuthService {
     async register(registerDto: RegisterDto): Promise<{
         message: string;
     }> {
-        let createdUser: User | null = null; // Нужно для логики отката
-
         try {
             // 1. Проверка существования пользователя (Делегирование UserService)
             const existingUser = await this.userService.findUserByEmailOrPhone(
@@ -58,29 +56,10 @@ export class AuthService {
             }
 
             // 2. Создание пользователя
-            createdUser = await this.userService.createUser(registerDto);
-
-            // 3. Отправка email
-            const emailSent = await this.mailService.sendVerificationEmail(
-                createdUser.email,
-                createdUser.verifyToken,
-            );
-
-            if (!emailSent) {
-                // Если отправка не удалась, инициируем откат через блок catch
-                throw new Error(EMAIL_VERIFICATION_FAILED);
-            }
+            await this.userService.createUser(registerDto);
 
             return { message: REGISTRATION_SUCCESS };
         } catch (error) {
-            if (createdUser && error.message === EMAIL_VERIFICATION_FAILED) {
-                await this.userService.deleteUser(createdUser.id);
-
-                throw new InternalServerErrorException(
-                    EMAIL_VERIFICATION_FAILED,
-                );
-            }
-
             if (error instanceof ConflictException) throw error;
 
             throw new InternalServerErrorException(DB_OPERATION_FAILED);
@@ -203,4 +182,103 @@ export class AuthService {
 
         return { message: REGISTRATION_CONFIRMED_MESSAGE };
     }
+
+    // запрос на восстановление пароля
+    async forgotPassword(dto: ForgotPasswordDto): Promise<{ message: string }> {
+        const user = await this.userService.findUserByEmail(dto.email);
+
+        // Если юзера нет, мы не кидаем ошибку, а просто имитируем успех
+        if (!user) {
+            return {
+                message:
+                    'Если адрес указан верно, письмо придет в течение нескольких минут',
+            };
+        }
+
+        const rawResetToken = uuidv4();
+        const salt = this.configService.get('JWT_RESET_PASSWORD_SALT');
+        const hashedResetToken = this.tokenService.hashToken(
+            rawResetToken,
+            salt,
+        );
+
+        const expiryDate = new Date();
+        expiryDate.setHours(expiryDate.getHours() + 1); // Токены сброса обычно живут недолго (1 час)
+
+        try {
+            await this.prisma.$transaction(async (tx) => {
+                // Удаляем старые токены сброса пароля этого пользователя (чтобы не копились)
+                await tx.token.deleteMany({
+                    where: { userId: user.id, type: 'RESET_PASSWORD' },
+                });
+
+                // Создаем новый
+                await tx.token.create({
+                    data: {
+                        userId: user.id,
+                        type: 'RESET_PASSWORD',
+                        hashedToken: hashedResetToken,
+                        exp: expiryDate,
+                    },
+                });
+            });
+
+            // Отправка письма (вне транзакции!)
+            await this.mailService.sendResetPasswordEmail(
+                user.email,
+                rawResetToken,
+            );
+        } catch (error) {
+            console.error('Forgot password error:', error);
+            // Тут можно выбросить ошибку, так как это технический сбой
+            throw new InternalServerErrorException(DB_OPERATION_FAILED);
+        }
+
+        return { message: 'Инструкции по сбросу пароля отправлены на почту' };
+    }
+
+    // async resetPassword(dto: ResetPasswordDto) {
+    //     const { token, newPassword } = dto;
+
+    //     // 1. Хешируем входящий токен для поиска
+    //     const salt = this.configService.get('JWT_RESET_PASSWORD_SALT');
+    //     const hashedInput = this.tokenService.hashToken(token, salt);
+
+    //     // 2. Ищем токен
+    //     const tokenRecord = await this.prisma.token.findUnique({
+    //         where: { hashedToken: hashedInput },
+    //     });
+
+    //     if (!tokenRecord || tokenRecord.type !== 'RESET_PASSWORD') {
+    //         throw new BadRequestException('Неверный или просроченный токен');
+    //     }
+
+    //     // 3. Проверка срока действия
+    //     if (new Date() > tokenRecord.exp) {
+    //         await this.prisma.token.delete({ where: { id: tokenRecord.id } });
+    //         throw new BadRequestException('Срок действия токена истек');
+    //     }
+
+    //     // 4. Хешируем новый пароль
+    //     const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    //     // 5. Обновляем пароль и удаляем токен (транзакция)
+    //     try {
+    //         await this.prisma.$transaction([
+    //             this.prisma.user.update({
+    //                 where: { id: tokenRecord.userId },
+    //                 data: { password: hashedPassword },
+    //             }),
+    //             this.prisma.token.delete({
+    //                 where: { id: tokenRecord.id },
+    //             }),
+    //         ]);
+    //     } catch (error) {
+    //         throw new InternalServerErrorException(
+    //             'Не удалось сбросить пароль',
+    //         );
+    //     }
+
+    //     return { message: 'Пароль успешно изменен' };
+    // }
 }

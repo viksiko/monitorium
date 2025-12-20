@@ -23,7 +23,7 @@ export class TokenSevice {
         private configService: ConfigService,
     ) {}
 
-    // Генерация токенов
+    // Генерация токенов доступа
     async generateTokens(
         payload: JwtPayload,
         response: Response,
@@ -61,18 +61,22 @@ export class TokenSevice {
         };
     }
 
-    // Сохранение токена в базу
+    // Сохранение refresh токена в базу
     private async saveRefreshToken(
         userId: string,
         refreshToken: string,
         expiresAt: Date,
     ): Promise<void> {
-        const hashed = this.hashToken(refreshToken);
+        const hashed = this.hashToken(
+            refreshToken,
+            this.configService.get('JWT_REFRESH_SALT'),
+        );
 
         try {
             await this.prisma.token.create({
                 data: {
                     hashedToken: hashed,
+                    type: 'REFRESH',
                     userId,
                     exp: expiresAt,
                 },
@@ -88,15 +92,9 @@ export class TokenSevice {
         }
     }
 
-    // Хеширование токена перед сохранением в базу данных (с использованием секретного ключа/соли)
-    hashToken(token: string): string {
-        return crypto
-            .createHmac(
-                'sha256',
-                this.configService.get('JWT_REFRESH_SALT') || '',
-            )
-            .update(token)
-            .digest('hex');
+    // Хеширование для токенов перед сохранением в базу данных (с использованием секретного ключа/соли)
+    hashToken(token: string, salt: string = ''): string {
+        return crypto.createHmac('sha256', salt).update(token).digest('hex');
     }
 
     // Устанавливает Refresh Token в HTTP-ответ в виде безопасной HttpOnly куки.
@@ -120,7 +118,10 @@ export class TokenSevice {
     }
 
     async deleteTokensByHash(refreshToken: string): Promise<number> {
-        const hashedToken = this.hashToken(refreshToken);
+        const hashedToken = this.hashToken(
+            refreshToken,
+            this.configService.get('JWT_REFRESH_SALT'),
+        );
 
         try {
             const deleteResult = await this.prisma.token.deleteMany({
@@ -135,7 +136,10 @@ export class TokenSevice {
     }
 
     async consumeRefreshToken(refreshToken: string): Promise<string> {
-        const hashedToken = this.hashToken(refreshToken);
+        const hashedToken = this.hashToken(
+            refreshToken,
+            this.configService.get('JWT_REFRESH_SALT'),
+        );
 
         try {
             const tokenRecord = await this.prisma.token.findUnique({
@@ -157,6 +161,7 @@ export class TokenSevice {
             if (error instanceof UnauthorizedException) {
                 throw error;
             }
+
             // Логирование и переброс внутренней ошибки БД.
             console.error('DB error during token consumption:', error);
             throw new InternalServerErrorException(DB_OPERATION_FAILED);

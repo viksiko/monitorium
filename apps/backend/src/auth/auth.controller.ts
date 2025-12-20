@@ -20,6 +20,7 @@ import {
 } from '@src/constants/api-responses.swagger';
 import { Request, Response } from 'express';
 import { AuthService } from './auth.service';
+import { ForgotPasswordDto } from './dto/forgotPassword.dto';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 
@@ -113,5 +114,16 @@ export class AuthController {
     ): Promise<void> {
         await this.authService.confirmRegistration(token);
         return response.redirect(`${process.env.VITE_FRONTEND_URL}/login`);
+    }
+
+    @Post('forgot-password')
+    @ApiOperation({ summary: 'Запрос на восстановление пароля' })
+    @ApiResponse({ status: 200, description: 'Письмо отправлено' })
+    async forgotPassword(
+        @Body() forgotPasswordDto: ForgotPasswordDto,
+    ): Promise<{ message: string }> {
+        const res = await this.authService.forgotPassword(forgotPasswordDto);
+
+        return res;
     }
 }
