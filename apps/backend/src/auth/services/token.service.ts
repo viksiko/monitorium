@@ -1,16 +1,10 @@
 import * as crypto from 'crypto';
 import { UserProfile } from '@monorepo/types';
-import {
-    Injectable,
-    InternalServerErrorException,
-    UnauthorizedException,
-} from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import {
-    DB_OPERATION_FAILED,
-    REFRESH_TOKEN_INVALID,
-} from '@src/constants/api-messages.constants';
+import { TOKEN_INVALID } from '@src/constants/api-messages.constants';
+import { logger } from '@src/logger/winston.logger';
 import { PrismaService } from '@src/prisma/prisma.service';
 import { JwtPayload } from '@src/types/auth';
 import { Response } from 'express';
@@ -82,13 +76,12 @@ export class TokenSevice {
                 },
             });
         } catch (error) {
-            // Логирование фактической ошибки (Надо настроить логер)
-            console.error(
-                `Не удалось сохранить токен для пользователя ${userId}:`,
-                error,
-            );
-
-            throw new InternalServerErrorException(DB_OPERATION_FAILED);
+            logger.error('Failed to create refresh token', {
+                category: 'database',
+                operation: 'saveRefreshToken',
+                error: error instanceof Error ? error.message : error,
+            });
+            throw error;
         }
     }
 
@@ -123,16 +116,10 @@ export class TokenSevice {
             this.configService.get('JWT_REFRESH_SALT'),
         );
 
-        try {
-            const deleteResult = await this.prisma.token.deleteMany({
-                where: { hashedToken },
-            });
-            return deleteResult.count;
-        } catch (error) {
-            // Логирование фактической ошибки БД
-            console.error('DB error during token deletion on logout:', error);
-            throw new InternalServerErrorException(DB_OPERATION_FAILED);
-        }
+        const deleteResult = await this.prisma.token.deleteMany({
+            where: { hashedToken },
+        });
+        return deleteResult.count;
     }
 
     async consumeRefreshToken(refreshToken: string): Promise<string> {
@@ -141,30 +128,19 @@ export class TokenSevice {
             this.configService.get('JWT_REFRESH_SALT'),
         );
 
-        try {
-            const tokenRecord = await this.prisma.token.findUnique({
-                where: { hashedToken },
-            });
+        const tokenRecord = await this.prisma.token.findUnique({
+            where: { hashedToken },
+        });
 
-            if (!tokenRecord) {
-                throw new UnauthorizedException(REFRESH_TOKEN_INVALID);
-            }
-
-            // Удаляем старый токен (потребляем)
-            await this.prisma.token.delete({
-                where: { id: tokenRecord.id },
-            });
-
-            return tokenRecord.userId; // Возвращаем ID пользователя
-        } catch (error) {
-            // Если это ошибка авторизации, перебрасываем ее.
-            if (error instanceof UnauthorizedException) {
-                throw error;
-            }
-
-            // Логирование и переброс внутренней ошибки БД.
-            console.error('DB error during token consumption:', error);
-            throw new InternalServerErrorException(DB_OPERATION_FAILED);
+        if (!tokenRecord) {
+            throw new UnauthorizedException(TOKEN_INVALID);
         }
+
+        // Удаляем старый токен (потребляем)
+        await this.prisma.token.delete({
+            where: { id: tokenRecord.id },
+        });
+
+        return tokenRecord.userId;
     }
 }

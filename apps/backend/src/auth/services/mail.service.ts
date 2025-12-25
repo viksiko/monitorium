@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { logger } from '@src/logger/winston.logger';
 import * as nodemailer from 'nodemailer';
 
 @Injectable()
@@ -29,19 +30,40 @@ export class MailService {
             to: `${process.env.EMAIL_USER}`,
             subject: 'Подтверждение регистрации',
             html: `
-                <h1>Добро пожаловать!</h1>
-                <p>Пожалуйста, перейдите по ссылке ниже, чтобы подтвердить ваш адрес электронной почты:</p>
-                <p><a href="${verificationUrl}">Подтвердить мой email</a></p>
-                <p>Если вы не регистрировались, просто проигнорируйте это письмо.</p>
+                <div style="font-family: sans-serif; line-height: 1.5; color: #333;">
+                    <h1 style="color: #2c3e50;">Подтверждение регистрации</h1>
+                    <p>Добро пожаловать!</p>
+                    <p>Пожалуйста, перейдите по ссылке ниже, чтобы подтвердить ваш адрес электронной почты в системе <strong>"МОНИТОРИУМ"</strong></p>
+                    <p style="margin: 20px 0;">
+                        <a href="${verificationUrl}" 
+                        style="background-color: #007bff; color: white; padding: 12px 20px; text-decoration: none; border-radius: 5px; display: inline-block;">
+                        Подтвердить регистрацию
+                        </a>
+                    </p>
+                    <p style="font-size: 0.9em; color: #666;">
+                        Срок действия этой ссылки <strong>24 часа</strong>.
+                    </p>
+                    <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;" />
+                    <p style="font-size: 0.8em; color: #999;">
+                        Если вы не регистрировались, просто проигнорируйте это письмо.
+                    </p>
+                </div>
             `,
         };
 
         try {
-            const info = await this.transporter.sendMail(mailOptions);
-            console.log('Письмо отправлено:', info.messageId);
+            await this.transporter.sendMail(mailOptions);
+            logger.info(`The email has been sent - ${process.env.EMAIL_USER}`, {
+                category: 'email',
+                operation: 'sendVerificationEmail',
+            });
             return true;
         } catch (error) {
-            console.error('Ошибка отправки письма:', error);
+            logger.error('Error sending email', {
+                category: 'email',
+                operation: 'sendVerificationEmail',
+                error: error instanceof Error ? error.message : error,
+            });
             return false;
         }
     }
@@ -68,7 +90,7 @@ export class MailService {
                         </a>
                     </p>
                     <p style="font-size: 0.9em; color: #666;">
-                        Эта ссылка действительна в течение <strong>1 часа</strong>.
+                        Срок действия этой ссылки <strong>1 час</strong>.
                     </p>
                     <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;" />
                     <p style="font-size: 0.8em; color: #999;">
@@ -79,11 +101,18 @@ export class MailService {
         };
 
         try {
-            const info = await this.transporter.sendMail(mailOptions);
-            console.log('Письмо отправлено:', info.messageId);
+            await this.transporter.sendMail(mailOptions);
+            logger.info(`The email has been sent - ${process.env.EMAIL_USER}`, {
+                category: 'email',
+                operation: 'sendResetPasswordEmail',
+            });
             return true;
         } catch (error) {
-            console.error('Ошибка отправки письма:', error);
+            logger.error('Error sending email', {
+                category: 'email',
+                operation: 'sendResetPasswordEmail',
+                error: error instanceof Error ? error.message : error,
+            });
             return false;
         }
     }

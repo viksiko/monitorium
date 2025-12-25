@@ -1,3 +1,4 @@
+// http-exception.filter.ts
 import {
     ArgumentsHost,
     Catch,
@@ -5,54 +6,80 @@ import {
     HttpException,
     HttpStatus,
 } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
+import { logger } from '@src/logger/winston.logger';
 import { Response } from 'express';
 
-@Catch(HttpException)
+@Catch()
 export class HttpExceptionFilter implements ExceptionFilter {
-    catch(exception: HttpException, host: ArgumentsHost): void {
+    catch(exception: unknown, host: ArgumentsHost): void {
         const ctx = host.switchToHttp();
         const response = ctx.getResponse<Response>();
 
-        const status =
-            exception instanceof HttpException
-                ? exception.getStatus()
-                : HttpStatus.INTERNAL_SERVER_ERROR;
-
-        // Оригинальный ответ NestJS (может быть строкой или объектом)
-        const exceptionResponse = exception.getResponse();
-
-        /*
-      Пример exceptionResponse при валидации:
-      {
-        statusCode: 400,
-        message: [ ...errors ],
-        error: "Bad Request"
-      }
-    */
-
+        let status: number;
         let message: string | string[];
 
-        if (typeof exceptionResponse === 'string') {
-            // Например, throw new HttpException("Error", 400)
-            message = exceptionResponse;
-        } else if (
-            typeof exceptionResponse === 'object' &&
-            exceptionResponse !== null
-        ) {
-            // Берём message, если он есть
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            message = (exceptionResponse as any).message ?? exception.message;
-        } else {
-            // fallback
-            message = exception.message;
+        // ================= HTTP EXCEPTIONS =================
+        if (exception instanceof HttpException) {
+            status = exception.getStatus();
+            const exceptionResponse = exception.getResponse();
+
+            if (typeof exceptionResponse === 'string') {
+                message = exceptionResponse;
+            } else if (
+                typeof exceptionResponse === 'object' &&
+                exceptionResponse !== null
+            ) {
+                message =
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    (exceptionResponse as any).message ?? exception.message;
+            } else {
+                message = exception.message;
+            }
+        }
+        // ================= PRISMA / DATABASE ERRORS =================
+        else if (this.isPrismaError(exception)) {
+            status = HttpStatus.INTERNAL_SERVER_ERROR;
+            message = 'Internal server error PRISMA';
+        }
+        // ================= OTHER ERRORS =================
+        else if (exception instanceof Error) {
+            status = HttpStatus.INTERNAL_SERVER_ERROR;
+            message = 'Internal server error OTHER';
+
+            logger.error('Unhandled error', {
+                name: exception.name,
+                message: exception.message,
+                stack:
+                    process.env.NODE_ENV === 'development'
+                        ? exception.stack
+                        : undefined,
+            });
+        }
+        // ================= UNKNOWN ERRORS =================
+        else {
+            status = HttpStatus.INTERNAL_SERVER_ERROR;
+            message = 'Internal server error UNKNOWN';
+
+            logger.error('Unknown error type', { exception });
         }
 
         response.status(status).json({
             success: false,
             statusCode: status,
-            data: {
-                message,
-            },
+            data: { message },
         });
+    }
+
+    private isPrismaError(error: unknown): boolean | undefined {
+        return (
+            error instanceof Prisma.PrismaClientKnownRequestError ||
+            error instanceof Prisma.PrismaClientUnknownRequestError ||
+            error instanceof Prisma.PrismaClientInitializationError ||
+            error instanceof Prisma.PrismaClientRustPanicError ||
+            error instanceof Prisma.PrismaClientValidationError ||
+            // Дополнительная проверка по имени класса на случай проблем с импортом
+            error?.constructor?.name?.includes('Prisma')
+        );
     }
 }

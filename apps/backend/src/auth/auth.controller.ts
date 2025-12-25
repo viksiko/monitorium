@@ -1,28 +1,44 @@
 import { UserProfile } from '@monorepo/types';
-import { Body, Controller, Get, Post, Query, Req, Res } from '@nestjs/common';
+import {
+    Body,
+    Controller,
+    Get,
+    Post,
+    Query,
+    Req,
+    Res,
+    UseGuards,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import {
+    AUTH_CONFLICT_RESPONSE,
     DATABASE_ERROR_RESPONSE,
-    EMAIL_NOT_VERIFIED_CONFLICT_RESPONSE,
+    FORGOT_PASSWORD_SUCCESS_RESPONSE,
+    INVALID_RESET_PASSWORD_TOKEN_RESPONSE,
     INVALID_TOKEN_RESPONSE,
     LOGIN_VALIDATION_ERROR_RESPONSE,
     LOGOUT_SUCCESS_RESPONSE,
     REFRESH_INVALID,
     REFRESH_SUCCESS_RESPONSE,
     REGISTRATION_CONFIRMED_RESPONSE,
+    RESET_PASSWORD_CHANGED,
     SERVER_ERROR_RESPONSES_REGISTR,
-    UNAUTHORIZED_LOGIN_RESPONSE,
+    TOO_MANY_REQUESTS_RESPONSE,
     USER_CONFLICT_RESPONSE,
     USER_LOGIN_SUCCESS_RESPONSE,
     USER_REGISTER_SUCCESS_RESPONSE,
     VALIDATION_ERROR_RESPONSE,
+    VALIDATION_FORGOT_PASSWORD_ERROR_RESPONSE,
+    VALIDATION_RESET_PASSWORD_ERROR_RESPONSE,
 } from '@src/constants/api-responses.swagger';
 import { Request, Response } from 'express';
 import { AuthService } from './auth.service';
 import { ForgotPasswordDto } from './dto/forgotPassword.dto';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
+import { ResetPasswordDto } from './dto/resetPassword.dto';
+import { CustomThrottlerGuard } from './guards/custom-throttler.guard';
 
 @Controller({
     path: 'auth',
@@ -51,8 +67,7 @@ export class AuthController {
     @ApiOperation({ summary: 'Авторизация пользователя' })
     @ApiResponse(USER_LOGIN_SUCCESS_RESPONSE)
     @ApiResponse(LOGIN_VALIDATION_ERROR_RESPONSE)
-    @ApiResponse(LOGIN_VALIDATION_ERROR_RESPONSE)
-    @ApiResponse(UNAUTHORIZED_LOGIN_RESPONSE)
+    @ApiResponse(AUTH_CONFLICT_RESPONSE)
     @ApiResponse(DATABASE_ERROR_RESPONSE)
     async login(
         @Body() loginDto: LoginDto,
@@ -93,12 +108,38 @@ export class AuthController {
         return await this.authService.logout(request, response);
     }
 
+    @Post('forgot-password')
+    @UseGuards(CustomThrottlerGuard)
+    @ApiOperation({ summary: 'Запрос на восстановление пароля' })
+    @ApiResponse(VALIDATION_FORGOT_PASSWORD_ERROR_RESPONSE)
+    @ApiResponse(FORGOT_PASSWORD_SUCCESS_RESPONSE)
+    @ApiResponse(TOO_MANY_REQUESTS_RESPONSE)
+    @ApiResponse(DATABASE_ERROR_RESPONSE)
+    async forgotPassword(
+        @Body() forgotPasswordDto: ForgotPasswordDto,
+    ): Promise<{ message: string }> {
+        return await this.authService.forgotPassword(forgotPasswordDto);
+    }
+
+    @Post('reset-password')
+    @UseGuards(CustomThrottlerGuard)
+    @ApiOperation({ summary: 'Запрос на изменение пароля' })
+    @ApiResponse(RESET_PASSWORD_CHANGED)
+    @ApiResponse(DATABASE_ERROR_RESPONSE)
+    @ApiResponse(VALIDATION_RESET_PASSWORD_ERROR_RESPONSE)
+    @ApiResponse(TOO_MANY_REQUESTS_RESPONSE)
+    @ApiResponse(INVALID_RESET_PASSWORD_TOKEN_RESPONSE)
+    async resetPassword(
+        @Body() resetPasswordDto: ResetPasswordDto,
+    ): Promise<{ message: string }> {
+        return await this.authService.resetPassword(resetPasswordDto);
+    }
+
     @Get('confirm')
     @ApiOperation({ summary: 'Подтверждение регистрации' })
     @ApiOperation({ summary: 'Подтверждение регистрации по токену из Email' })
     @ApiResponse(REGISTRATION_CONFIRMED_RESPONSE)
     @ApiResponse(INVALID_TOKEN_RESPONSE)
-    @ApiResponse(EMAIL_NOT_VERIFIED_CONFLICT_RESPONSE)
     @ApiResponse(DATABASE_ERROR_RESPONSE)
     @ApiQuery({
         name: 'token',
@@ -108,22 +149,8 @@ export class AuthController {
         example:
             '/api/v1/auth/confirm?token=ee4340b9-0fe0-4c49-983d-2cd9283d0c29',
     })
-    async confirm(
-        @Query('token') token: string,
-        @Res({ passthrough: true }) response: Response,
-    ): Promise<void> {
-        await this.authService.confirmRegistration(token);
-        return response.redirect(`${process.env.VITE_FRONTEND_URL}/login`);
-    }
-
-    @Post('forgot-password')
-    @ApiOperation({ summary: 'Запрос на восстановление пароля' })
-    @ApiResponse({ status: 200, description: 'Письмо отправлено' })
-    async forgotPassword(
-        @Body() forgotPasswordDto: ForgotPasswordDto,
-    ): Promise<{ message: string }> {
-        const res = await this.authService.forgotPassword(forgotPasswordDto);
-
-        return res;
+    async confirm(@Query('token') token: string): Promise<{ message: string }> {
+        return await this.authService.confirmRegistration(token);
+        // return response.redirect(`${process.env.VITE_FRONTEND_URL}/login`);
     }
 }
