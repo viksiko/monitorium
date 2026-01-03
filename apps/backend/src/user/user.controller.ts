@@ -49,7 +49,7 @@ export class UserController {
         description: 'Опциональный email для поиска конкретного пользователя',
         required: false,
         type: String,
-        example: '/api/v1/users?email="user1@test.test"',
+        example: '/api/v1/users?email=user1@test.test',
     })
     @ApiResponse(USER_LIST_SUCCESS_RESPONSE)
     @ApiResponse(AUTHENTICATION_ERROR_RESPONSES)
@@ -60,7 +60,7 @@ export class UserController {
         if (email) {
             return this.userService.findUserByEmail(email);
         }
-        return this.userService.getAllUsers();
+        return this.userService.getUsers();
     }
 
     // Получить пользователя по id

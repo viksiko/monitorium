@@ -13,8 +13,6 @@ export interface User {
     name: string;
     district: string | null;
     isVerified: boolean;
-    verifyToken: string | null;
-    verifyExp: Date | null;
     isRepresentative: boolean;
     role: PrismaRole;
     position: string | null;

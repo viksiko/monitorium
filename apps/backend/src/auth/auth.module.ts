@@ -11,9 +11,7 @@ import { AccessStrategy } from './strategies/access.strategy';
 import { RefreshStrategy } from './strategies/refresh.strategy';
 
 @Module({
-    imports: [
-        JwtModule.register({}), // конфиг через sign()
-    ],
+    imports: [JwtModule.register({})],
     controllers: [AuthController],
     providers: [
         AuthService,

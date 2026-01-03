@@ -13,17 +13,15 @@ datasource db {
 }
 
 model User {
-  id               String    @id @default(cuid())
-  name             String
-  email            String    @unique
-  password         String? // Nullable для пользователей через OAuth
-  phone            String?   @unique
-  district         String? // Округ пользователя
-  isVerified       Boolean   @default(false)
-  verifyToken      String?
-  verifyExp        DateTime?
-  isRepresentative Boolean   @default(false)
-  role             Role      @default(USER)
+  id       String  @id @default(cuid())
+  name     String
+  email    String  @unique
+  password String? // Nullable для пользователей через OAuth
+  phone    String? @unique
+  district String? // Округ пользователя
+
+  isRepresentative Boolean @default(false)
+  role             Role    @default(USER)
 
   // Поля для представителей власти
   position       String? // "Депутат городской думы", "Глава района"
@@ -46,22 +44,25 @@ model User {
   updatedAt DateTime @updatedAt
   tokens    Token[]
 
-  isActive  Boolean  @default(true)
-  deletedAt DateTime?
+  // верифицирован и активная учтеная запись
+  isVerified Boolean   @default(false)
+  isActive   Boolean   @default(true)
+  deletedAt  DateTime?
 
   @@map("users")
 }
 
 model Token {
-  id          String   @id @default(cuid())
+  id          String    @id @default(cuid())
   userId      String
-  hashedToken String   @unique
+  type        TokenType
+  hashedToken String    @unique
   device      String?
   ip          String?
   exp         DateTime
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("tokens")
 }
@@ -70,4 +71,10 @@ enum Role {
   USER
   REPRESENTATIVE
   ADMIN
+}
+
+enum TokenType {
+  REFRESH
+  VERIFY_EMAIL
+  RESET_PASSWORD
 }

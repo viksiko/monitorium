@@ -5,7 +5,9 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import { ACCESS_TOKEN_INVALID } from '@src/constants/api-messages.constants';
+import { TOKEN_INVALID } from '@src/constants/api-messages.constants';
+import { logger } from '@src/logger/winston.logger';
+import { JwtPayload } from '@src/types/auth';
 import { UserService } from '@src/user/user.service';
 import { NextFunction, Response } from 'express';
 import { ExpressRequest } from '../../../src/types/expressRequest.interface';
@@ -14,40 +16,49 @@ import { ExpressRequest } from '../../../src/types/expressRequest.interface';
 export class AuthMiddleware implements NestMiddleware {
     constructor(
         private readonly userService: UserService,
-        private jwt: JwtService,
-        private configService: ConfigService,
+        private readonly jwt: JwtService,
+        private readonly configService: ConfigService,
     ) {}
+
     async use(
         req: ExpressRequest,
         res: Response,
         next: NextFunction,
     ): Promise<void> {
-        if (!req.headers.authorization) {
-            req.user = undefined;
+        const authHeader = req.headers.authorization;
 
-            next();
-            return;
+        if (!authHeader || !authHeader.startsWith('Bearer ')) {
+            req.user = undefined;
+            return next();
         }
 
-        const token = req.headers.authorization.split(' ')[1];
+        const token = authHeader.split(' ')[1];
+
+        let payload: JwtPayload;
 
         try {
-            const verifyJwt = this.jwt.verify(token, {
+            payload = this.jwt.verify(token, {
                 secret: this.configService.get('JWT_ACCESS_SECRET'),
             });
-
-            const user = await this.userService.findUserById(
-                verifyJwt.id as string,
-            );
-
-            req.user = user ? user : undefined;
         } catch (error) {
-            // Логирование фактической ошибки (Надо настроить логер)
-            console.error('Ошибка верификации токена:', error);
+            logger.warn('Verify access token failed', {
+                category: 'token',
+                operation: 'AuthMiddleware',
+                jwtError: error instanceof Error ? error.message : error,
+            });
 
-            throw new UnauthorizedException(ACCESS_TOKEN_INVALID);
-        } finally {
-            next();
+            req.user = undefined;
+            throw new UnauthorizedException(TOKEN_INVALID);
         }
+
+        const user = await this.userService.findUserById(payload.id as string);
+
+        if (!user) {
+            throw new UnauthorizedException(TOKEN_INVALID);
+        }
+
+        req.user = user;
+
+        next();
     }
 }
