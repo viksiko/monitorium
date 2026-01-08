@@ -27,6 +27,7 @@
             "@shared/middleware/*": ["libs/middleware/src/*"],
             "@shared/schema": ["libs/schema/src"],
             "@shared/schema/*": ["libs/schema/src/*"],
+            "@libs/*": ["apps/backend/libs/*"]
         }
     }
 }

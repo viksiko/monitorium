@@ -17,6 +17,20 @@ import {
     USER_NOT_AUTHORIZED,
 } from './api-messages.constants';
 
+export const TOKEN_INVALID_RES = {
+    success: false,
+    statusCode: 401,
+    data: {
+        message: TOKEN_INVALID,
+    },
+};
+
+export const USER_NOT_AUTHORIZED_RES = {
+    success: false,
+    statusCode: 401,
+    data: { message: USER_NOT_AUTHORIZED },
+};
+
 export const USER_LIST_SUCCESS_RESPONSE: ApiResponseOptions = {
     status: 200,
     description:
@@ -242,21 +256,6 @@ export const RESET_PASSWORD_CHANGED: ApiResponseOptions = {
     },
 };
 
-export const EMAIL_VERIFICATION_FAILED_RESPONSE: ApiResponseOptions = {
-    status: 500,
-    description:
-        'Ошибка отправки письма поьзователю для подтверждения регистрации',
-    schema: {
-        example: {
-            success: false,
-            statusCode: 500,
-            data: {
-                message: EMAIL_VERIFICATION_FAILED,
-            },
-        },
-    },
-};
-
 export const VALIDATION_ERROR_RESPONSE: ApiResponseOptions = {
     status: 400,
     description: 'Ошибка валидации данных при регистрации',
@@ -353,13 +352,7 @@ export const REFRESH_INVALID: ApiResponseOptions = {
     status: 401,
     description: 'RefreshToken недействителен, просрочен или пустой',
     schema: {
-        example: {
-            success: false,
-            statusCode: 401,
-            data: {
-                message: TOKEN_INVALID,
-            },
-        },
+        example: TOKEN_INVALID_RES,
     },
 };
 
@@ -367,11 +360,7 @@ export const UNAUTHORIZED_ACCESS_RESPONSE: ApiResponseOptions = {
     status: 401,
     description: 'Неавторизованный доступ (отсутсвует в header Authorization)',
     schema: {
-        example: {
-            success: false,
-            statusCode: 401,
-            data: { message: USER_NOT_AUTHORIZED },
-        },
+        example: USER_NOT_AUTHORIZED_RES,
     },
 };
 
@@ -379,13 +368,7 @@ export const INVALID_ACCESS_TOKEN_RESPONSE: ApiResponseOptions = {
     status: 401,
     description: 'Неудачная попытка деактивации',
     schema: {
-        example: {
-            success: false,
-            statusCode: 401,
-            data: {
-                message: TOKEN_INVALID,
-            },
-        },
+        example: TOKEN_INVALID_RES,
     },
 };
 
@@ -393,13 +376,15 @@ export const INVALID_RESET_PASSWORD_TOKEN_RESPONSE: ApiResponseOptions = {
     status: 401,
     description: 'Невалидный токен изменения пароля',
     schema: {
-        example: {
-            success: false,
-            statusCode: 401,
-            data: {
-                message: TOKEN_INVALID,
-            },
-        },
+        example: TOKEN_INVALID_RES,
+    },
+};
+
+export const INVALID_TOKEN_RESPONSE: ApiResponseOptions = {
+    status: 401,
+    description: 'Неверный или просроченный токен',
+    schema: {
+        example: TOKEN_INVALID_RES,
     },
 };
 
@@ -432,20 +417,6 @@ export const DEACTIVATE_OWN_ACCOUNT_ERROR_RESPONSE: ApiResponseOptions = {
             statusCode: 403,
             data: {
                 message: DEACTIVATE_OWN_ACCOUNT_ONLY,
-            },
-        },
-    },
-};
-
-export const INVALID_TOKEN_RESPONSE: ApiResponseOptions = {
-    status: 404,
-    description: 'Неверный или просроченный токен',
-    schema: {
-        example: {
-            success: false,
-            statusCode: 404,
-            data: {
-                message: TOKEN_INVALID,
             },
         },
     },
@@ -537,6 +508,21 @@ export const DATABASE_ERROR_RESPONSE: ApiResponseOptions = {
             statusCode: 500,
             data: {
                 message: DB_OPERATION_FAILED,
+            },
+        },
+    },
+};
+
+export const EMAIL_VERIFICATION_FAILED_RESPONSE: ApiResponseOptions = {
+    status: 500,
+    description:
+        'Ошибка отправки письма поьзователю для подтверждения регистрации',
+    schema: {
+        example: {
+            success: false,
+            statusCode: 500,
+            data: {
+                message: EMAIL_VERIFICATION_FAILED,
             },
         },
     },
