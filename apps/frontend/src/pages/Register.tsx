@@ -13,6 +13,7 @@ import {
     TinkoffAuthButton,
 } from '@/components/auth';
 import { Separator } from '@/components/ui/separator';
+import { RegisterStep1FormValues } from '@/zod/registerStep1.schema';
 
 const Register = () => {
     const { register } = useAuth();
@@ -37,28 +38,20 @@ const Register = () => {
         });
     };
 
-    const handleSubmitStep1 = async (e: React.FormEvent) => {
-        e.preventDefault();
-
-        // Проверяем, что все обязательные поля заполнены
-        if (!formData.fullName || !formData.email || !formData.password) {
-            return;
-        }
-
+    const handleSubmitStep1 = async (data: RegisterStep1FormValues) => {
+        console.log('data', data);
         try {
             await register({
-                email: formData.email,
-                password: formData.password,
-                name: formData.fullName,
-                phone: formData.phone || undefined,
-                district: formData.district || undefined,
+                email: data.email,
+                password: data.password,
+                name: data.fullName,
+                phone: data.phone || undefined,
+                // district: data.district || undefined,
             });
 
-            // После успешной регистрации перенаправляем на dashboard
             navigate('/dashboard');
         } catch (error) {
-            // Ошибка уже обработана в контексте через toast
-            console.error('Registration error:', error);
+            console.error(error);
         }
     };
 
@@ -77,7 +70,8 @@ const Register = () => {
                         Регистрация избирателя
                     </h1>
 
-                    <div className="flex flex-col gap-3 mb-6">
+                    {/* авторизация с помощью сторонних сервисов */}
+                    {/* <div className="flex flex-col gap-3 mb-6">
                         <GosuslugiAuthButton />
                         <SberAuthButton />
                         <TinkoffAuthButton />
@@ -89,14 +83,10 @@ const Register = () => {
                             или
                         </span>
                         <Separator className="flex-grow" />
-                    </div>
+                    </div> */}
 
                     {step === 1 ? (
-                        <RegisterStep1
-                            formData={formData}
-                            handleChange={handleChange}
-                            handleSubmit={handleSubmitStep1}
-                        />
+                        <RegisterStep1 onSubmit={handleSubmitStep1} />
                     ) : (
                         <VerificationStep
                             verificationCode={formData.verificationCode}

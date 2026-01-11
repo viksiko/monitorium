@@ -13,44 +13,58 @@ import {
     SberAuthButton,
     TinkoffAuthButton,
 } from '@/components/auth';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { loginSchema, LoginFormValues } from '@/zod/login.schema';
+import { FormError, formInputClass } from '@/components/ui/formInputClass';
 
 const Login = () => {
     const navigate = useNavigate();
     const { login } = useAuth();
     const { toast } = useToast();
-    const [formData, setFormData] = useState({
-        email: '',
-        password: '',
+
+    const {
+        register,
+        handleSubmit,
+        formState: { errors, isSubmitting },
+    } = useForm<LoginFormValues>({
+        resolver: zodResolver(loginSchema),
     });
+    // const [formData, setFormData] = useState({
+    //     email: '',
+    //     password: '',
+    // });
     const [isLoading, setIsLoading] = useState(false);
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, value } = e.target;
-        setFormData({
-            ...formData,
-            [name]: value,
-        });
-    };
+    // const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    //     const { name, value } = e.target;
+    //     setFormData({
+    //         ...formData,
+    //         [name]: value,
+    //     });
+    // };
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
+    const onSubmit = async (data: LoginFormValues) => {
+        console.log('data', data);
+
         setIsLoading(true);
 
         try {
-            await login(formData.email, formData.password);
+            // await login(data.email, data.password);
+
             toast({
                 title: 'Вход выполнен успешно!',
                 description: 'Добро пожаловать в систему «Честь»',
             });
+
             navigate('/dashboard');
         } catch (error) {
             toast({
                 title: 'Ошибка входа',
                 description:
-                    'Неверный email или пароль. Пожалуйста, проверьте данные и попробуйте снова.',
+                    'Неверный email или пароль. Пожалуйста, проверьте данные.',
                 variant: 'destructive',
             });
-            console.error('Login failed:', error);
         } finally {
             setIsLoading(false);
         }
@@ -64,7 +78,8 @@ const Login = () => {
                         Вход в систему
                     </h1>
 
-                    <div className="flex flex-col gap-3 mb-6">
+                    {/* авторизация с помощью сторонних сервисов */}
+                    {/* <div className="flex flex-col gap-3 mb-6">
                         <GosuslugiAuthButton />
                         <SberAuthButton />
                         <TinkoffAuthButton />
@@ -76,10 +91,10 @@ const Login = () => {
                             или
                         </span>
                         <Separator className="flex-grow" />
-                    </div>
+                    </div> */}
 
                     <form
-                        onSubmit={handleSubmit}
+                        onSubmit={handleSubmit(onSubmit)}
                         className="honor-card">
                         <div className="mb-6">
                             <Label
@@ -94,13 +109,17 @@ const Login = () => {
                                 />
                                 <Input
                                     id="email"
-                                    name="email"
-                                    value={formData.email}
-                                    onChange={handleChange}
-                                    className="honor-input pl-10"
+                                    {...register('email')}
+                                    className={formInputClass(errors.email)}
                                     placeholder="example@mail.ru"
-                                    required
                                 />
+                                <FormError error={errors.email} />
+
+                                {errors.email && (
+                                    <p className="absolute text-sm text-red-500">
+                                        {errors.email.message}
+                                    </p>
+                                )}
                             </div>
                         </div>
 
@@ -120,14 +139,13 @@ const Login = () => {
                                 />
                                 <Input
                                     id="password"
-                                    name="password"
                                     type="password"
-                                    value={formData.password}
-                                    onChange={handleChange}
-                                    className="honor-input pl-10"
+                                    {...register('password')}
+                                    className={formInputClass(errors.password)}
                                     placeholder="••••••••"
-                                    required
                                 />
+
+                                <FormError error={errors.password} />
                             </div>
                         </div>
 
@@ -148,15 +166,6 @@ const Login = () => {
                                 Регистрация
                             </Link>
                         </p>
-                    </div>
-
-                    <div className="mt-6 text-center">
-                        <div className="text-sm text-honor-darkGray mb-4">
-                            Для представителей власти
-                        </div>
-                        <GosuslugiAuthButton className="max-w-xs mx-auto mb-2" />
-                        <SberAuthButton className="max-w-xs mx-auto mb-2" />
-                        <TinkoffAuthButton className="max-w-xs mx-auto" />
                     </div>
                 </div>
             </div>

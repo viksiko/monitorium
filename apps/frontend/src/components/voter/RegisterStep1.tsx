@@ -1,31 +1,32 @@
-import React from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { MapPin, Mail, Phone, User, Lock } from 'lucide-react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import {
+    registerStep1Schema,
+    RegisterStep1FormValues,
+} from '@/zod/registerStep1.schema';
+import { FormError, formInputClass } from '../ui/formInputClass';
 
 interface RegisterStep1Props {
-    formData: {
-        fullName: string;
-        phone: string;
-        email: string;
-        password: string;
-        district: string;
-        address: string;
-        useAddress: boolean;
-    };
-    handleChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-    handleSubmit: (e: React.FormEvent) => void;
+    onSubmit: (data: RegisterStep1FormValues) => void;
 }
 
-const RegisterStep1 = ({
-    formData,
-    handleChange,
-    handleSubmit,
-}: RegisterStep1Props) => {
+const RegisterStep1 = ({ onSubmit }: RegisterStep1Props) => {
+    const {
+        register,
+        handleSubmit,
+        watch,
+        formState: { errors, isSubmitting },
+    } = useForm<RegisterStep1FormValues>({
+        resolver: zodResolver(registerStep1Schema),
+    });
+
     return (
         <form
-            onSubmit={handleSubmit}
+            onSubmit={handleSubmit(onSubmit)}
             className="honor-card">
             <div className="mb-6">
                 <Label
@@ -39,14 +40,11 @@ const RegisterStep1 = ({
                         size={18}
                     />
                     <Input
-                        id="fullName"
-                        name="fullName"
-                        value={formData.fullName}
-                        onChange={handleChange}
-                        className="honor-input pl-10"
+                        {...register('fullName')}
                         placeholder="Иванов Иван Иванович"
-                        required
+                        className={formInputClass(errors.fullName)}
                     />
+                    <FormError error={errors.fullName} />
                 </div>
             </div>
 
@@ -62,15 +60,12 @@ const RegisterStep1 = ({
                         size={18}
                     />
                     <Input
-                        id="email"
-                        name="email"
                         type="email"
-                        value={formData.email}
-                        onChange={handleChange}
-                        className="honor-input pl-10"
+                        {...register('email')}
+                        className={formInputClass(errors.email)}
                         placeholder="example@mail.ru"
-                        required
                     />
+                    <FormError error={errors.email} />
                 </div>
             </div>
 
@@ -86,20 +81,34 @@ const RegisterStep1 = ({
                         size={18}
                     />
                     <Input
-                        id="password"
-                        name="password"
                         type="password"
-                        value={formData.password}
-                        onChange={handleChange}
-                        className="honor-input pl-10"
+                        className={formInputClass(errors.password)}
                         placeholder="Введите пароль"
-                        required
-                        minLength={6}
+                        {...register('password')}
                     />
+                    <FormError error={errors.password} />
                 </div>
-                <p className="text-xs text-honor-darkGray mt-1">
-                    Минимум 6 символов
-                </p>
+            </div>
+
+            <div className="mb-6">
+                <Label
+                    htmlFor="password"
+                    className="block mb-2">
+                    Подтвердите пароль
+                </Label>
+                <div className="relative">
+                    <Lock
+                        className="absolute left-3 top-1/2 transform -translate-y-1/2 text-honor-darkGray"
+                        size={18}
+                    />
+                    <Input
+                        type="password"
+                        className={formInputClass(errors.confirmPassword)}
+                        placeholder="Введите пароль"
+                        {...register('confirmPassword')}
+                    />
+                    <FormError error={errors.confirmPassword} />
+                </div>
             </div>
 
             <div className="mb-6">
@@ -114,25 +123,19 @@ const RegisterStep1 = ({
                         size={18}
                     />
                     <Input
-                        id="phone"
-                        name="phone"
-                        value={formData.phone}
-                        onChange={handleChange}
-                        className="honor-input pl-10"
+                        className={formInputClass(errors.phone)}
                         placeholder="+7 (___) ___-__-__"
+                        {...register('phone')}
                     />
+                    <FormError error={errors.phone} />
                 </div>
             </div>
 
-            <div className="mb-6">
+            {/* <div className="mb-6">
                 <div className="flex items-center mb-2">
                     <input
-                        id="useAddress"
-                        name="useAddress"
                         type="checkbox"
-                        checked={formData.useAddress}
-                        onChange={handleChange}
-                        className="h-4 w-4 text-honor-blue border-gray-300 rounded focus:ring-honor-blue"
+                        {...register('useAddress')}
                     />
                     <label
                         htmlFor="useAddress"
@@ -177,7 +180,7 @@ const RegisterStep1 = ({
                         />
                     </div>
                 )}
-            </div>
+            </div> */}
 
             <Button
                 type="submit"
