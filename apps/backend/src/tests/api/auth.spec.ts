@@ -36,7 +36,6 @@ describe('Auth Endpoint (e2e) – not auth', () => {
                     message: [
                         'Пароль должен содержать минимум 8 символов, одну заглавную букву, одну цифру и один специальный символ',
                         'Пароль должен быть не менее 8 символов',
-                        'Телефон не может быть пустым',
                         'Телефон должен состоять ровно из 11 символов',
                         'Телефон должно быть строкой',
                     ],
@@ -155,12 +154,18 @@ describe('Auth Endpoint (e2e) – not auth', () => {
             .expect(TOKEN_INVALID_RES);
     });
 
-    // api/v1/auth/confirm
-    it('GET /api/v1/auth/confirm should return 401 when token is invalid', async () => {
-        await request(app.getHttpServer())
-            .get('/api/v1/auth/confirm')
-            .set('Cookie', ['refreshToken=invalid_refresh_token'])
-            .expect(401)
-            .expect(TOKEN_INVALID_RES);
+    // api/v1/auth/confirm-registration
+    it('GET /api/v1/auth/confirm-registration should redirect to frontend with failed status when token is invalid', async () => {
+        const response = await request(app.getHttpServer())
+            .get('/api/v1/auth/confirm-registration')
+            .query({ token: 'invalid_token' })
+            .expect(302);
+
+        expect(response.header.location).toContain(
+            process.env.VITE_FRONTEND_URL,
+        );
+
+        const expectedUrl = `${process.env.VITE_FRONTEND_URL}/confirm-registration-failed`;
+        expect(response.header.location).toBe(expectedUrl);
     });
 });

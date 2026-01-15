@@ -23,7 +23,7 @@ export class MailService {
         recipientEmail, // почта пользователя, потом добавить в 'to'
         activationLink,
     ): Promise<boolean> {
-        const verificationUrl = `${process.env.API_URL}/api/v1/auth/confirm?token=${activationLink}`;
+        const verificationUrl = `${process.env.API_URL}/api/v1/auth/confirm-registration?token=${activationLink}`;
 
         const mailOptions = {
             from: `"МОНИТОРИУМ" <${process.env.EMAIL_USER}>`,

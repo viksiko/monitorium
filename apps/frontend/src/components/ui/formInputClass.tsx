@@ -15,5 +15,7 @@ export const formInputClass = (error?: FieldError) =>
 export const FormError = ({ error }: { error?: FieldError }) => {
     if (!error) return null;
 
-    return <p className="absolute text-sm text-red-500">{error.message}</p>;
+    return (
+        <p className="absolute text-sm text-red-500 text-xs">{error.message}</p>
+    );
 };

@@ -32,6 +32,8 @@ import RepresentativeStatistics from './pages/RepresentativeStatistics';
 import Tasks from './pages/Tasks';
 import Analytics from './pages/Analytics';
 import DistrictDetails from './pages/DistrictDetails';
+import ConfirmRegistration from './pages/ConfirmRegistration';
+import ConfirmRegistrationFailed from './pages/ConfirmRegistrationFailed';
 
 const queryClient = new QueryClient();
 
@@ -83,6 +85,16 @@ const App = () => (
                             <Route
                                 path="/help"
                                 element={<Help />}
+                            />
+
+                            <Route
+                                path="/confirm-registration"
+                                element={<ConfirmRegistration />}
+                            />
+
+                            <Route
+                                path="/confirm-registration-failed"
+                                element={<ConfirmRegistrationFailed />}
                             />
 
                             {/* Dashboard routes */}
