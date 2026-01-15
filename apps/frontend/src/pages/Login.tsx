@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import Layout from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Mail, Lock } from 'lucide-react';
+import { Mail, Lock, Loader2 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Separator } from '@/components/ui/separator';
 import { useAuth } from '@/context/AuthContext';
@@ -45,26 +45,30 @@ const Login = () => {
     // };
 
     const onSubmit = async (data: LoginFormValues) => {
-        console.log('data', data);
-
         setIsLoading(true);
 
         try {
-            // await login(data.email, data.password);
+            await login(data.email, data.password);
 
-            toast({
-                title: 'Вход выполнен успешно!',
-                description: 'Добро пожаловать в систему «Честь»',
+            // toast({
+            //     title: 'Вход выполнен успешно!',
+            //     description: 'Добро пожаловать в систему «Мониториум»',
+            //     variant: 'success',
+            // });
+
+            navigate('/dashboard', {
+                state: {
+                    loginSuccess: true,
+                },
             });
-
-            navigate('/dashboard');
         } catch (error) {
-            toast({
-                title: 'Ошибка входа',
-                description:
-                    'Неверный email или пароль. Пожалуйста, проверьте данные.',
-                variant: 'destructive',
-            });
+            // toast({
+            //     title: 'Ошибка входа',
+            //     description:
+            //         error.response?.data?.data?.message ||
+            //         'Произошла ошибка при авторизации.',
+            //     variant: 'destructive',
+            // });
         } finally {
             setIsLoading(false);
         }
@@ -113,13 +117,8 @@ const Login = () => {
                                     className={formInputClass(errors.email)}
                                     placeholder="example@mail.ru"
                                 />
-                                <FormError error={errors.email} />
 
-                                {errors.email && (
-                                    <p className="absolute text-sm text-red-500">
-                                        {errors.email.message}
-                                    </p>
-                                )}
+                                <FormError error={errors.email} />
                             </div>
                         </div>
 
@@ -153,7 +152,11 @@ const Login = () => {
                             type="submit"
                             className="w-full honor-button-primary"
                             disabled={isLoading}>
-                            {isLoading ? 'Выполняется вход...' : 'Войти'}
+                            {isLoading ? (
+                                <Loader2 className="h-8 w-8 animate-spin" />
+                            ) : (
+                                'Войти'
+                            )}
                         </Button>
                     </form>
 

@@ -30,8 +30,8 @@ export interface LoginData {
 }
 
 export interface AuthResponse {
-    user: User;
-    token: string;
+    userProfile: User;
+    accessToken: string;
 }
 
 export interface OAuthData {

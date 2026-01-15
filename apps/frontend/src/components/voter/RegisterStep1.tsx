@@ -1,7 +1,7 @@
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { MapPin, Mail, Phone, User, Lock } from 'lucide-react';
+import { MapPin, Mail, Phone, User, Lock, Loader2 } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
@@ -12,9 +12,10 @@ import { FormError, formInputClass } from '../ui/formInputClass';
 
 interface RegisterStep1Props {
     onSubmit: (data: RegisterStep1FormValues) => void;
+    isLoading: boolean;
 }
 
-const RegisterStep1 = ({ onSubmit }: RegisterStep1Props) => {
+const RegisterStep1 = ({ onSubmit, isLoading }: RegisterStep1Props) => {
     const {
         register,
         handleSubmit,
@@ -115,7 +116,7 @@ const RegisterStep1 = ({ onSubmit }: RegisterStep1Props) => {
                 <Label
                     htmlFor="phone"
                     className="block mb-2">
-                    Номер телефона (необязательно)
+                    Номер телефона (не обязательно)
                 </Label>
                 <div className="relative">
                     <Phone
@@ -125,7 +126,9 @@ const RegisterStep1 = ({ onSubmit }: RegisterStep1Props) => {
                     <Input
                         className={formInputClass(errors.phone)}
                         placeholder="+7 (___) ___-__-__"
-                        {...register('phone')}
+                        {...register('phone', {
+                            setValueAs: (value) => value.replace(/[^0-9]/g, ''),
+                        })}
                     />
                     <FormError error={errors.phone} />
                 </div>
@@ -184,8 +187,13 @@ const RegisterStep1 = ({ onSubmit }: RegisterStep1Props) => {
 
             <Button
                 type="submit"
+                disabled={isLoading}
                 className="w-full honor-button-primary">
-                Зарегистрироваться
+                {isLoading ? (
+                    <Loader2 className="h-8 w-8 animate-spin" />
+                ) : (
+                    'Зарегистрироваться'
+                )}
             </Button>
 
             <div className="mt-4 text-xs text-honor-darkGray text-center">

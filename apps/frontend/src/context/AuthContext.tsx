@@ -40,7 +40,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
             toast({
                 title: 'Вход выполнен!',
                 description: 'Вы успешно вошли в систему.',
-                variant: 'default',
+                variant: 'success',
             });
         } catch (error: any) {
             toast({
@@ -59,8 +59,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
             await registerMutation.mutateAsync(data);
             toast({
                 title: 'Регистрация успешна!',
-                description: 'Добро пожаловать! Вам начислено 10 токенов.',
-                variant: 'default',
+                description:
+                    'Пожалуйста, проверьте вашу электронную почту для получения ссылки подтверждения.',
+                variant: 'success',
             });
         } catch (error: any) {
             toast({

@@ -25,7 +25,7 @@ export const registerStep1Schema = z
 
                     const digits = val.replace(/\D/g, '');
 
-                    return /^([78])[0-9]{10}$/.test(digits);
+                    return /^([178])[0-9]{10}$/.test(digits);
                 },
                 {
                     message: 'Введите корректный номер телефона',

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import { useAuth } from '@/context/AuthContext';
@@ -14,11 +14,15 @@ import {
 } from '@/components/auth';
 import { Separator } from '@/components/ui/separator';
 import { RegisterStep1FormValues } from '@/zod/registerStep1.schema';
+import axios from 'axios';
+import { useToast } from '@/components/ui/use-toast';
 
 const Register = () => {
     const { register } = useAuth();
     const navigate = useNavigate();
+    const { toast } = useToast();
     const [step, setStep] = useState(1);
+    const [isLoading, setIsLoading] = useState(false);
     const [formData, setFormData] = useState({
         fullName: '',
         phone: '',
@@ -39,7 +43,8 @@ const Register = () => {
     };
 
     const handleSubmitStep1 = async (data: RegisterStep1FormValues) => {
-        console.log('data', data);
+        setIsLoading(true);
+
         try {
             await register({
                 email: data.email,
@@ -49,9 +54,30 @@ const Register = () => {
                 // district: data.district || undefined,
             });
 
-            navigate('/dashboard');
+            // const response = await axios.post('/api/v1/auth/register', {
+            //     name: data.fullName,
+            //     email: data.email,
+            //     password: data.password,
+            //     phone: data.phone,
+            // });
+            // toast({
+            //     title: 'Регистрация успешна!',
+            //     description: response?.data?.data?.message,
+            //     variant: 'success',
+            // });
+
+            // navigate('/dashboard');
         } catch (error) {
-            console.error(error);
+            // console.error('e', error);
+            // toast({
+            //     title: 'Ошибка регистрации',
+            //     description:
+            //         error.response?.data?.data?.message ||
+            //         'Произошла ошибка при регистрации.',
+            //     variant: 'destructive',
+            // });
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -86,7 +112,10 @@ const Register = () => {
                     </div> */}
 
                     {step === 1 ? (
-                        <RegisterStep1 onSubmit={handleSubmitStep1} />
+                        <RegisterStep1
+                            onSubmit={handleSubmitStep1}
+                            isLoading={isLoading}
+                        />
                     ) : (
                         <VerificationStep
                             verificationCode={formData.verificationCode}

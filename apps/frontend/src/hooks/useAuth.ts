@@ -15,11 +15,11 @@ export const useRegister = () => {
         mutationFn: (
             data: RegisterData,
         ): Promise<{ data: { data: AuthResponse } }> =>
-            api.post('/auth/register', data),
-        onSuccess: (response) => {
-            localStorage.setItem('token', response.data.data.token);
-            queryClient.setQueryData(['user'], response.data.data.user);
-        },
+            api.post('/api/v1/auth/register', data),
+        // onSuccess: (response) => {
+        //     localStorage.setItem('token', response.data.data.token);
+        //     queryClient.setQueryData(['user'], response.data.data.user);
+        // },
     });
 };
 
@@ -30,10 +30,10 @@ export const useLogin = () => {
         mutationFn: (
             data: LoginData,
         ): Promise<{ data: { data: AuthResponse } }> =>
-            api.post('/auth/login', data),
+            api.post('/api/v1/auth/login', data),
         onSuccess: (response) => {
-            localStorage.setItem('token', response.data.data.token);
-            queryClient.setQueryData(['user'], response.data.data.user);
+            localStorage.setItem('token', response.data.data.accessToken);
+            queryClient.setQueryData(['user'], response.data.data.userProfile);
         },
     });
 };
@@ -46,10 +46,10 @@ export const useOAuthLogin = () => {
             data: OAuthData,
         ): Promise<{ data: { data: AuthResponse } }> =>
             api.post('/auth/oauth', data),
-        onSuccess: (response) => {
-            localStorage.setItem('token', response.data.data.token);
-            queryClient.setQueryData(['user'], response.data.data.user);
-        },
+        // onSuccess: (response) => {
+        //     localStorage.setItem('token', response.data.data.token);
+        //     queryClient.setQueryData(['user'], response.data.data.user);
+        // },
     });
 };
 

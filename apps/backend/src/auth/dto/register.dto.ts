@@ -41,7 +41,6 @@ export class RegisterDto {
 
     @IsString({ message: 'Телефон должно быть строкой' })
     @Length(11, 11, { message: 'Телефон должен состоять ровно из 11 символов' })
-    @IsNotEmpty({ message: 'Телефон не может быть пустым' })
     @ApiProperty({
         example: '89775557799',
     })

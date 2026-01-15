@@ -206,6 +206,7 @@ export class UserService {
 
         // 2. Отправка Email
         try {
+            console.log('отрпавка Email');
             const emailSent = await this.mailService.sendVerificationEmail(
                 createdUser.email,
                 rawVerifyToken,

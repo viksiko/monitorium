@@ -14,11 +14,15 @@ const Dashboard = () => {
     const { user, isLoading } = useAuth();
     const navigate = useNavigate();
 
+    console.log(user, isLoading);
+
     useEffect(() => {
         if (!isLoading && !user) {
             navigate('/login');
         }
     }, [user, isLoading, navigate]);
+
+    console.log('useasdfasfr', user);
 
     useEffect(() => {
         // Если пользователь - представитель власти, перенаправляем на специальный дашборд

@@ -135,7 +135,7 @@ export class AuthController {
         return await this.authService.resetPassword(resetPasswordDto);
     }
 
-    @Get('confirm')
+    @Get('confirm-registration')
     @ApiOperation({ summary: 'Подтверждение регистрации' })
     @ApiOperation({ summary: 'Подтверждение регистрации по токену из Email' })
     @ApiResponse(REGISTRATION_CONFIRMED_RESPONSE)
@@ -149,8 +149,20 @@ export class AuthController {
         example:
             '/api/v1/auth/confirm?token=ee4340b9-0fe0-4c49-983d-2cd9283d0c29',
     })
-    async confirm(@Query('token') token: string): Promise<{ message: string }> {
-        return await this.authService.confirmRegistration(token);
-        // return response.redirect(`${process.env.VITE_FRONTEND_URL}/login`);
+    async confirmRegistration(
+        @Query('token') token: string,
+        @Res() res: Response,
+    ): Promise<void> {
+        try {
+            await this.authService.confirmRegistration(token);
+
+            return res.redirect(
+                `${process.env.VITE_FRONTEND_URL}/confirm-registration`,
+            );
+        } catch {
+            return res.redirect(
+                `${process.env.VITE_FRONTEND_URL}/confirm-registration-failed`,
+            );
+        }
     }
 }
