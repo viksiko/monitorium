@@ -2,6 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import {
     IsEmail,
     IsNotEmpty,
+    IsOptional,
     IsString,
     Length,
     Matches,
@@ -39,6 +40,7 @@ export class RegisterDto {
     @ApiProperty({ example: 'Abc123!' })
     password: string;
 
+    @IsOptional()
     @IsString({ message: 'Телефон должно быть строкой' })
     @Length(11, 11, { message: 'Телефон должен состоять ровно из 11 символов' })
     @ApiProperty({

@@ -165,4 +165,18 @@ export class AuthController {
             );
         }
     }
+
+    // @Get('cookie')
+    // testCookie(@Res({ passthrough: true }) response: Response) {
+    //     // Устанавливаем тестовую куку
+    //     response.cookie('testCookie', 'testValue', {
+    //         httpOnly: true, // JS не видит, безопасно
+    //         secure: false, // DEV: http, true для prod + HTTPS
+    //         sameSite: 'lax', // Lax для SPA
+    //         maxAge: 24 * 60 * 60 * 1000, // 1 день
+    //         path: '/', // Важно: отправляется на все пути
+    //     });
+
+    //     return { message: 'Cookie set' };
+    // }
 }

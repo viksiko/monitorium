@@ -1,4 +1,3 @@
-import React from 'react';
 import { Link } from 'react-router-dom';
 import { HelpCircle } from 'lucide-react';
 
@@ -9,7 +8,7 @@ const Footer = () => {
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
                     <div>
                         <h3 className="text-lg font-bold mb-4">
-                            Платформа «Честь»
+                            Платформа «Мониториум»
                         </h3>
                         <p className="text-honor-darkGray">
                             Цифровая платформа взаимодействия между гражданами и
