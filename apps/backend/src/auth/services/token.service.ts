@@ -8,6 +8,7 @@ import { logger } from '@src/logger/winston.logger';
 import { PrismaService } from '@src/prisma/prisma.service';
 import { JwtPayload } from '@src/types/auth';
 import { Response } from 'express';
+import { CookieTokenService } from './cookieToken.service';
 
 @Injectable()
 export class TokenSevice {
@@ -15,6 +16,7 @@ export class TokenSevice {
         private prisma: PrismaService,
         private jwtService: JwtService,
         private configService: ConfigService,
+        private cookieTokenService: CookieTokenService,
     ) {}
 
     // Генерация токенов доступа
@@ -42,7 +44,7 @@ export class TokenSevice {
 
         await this.saveRefreshToken(payload.id, refreshToken, expiresAt);
 
-        this.setRefreshTokenCookie(response, refreshToken);
+        this.cookieTokenService.setRefreshTokenCookie(response, refreshToken);
 
         return {
             accessToken,
@@ -90,26 +92,6 @@ export class TokenSevice {
         return crypto.createHmac('sha256', salt).update(token).digest('hex');
     }
 
-    // Устанавливает Refresh Token в HTTP-ответ в виде безопасной HttpOnly куки.
-    private setRefreshTokenCookie(
-        response: Response,
-        refreshToken: string,
-    ): void {
-        const isProduction =
-            this.configService.get('ENVIRONMENT') === 'production';
-        const refreshExpiresString =
-            this.configService.get<string>('JWT_REFRESH_EXPIRES') || '0';
-        const refreshExpiresMs = parseInt(refreshExpiresString, 10);
-
-        response.cookie('refreshToken', refreshToken, {
-            httpOnly: true, // Защита от XSS-атак
-            secure: isProduction, // Только по HTTPS в продакшене
-            sameSite: 'strict', // Защита от CSRF-атак
-            expires: new Date(Date.now() + refreshExpiresMs),
-            path: '/api/v1/auth/refresh', // Должен совпадать с путем установки
-        });
-    }
-
     async deleteTokensByHash(refreshToken: string): Promise<number> {
         const hashedToken = this.hashToken(
             refreshToken,
@@ -136,7 +118,7 @@ export class TokenSevice {
             throw new UnauthorizedException(TOKEN_INVALID);
         }
 
-        // Удаляем старый токен (потребляем)
+        // Удаляем старый токен
         await this.prisma.token.delete({
             where: { id: tokenRecord.id },
         });

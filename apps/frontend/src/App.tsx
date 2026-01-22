@@ -34,6 +34,9 @@ import Analytics from './pages/Analytics';
 import DistrictDetails from './pages/DistrictDetails';
 import ConfirmRegistration from './pages/ConfirmRegistration';
 import ConfirmRegistrationFailed from './pages/ConfirmRegistrationFailed';
+import { AuthInit } from './hooks/useAuthInit';
+import PrivateRoute from './guards/PrivateRoute';
+import PublicRoute from './guards/PublicRoute';
 
 const queryClient = new QueryClient();
 
@@ -44,130 +47,137 @@ const App = () => (
                 <ErrorBoundary>
                     <Toaster />
                     <Sonner />
-                    <BrowserRouter>
-                        <Routes>
-                            <Route
-                                path="/"
-                                element={<Index />}
-                            />
-                            <Route
-                                path="/login"
-                                element={<Login />}
-                            />
-                            <Route
-                                path="/register"
-                                element={<Register />}
-                            />
-                            <Route
-                                path="/register/representative"
-                                element={<RepresentativeRegister />}
-                            />
-                            <Route
-                                path="/map"
-                                element={<Map />}
-                            />
-                            <Route
-                                path="/representatives"
-                                element={<Representatives />}
-                            />
-                            <Route
-                                path="/representative/profile/:id"
-                                element={<RepresentativeProfile />}
-                            />
-                            <Route
-                                path="/tasks/create"
-                                element={<TaskCreate />}
-                            />
-                            <Route
-                                path="/balance"
-                                element={<Balance />}
-                            />
-                            <Route
-                                path="/help"
-                                element={<Help />}
-                            />
+                    <AuthInit>
+                        <BrowserRouter>
+                            <Routes>
+                                {/* ================== PUBLIC (доступны всем) ================== */}
+                                <Route
+                                    path="/"
+                                    element={<Index />}
+                                />
+                                <Route
+                                    path="/map"
+                                    element={<Map />}
+                                />
+                                <Route
+                                    path="/representatives"
+                                    element={<Representatives />}
+                                />
+                                <Route
+                                    path="/representative/profile/:id"
+                                    element={<RepresentativeProfile />}
+                                />
+                                <Route
+                                    path="/help"
+                                    element={<Help />}
+                                />
+                                <Route
+                                    path="/blog"
+                                    element={<Blog />}
+                                />
+                                <Route
+                                    path="/blog/:id"
+                                    element={<Blog />}
+                                />
+                                <Route
+                                    path="/districts/:id"
+                                    element={<DistrictDetails />}
+                                />
 
-                            <Route
-                                path="/confirm-registration"
-                                element={<ConfirmRegistration />}
-                            />
+                                {/* ================== PUBLIC ONLY (только для НЕавторизованных) ================== */}
+                                <Route element={<PublicRoute />}>
+                                    <Route
+                                        path="/login"
+                                        element={<Login />}
+                                    />
+                                    <Route
+                                        path="/register"
+                                        element={<Register />}
+                                    />
+                                    <Route
+                                        path="/register/representative"
+                                        element={<RepresentativeRegister />}
+                                    />
+                                </Route>
 
-                            <Route
-                                path="/confirm-registration-failed"
-                                element={<ConfirmRegistrationFailed />}
-                            />
+                                {/* ================== PRIVATE (только для авторизованных) ================== */}
+                                <Route element={<PrivateRoute />}>
+                                    <Route
+                                        path="/dashboard"
+                                        element={<Dashboard />}
+                                    />
+                                    <Route
+                                        path="/messages"
+                                        element={<MessageCenter />}
+                                    />
+                                    <Route
+                                        path="/analytics"
+                                        element={<Analytics />}
+                                    />
+                                    <Route
+                                        path="/tasks"
+                                        element={<Tasks />}
+                                    />
+                                    <Route
+                                        path="/tasks/create"
+                                        element={<TaskCreate />}
+                                    />
+                                    <Route
+                                        path="/balance"
+                                        element={<Balance />}
+                                    />
 
-                            {/* Dashboard routes */}
-                            <Route
-                                path="/dashboard"
-                                element={<Dashboard />}
-                            />
-                            <Route
-                                path="/blog"
-                                element={<Blog />}
-                            />
-                            <Route
-                                path="/blog/:id"
-                                element={<Blog />}
-                            />
-                            <Route
-                                path="/messages"
-                                element={<MessageCenter />}
-                            />
-                            <Route
-                                path="/representative/dashboard"
-                                element={<RepresentativeDashboard />}
-                            />
-                            <Route
-                                path="/analytics"
-                                element={<Analytics />}
-                            />
+                                    {/* Representative */}
+                                    <Route
+                                        path="/representative/dashboard"
+                                        element={<RepresentativeDashboard />}
+                                    />
+                                    <Route
+                                        path="/representative/tasks"
+                                        element={<RepresentativeTasks />}
+                                    />
+                                    <Route
+                                        path="/representative/statistics"
+                                        element={<RepresentativeStatistics />}
+                                    />
+                                </Route>
 
-                            {/* Tasks management and statistics */}
-                            <Route
-                                path="/representative/tasks"
-                                element={<RepresentativeTasks />}
-                            />
-                            <Route
-                                path="/representative/statistics"
-                                element={<RepresentativeStatistics />}
-                            />
-                            <Route
-                                path="/tasks"
-                                element={<Tasks />}
-                            />
+                                {/* ================== CALLBACKS (без guard’ов) ================== */}
+                                <Route
+                                    path="/gosuslugi/callback"
+                                    element={<GosuslugiCallback />}
+                                />
+                                <Route
+                                    path="/sber/auth"
+                                    element={<SberCallback />}
+                                />
+                                <Route
+                                    path="/tinkoff/auth"
+                                    element={<TinkoffCallback />}
+                                />
 
-                            {/* Authentication callback routes */}
-                            <Route
-                                path="/gosuslugi/callback"
-                                element={<GosuslugiCallback />}
-                            />
-                            <Route
-                                path="/sber/auth"
-                                element={<SberCallback />}
-                            />
-                            <Route
-                                path="/tinkoff/auth"
-                                element={<TinkoffCallback />}
-                            />
+                                {/* ================== SERVICE ================== */}
+                                <Route
+                                    path="/confirm-registration"
+                                    element={<ConfirmRegistration />}
+                                />
+                                <Route
+                                    path="/confirm-registration-failed"
+                                    element={<ConfirmRegistrationFailed />}
+                                />
 
-                            {/* District details page */}
-                            <Route
-                                path="/districts/:id"
-                                element={<DistrictDetails />}
-                            />
-
-                            {/* Error pages */}
-                            <Route
-                                path="/server-error"
-                                element={<ServerError />}
-                            />
-                            <Route
-                                path="*"
-                                element={<NotFound />}
-                            />
-                        </Routes>
-                    </BrowserRouter>
+                                {/* ================== ERRORS ================== */}
+                                <Route
+                                    path="/server-error"
+                                    element={<ServerError />}
+                                />
+                                <Route
+                                    path="*"
+                                    element={<NotFound />}
+                                />
+                            </Routes>
+                        </BrowserRouter>
+                    </AuthInit>
                 </ErrorBoundary>
             </AuthProvider>
         </TooltipProvider>

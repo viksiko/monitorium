@@ -35,7 +35,7 @@ const ConfirmRegistrationFailed = () => {
                     {/* Действия */}
                     <div className="pt-8 space-y-4">
                         {/* Кнопка повторной отправки */}
-                        <Button
+                        {/* <Button
                             className="w-full honor-button-primary flex items-center justify-center space-x-2"
                             onClick={() => {
                                 // Здесь будет логика повторной отправки подтверждения
@@ -46,15 +46,13 @@ const ConfirmRegistrationFailed = () => {
                             }}>
                             <RefreshCw size={18} />
                             <span>Отправить ссылку повторно</span>
-                        </Button>
+                        </Button> */}
 
                         {/* Кнопка регистрации */}
                         <Link
                             to="/register"
                             className="block">
-                            <Button
-                                variant="outline"
-                                className="w-full flex items-center justify-center space-x-2">
+                            <Button className="w-full flex items-center justify-center space-x-2">
                                 <ArrowRight size={18} />
                                 <span>Зарегистрироваться снова</span>
                             </Button>
@@ -67,39 +65,6 @@ const ConfirmRegistrationFailed = () => {
                                 className="text-sm text-blue-600 hover:text-blue-800 hover:underline inline-flex items-center space-x-1">
                                 <span>Нужна помощь?</span>
                                 <ArrowRight size={14} />
-                            </Link>
-                        </div>
-                    </div>
-
-                    {/* Альтернативные варианты */}
-                    <div className="pt-8 border-t border-gray-200">
-                        <p className="text-sm text-gray-500 mb-4">
-                            Или воспользуйтесь другими вариантами:
-                        </p>
-
-                        <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                            <Link to="/login">
-                                <Button
-                                    variant="ghost"
-                                    size="sm">
-                                    Войти в аккаунт
-                                </Button>
-                            </Link>
-
-                            <Link to="/">
-                                <Button
-                                    variant="ghost"
-                                    size="sm">
-                                    На главную
-                                </Button>
-                            </Link>
-
-                            <Link to="/contact">
-                                <Button
-                                    variant="ghost"
-                                    size="sm">
-                                    Связаться с нами
-                                </Button>
                             </Link>
                         </div>
                     </div>
