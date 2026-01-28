@@ -2,11 +2,11 @@ import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { LoggerMiddleware } from '@shared/middleware';
-import { AuthMiddleware } from '../libs/middleware/src/auth.middleware';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { PrismaModule } from './prisma/prisma.module';
+import { TaskModule } from './task/task.module';
 import { UserModule } from './user/user.module';
 
 @Module({
@@ -21,6 +21,7 @@ import { UserModule } from './user/user.module';
                 limit: 3, // 3 запроса
             },
         ]),
+        TaskModule,
     ],
     controllers: [AppController],
     providers: [AppService],
@@ -28,6 +29,5 @@ import { UserModule } from './user/user.module';
 export class AppModule implements NestModule {
     configure(consumer: MiddlewareConsumer): void {
         consumer.apply(LoggerMiddleware).forRoutes('*');
-        consumer.apply(AuthMiddleware).forRoutes('*');
     }
 }

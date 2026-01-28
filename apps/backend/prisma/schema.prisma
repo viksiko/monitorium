@@ -44,10 +44,14 @@ model User {
   updatedAt DateTime @updatedAt
   tokens    Token[]
 
-  // верифицирован и активная учтеная запись
+  // Верифицирован и активная учтеная запись
   isVerified Boolean   @default(false)
   isActive   Boolean   @default(true)
   deletedAt  DateTime?
+
+  // Связь с заданиями
+  tasks        Task[]
+  taskComments TaskComment[]
 
   @@map("users")
 }
@@ -67,6 +71,76 @@ model Token {
   @@map("tokens")
 }
 
+// Задание
+model Task {
+  id                    String    @id @default(cuid())
+  title                 String
+  address               String
+  problemDescription    String
+  possibleSolutions     String?
+  desiredResolutionDate DateTime?
+
+  //  Автор задания
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  stages TaskStage[] // Этапы решения
+  status TaskStatus  @default(NEW) // Статус задания
+
+  ikes     Int           @default(0) //  счет лайков
+  comments TaskComment[] //  комментарии
+
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  taskFiles TaskFile[]
+
+  @@map("tasks")
+}
+
+// Этапе заданий
+model TaskStage {
+  id     String @id @default(cuid())
+  taskId String
+
+  title String
+  date  DateTime
+
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@map("task_stages")
+}
+
+// Файлы для задания
+model TaskFile {
+  id     String  @id @default(cuid())
+  taskId String
+  url    String // Ссылка на файл (например, S3, Supabase, CDN)
+  name   String? // Опциональное название файла
+  type   String? // MIME-тип (например "image/png", "application/pdf")
+  size   Int? // Размер файла в байтах (опционально)
+
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@map("task_files")
+}
+
+model TaskComment {
+  id        String   @id @default(cuid())
+  taskId    String
+  userId    String // кто оставил комментарий
+  text      String
+  createdAt DateTime @default(now())
+
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("task_comments")
+}
+
 enum Role {
   USER
   REPRESENTATIVE
@@ -77,4 +151,11 @@ enum TokenType {
   REFRESH
   VERIFY_EMAIL
   RESET_PASSWORD
+}
+
+enum TaskStatus {
+  NEW // новое задание
+  IN_PROGRESS // в процессе
+  COMPLETED // выполнено
+  CANCELLED // отменено
 }

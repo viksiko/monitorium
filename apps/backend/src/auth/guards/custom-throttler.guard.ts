@@ -9,7 +9,7 @@ export class CustomThrottlerGuard extends ThrottlerGuard {
             {
                 statusCode: HttpStatus.TOO_MANY_REQUESTS,
                 error: 'Too Many Requests',
-                message: RATE_LIMIT_EXCEEDED_MESSAGE, // Ваше сообщение
+                message: RATE_LIMIT_EXCEEDED_MESSAGE,
             },
             HttpStatus.TOO_MANY_REQUESTS,
         );

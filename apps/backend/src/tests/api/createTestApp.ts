@@ -8,6 +8,7 @@ import { Test } from '@nestjs/testing';
 import { HttpExceptionFilter } from '@shared/filter';
 import { TransformInterceptor } from '@shared/interceptor';
 import { AppModule } from '@src/app.module';
+import { JwtAuthGuard } from '@src/auth/guards/jwt-auth.guard';
 import * as cookieParser from 'cookie-parser';
 
 export async function createTestApp({
@@ -15,9 +16,17 @@ export async function createTestApp({
 }: {
     mockAuth?: boolean;
 }): Promise<INestApplication<unknown>> {
-    const moduleFixture = await Test.createTestingModule({
+    const builder = Test.createTestingModule({
         imports: [AppModule],
-    }).compile();
+    });
+
+    if (mockAuth) {
+        builder.overrideGuard(JwtAuthGuard).useValue({
+            canActivate: () => true,
+        });
+    }
+
+    const moduleFixture = await builder.compile();
 
     const app = moduleFixture.createNestApplication();
     app.setGlobalPrefix('api');
