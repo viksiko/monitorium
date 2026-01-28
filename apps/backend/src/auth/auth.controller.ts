@@ -10,10 +10,9 @@ import {
     UseGuards,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiQuery, ApiResponse } from '@nestjs/swagger';
 import {
     AUTH_CONFLICT_RESPONSE,
-    DATABASE_ERROR_RESPONSE,
     FORGOT_PASSWORD_SUCCESS_RESPONSE,
     INVALID_RESET_PASSWORD_TOKEN_RESPONSE,
     INVALID_TOKEN_RESPONSE,
@@ -23,7 +22,6 @@ import {
     REFRESH_SUCCESS_RESPONSE,
     REGISTRATION_CONFIRMED_RESPONSE,
     RESET_PASSWORD_CHANGED,
-    SERVER_ERROR_RESPONSES_REGISTR,
     TOO_MANY_REQUESTS_RESPONSE,
     USER_CONFLICT_RESPONSE,
     USER_LOGIN_SUCCESS_RESPONSE,
@@ -31,7 +29,11 @@ import {
     VALIDATION_ERROR_RESPONSE,
     VALIDATION_FORGOT_PASSWORD_ERROR_RESPONSE,
     VALIDATION_RESET_PASSWORD_ERROR_RESPONSE,
-} from '@src/constants/api-responses.swagger';
+} from '@src/constants/swagger/auth-responses.swagger';
+import {
+    DATABASE_ERROR_RESPONSE,
+    SERVER_ERROR_RESPONSES_REGISTR,
+} from '@src/constants/swagger/shared-responses.swagger';
 import { Request, Response } from 'express';
 import { AuthService } from './auth.service';
 import { ForgotPasswordDto } from './dto/forgotPassword.dto';
@@ -44,7 +46,6 @@ import { CustomThrottlerGuard } from './guards/custom-throttler.guard';
     path: 'auth',
     version: '1',
 })
-@ApiTags('Регистрация/авторизация')
 export class AuthController {
     constructor(
         private readonly authService: AuthService,
@@ -91,7 +92,7 @@ export class AuthController {
         accessToken: string;
         userProfile: UserProfile;
     }> {
-        return this.authService.refresh(request, response);
+        return await this.authService.refresh(request, response);
     }
 
     @Post('logout')

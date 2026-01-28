@@ -1,5 +1,5 @@
 import { INestApplication } from '@nestjs/common';
-import { TOKEN_INVALID_RES } from '@src/constants/api-responses.swagger';
+import { TOKEN_INVALID_RES } from '@src/constants/swagger/shared-responses.swagger';
 import * as request from 'supertest';
 import { createTestApp } from './createTestApp';
 

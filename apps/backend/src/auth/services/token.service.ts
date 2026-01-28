@@ -3,7 +3,7 @@ import { UserProfile } from '@monorepo/types';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import { TOKEN_INVALID } from '@src/constants/api-messages.constants';
+import { AUTHORIZATION_REQUIRED } from '@src/constants/api-messages.constants';
 import { logger } from '@src/logger/winston.logger';
 import { PrismaService } from '@src/prisma/prisma.service';
 import { JwtPayload } from '@src/types/auth';
@@ -115,7 +115,7 @@ export class TokenSevice {
         });
 
         if (!tokenRecord) {
-            throw new UnauthorizedException(TOKEN_INVALID);
+            throw new UnauthorizedException(AUTHORIZATION_REQUIRED);
         }
 
         // Удаляем старый токен

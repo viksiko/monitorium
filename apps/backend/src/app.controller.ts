@@ -1,7 +1,7 @@
 import { Controller, Get } from '@nestjs/common';
 import { ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { AppService } from './app.service';
-import { HEALTH_CHECK_API } from './constants/api-responses.swagger';
+import { HEALTH_CHECK_API } from './constants/swagger/app-responst.swagger';
 
 @Controller({
     version: '1',

@@ -14,11 +14,13 @@
     "dev:back": "concurrently \"npm run types:watch\" \"dotenv -e ./.env -- npm run start:dev --workspace=back\"",
     "dev:front": "concurrently \"npm run types:watch\" \"dotenv -e ./.env -- npm run dev --workspace front",
     "dev": "concurrently \"npm run types:watch\" \"npm run dev:back\" \"npm run dev:front\"",
+    "db:validate": "cd apps/backend && npm run prisma:validate",
     "db:generate": "npx prisma generate --schema=apps/backend/prisma/schema.prisma",
     "db:migrate": "cd apps/backend && npm run prisma:migrate",
     "db:deploy": "cd apps/backend && npm run prisma:deploy",
     "db:reset": "cd apps/backend && npm run prisma:migrate-reset",
     "db:migrate-init": "cd apps/backend && npm run prisma:migrate-init",
+    "db:migrate-resolve": "cd apps/backend && npm run prisma:migrate-resolve",
     "db:full-reset": "cd apps/backend && npm run prisma:reset-db && npm run prisma:delete-migrations && npm run prisma:init-migration",
     "types:build": "npm run build --workspace=@monorepo/types",
     "types:watch": "npm run watch --workspace=@monorepo/types",
@@ -29,7 +31,7 @@
     "test:back-cover": "jest --config apps/backend/jest.config.js --coverage",
     "test:front": "jest --config apps/frontend/jest.config.ts",
     "test:front-cover": "jest --config apps/frontend/jest.config.ts --coverage",
-    "test:file":"npx jest --config apps/backend/jest.config.js app.spec.ts"
+    "test:file":"npx jest --config apps/backend/jest.config.js users.spec.ts"
   },
   "devDependencies": {
     "@types/jest": "^30.0.0",

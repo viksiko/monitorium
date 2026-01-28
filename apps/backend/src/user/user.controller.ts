@@ -13,17 +13,19 @@ import {
     ApiParam,
     ApiQuery,
     ApiResponse,
-    ApiTags,
 } from '@nestjs/swagger';
-import { AuthGuard } from '@src/auth/guards/access.guard';
+import { JwtAuthGuard } from '@src/auth/guards/jwt-auth.guard';
+import { HEADERS_AUTHORIZATION } from '@src/constants/swagger/api-headers.swagger';
 import {
     AUTHENTICATION_ERROR_RESPONSES,
     DATABASE_ERROR_RESPONSE,
+} from '@src/constants/swagger/shared-responses.swagger';
+import {
     DEACTIVATE_OWN_ACCOUNT_ERROR_RESPONSE,
     USER_ACCOUNT_DEACTIVATED_RESPONSE,
     USER_LIST_SUCCESS_RESPONSE,
     USER_NOT_FOUND_RESPONSE,
-} from '@src/constants/api-responses.swagger';
+} from '@src/constants/swagger/user-responses.swagger';
 import { User, UserResponse } from '@src/types/user';
 import { UserService } from './user.service';
 
@@ -31,19 +33,14 @@ import { UserService } from './user.service';
     path: 'users',
     version: '1',
 })
-@ApiTags('Пользователи')
 export class UserController {
     constructor(private readonly userService: UserService) {}
 
     // Получить всех пользователей или одного по email
     @Get()
-    @UseGuards(AuthGuard)
+    @UseGuards(JwtAuthGuard)
     @ApiOperation({ summary: 'Получить всех пользователей или найти по email' })
-    @ApiHeader({
-        name: 'Authorization',
-        description: 'JWT токен в формате Bearer <token>',
-        required: true,
-    })
+    @ApiHeader(HEADERS_AUTHORIZATION)
     @ApiQuery({
         name: 'email',
         description: 'Опциональный email для поиска конкретного пользователя',
@@ -65,13 +62,9 @@ export class UserController {
 
     // Получить пользователя по id
     @Get(':id')
-    @UseGuards(AuthGuard)
+    @UseGuards(JwtAuthGuard)
     @ApiOperation({ summary: 'Получить пользователя по Id' })
-    @ApiHeader({
-        name: 'Authorization',
-        description: 'JWT токен в формате Bearer <token>',
-        required: true,
-    })
+    @ApiHeader(HEADERS_AUTHORIZATION)
     @ApiParam({
         name: 'id',
         description: 'Обязательный параметр',
@@ -87,14 +80,10 @@ export class UserController {
     }
 
     // Деактивация пользователя
+    @UseGuards(JwtAuthGuard)
     @Patch(':id/deactivate')
-    @UseGuards(AuthGuard)
     @ApiOperation({ summary: 'Деакивация (удаление) пользователя' })
-    @ApiHeader({
-        name: 'Authorization',
-        description: 'JWT токен в формате Bearer <token>',
-        required: true,
-    })
+    @ApiHeader(HEADERS_AUTHORIZATION)
     @ApiParam({
         name: 'id',
         description: 'Обязательный параметр',

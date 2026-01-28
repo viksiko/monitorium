@@ -1,6 +1,7 @@
 export const DB_OPERATION_FAILED =
     'Не удалось выполнить операцию с базой данных. Повторите попытку позже.';
 
+// user, auth
 export const USER_NOT_AUTHORIZED = 'Пользователь не авторизован.';
 
 export const USER_ALREADY_EXISTS = 'Пользователь уже существует.';
@@ -37,3 +38,27 @@ export const PASSWORD_RESET_SUCCESS = 'Пароль успешно измене�
 
 export const RATE_LIMIT_EXCEEDED_MESSAGE =
     'Вы исчерпали лимит запросов. Попробуйте позже.';
+
+export const FORBIDDEN_RESOURCE = 'Forbidden resource';
+
+export const AUTHORIZATION_REQUIRED = 'Требуется авторизация';
+
+// task
+export const TASK_MESSAGES = {
+    // Успешные операции
+    DELETE_SUCCESS: 'Задание успешно удалено',
+    CREATE_SUCCESS: 'Задание успешно создано',
+    UPDATE_SUCCESS: 'Задание успешно обновлено',
+    GET_SUCCESS: 'Задание успешно получено',
+
+    // Ошибки
+    NOT_FOUND: 'Задание не найдено',
+    NOT_FOUND_BY_ID: (id: string) => `Задание с ID ${id} не найдено`,
+    ALREADY_EXISTS: 'Задание уже существует',
+    NO_ACCESS: 'Нет доступа к заданию',
+    VALIDATION_ERROR: 'Ошибка валидации данных задания',
+
+    // Дополнительные
+    EMPTY_LIST: 'Список заданий пуст',
+    INVALID_STATUS: 'Неверный статус задания',
+} as const;

@@ -10,11 +10,11 @@ import { RegisterDto } from '@src/auth/dto/register.dto';
 import { MailService } from '@src/auth/services/mail.service';
 import { TokenSevice } from '@src/auth/services/token.service';
 import {
+    AUTHORIZATION_REQUIRED,
     DEACTIVATE_OWN_ACCOUNT_ONLY,
     EMAIL_NOT_VERIFIED,
     EMAIL_VERIFICATION_FAILED,
     INVALID_CREDENTIALS_MSG,
-    TOKEN_INVALID,
     USER_DEACTIVATED_SUCCESS,
 } from '@src/constants/api-messages.constants';
 import { logger } from '@src/logger/winston.logger';
@@ -100,7 +100,7 @@ export class UserService {
 
         // Если токен не найден или это не токен верификации
         if (!tokenRecord || tokenRecord.type !== 'VERIFY_EMAIL') {
-            throw new NotFoundException(TOKEN_INVALID);
+            throw new NotFoundException(AUTHORIZATION_REQUIRED);
         }
 
         // 3. Проверяем срок действия
@@ -109,7 +109,7 @@ export class UserService {
             await this.prisma.token.delete({
                 where: { id: tokenRecord.id },
             });
-            throw new NotFoundException(TOKEN_INVALID);
+            throw new NotFoundException(AUTHORIZATION_REQUIRED);
         }
 
         // 4. Атомарно подтверждаем пользователя и удаляем использованный токен

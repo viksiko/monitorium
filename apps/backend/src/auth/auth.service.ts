@@ -7,11 +7,11 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import {
+    AUTHORIZATION_REQUIRED,
     LOGOUT_SUCCESS_MSG,
     MAIL_DELIVERY_MESSAGE,
     REGISTRATION_CONFIRMED_MESSAGE,
     REGISTRATION_SUCCESS,
-    TOKEN_INVALID,
     USER_ALREADY_EXISTS,
 } from '@src/constants/api-messages.constants';
 import { logger } from '@src/logger/winston.logger';
@@ -94,7 +94,7 @@ export class AuthService {
         const refreshToken = request.cookies['refreshToken'];
 
         if (!refreshToken) {
-            throw new UnauthorizedException(TOKEN_INVALID);
+            throw new UnauthorizedException(AUTHORIZATION_REQUIRED);
         }
 
         // 1. Проверка JWT-подписи токена (Остается в AuthService)
@@ -109,7 +109,7 @@ export class AuthService {
                 operation: 'refresh',
                 error: error instanceof Error ? error.message : error,
             });
-            throw new UnauthorizedException(TOKEN_INVALID);
+            throw new UnauthorizedException(AUTHORIZATION_REQUIRED);
         }
         // 2. Найти и удалить старый токен в БД (Делегируется TokenService)
         await this.tokenService.consumeRefreshToken(refreshToken);
@@ -136,14 +136,14 @@ export class AuthService {
         const refreshToken = request.cookies['refreshToken'];
 
         if (!refreshToken) {
-            throw new UnauthorizedException(TOKEN_INVALID);
+            throw new UnauthorizedException(AUTHORIZATION_REQUIRED);
         }
 
         const deletedCount =
             await this.tokenService.deleteTokensByHash(refreshToken);
 
         if (deletedCount === 0) {
-            throw new UnauthorizedException(TOKEN_INVALID);
+            throw new UnauthorizedException(AUTHORIZATION_REQUIRED);
         }
 
         this.cookieTokenService.clearRefreshTokenCookie(response);
@@ -154,7 +154,7 @@ export class AuthService {
     // подтверждение регистрации
     async confirmRegistration(token: string): Promise<{ message: string }> {
         if (!token) {
-            throw new UnauthorizedException(TOKEN_INVALID);
+            throw new UnauthorizedException(AUTHORIZATION_REQUIRED);
         }
 
         await this.userService.verifyUserByToken(token);
@@ -232,13 +232,13 @@ export class AuthService {
         });
 
         if (!tokenRecord || tokenRecord.type !== 'RESET_PASSWORD') {
-            throw new UnauthorizedException(TOKEN_INVALID);
+            throw new UnauthorizedException(AUTHORIZATION_REQUIRED);
         }
 
         // 3. Проверка срока действия
         if (new Date() > tokenRecord.exp) {
             await this.prisma.token.delete({ where: { id: tokenRecord.id } });
-            throw new UnauthorizedException(TOKEN_INVALID);
+            throw new UnauthorizedException(AUTHORIZATION_REQUIRED);
         }
 
         // 4. Хешируем новый пароль
