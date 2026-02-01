@@ -288,6 +288,15 @@ export const CREATE_TASK_SUCCESS_RESPONSE: ApiResponseOptions = {
                     likes: 0,
                     createdAt: '2026-01-26T14:35:48.064Z',
                     updatedAt: '2026-01-26T14:35:48.064Z',
+                    stages: [
+                        {
+                            id: 'cmkv4fznr0000m8jfrfe4gxdg',
+                            taskId: 'cmkv15eg10001lcjfnaqff138',
+                            title: 'Проверка труб',
+                            date: '2026-01-27T10:00:00.000Z',
+                            createdAt: '2026-01-26T12:06:12.806Z',
+                        },
+                    ],
                 },
             },
         },

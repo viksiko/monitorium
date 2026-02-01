@@ -1,32 +1,48 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import Layout from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { MapPin, Calendar, Plus, X } from 'lucide-react';
+import {
+    MapPin,
+    Calendar,
+    Plus,
+    X,
+    BookOpenText,
+    ClipboardCheck,
+    NotebookPen,
+    Lightbulb,
+    BookType,
+} from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
+import { useAuthStore } from '@/shared/stores/auth.store';
+import { useForm } from 'react-hook-form';
+import { createTaskSchema } from '@/zod/createTask.shema';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { FormError, formInputClass } from '@/components/ui/formInputClass';
+import { add } from 'date-fns';
 
 const TaskCreate = () => {
+    const accessToken = useAuthStore((state) => state.accessToken);
     const { toast } = useToast();
-    const [formData, setFormData] = useState({
-        title: '',
-        address: '',
-        description: '',
-        solution: '',
-        endDate: '',
-    });
     const [stages, setStages] = useState([{ title: '', date: '' }]);
 
-    const handleChange = (
-        e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-    ) => {
-        const { name, value } = e.target;
-        setFormData({
-            ...formData,
-            [name]: value,
-        });
-    };
+    const {
+        register,
+        handleSubmit,
+        reset,
+        formState: { errors },
+    } = useForm({
+        resolver: zodResolver(createTaskSchema),
+        defaultValues: {
+            title: '',
+            address: '',
+            description: '',
+            solution: '',
+            endDate: '',
+        },
+    });
 
     const handleStageChange = (index: number, field: string, value: string) => {
         const updatedStages = [...stages];
@@ -46,17 +62,55 @@ const TaskCreate = () => {
         }
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        // In a real app, send data to the backend
+    const onSubmit = async (data) => {
+        const payload = {
+            title: data.title,
+            address: data.address,
+            problemDescription: data.description,
+            possibleSolutions: data.solution,
+            desiredResolutionDate: new Date(data.endDate).toISOString(),
+            stages: stages.map((stage) => ({
+                title: stage.title,
+                date: new Date(stage.date).toISOString(),
+            })),
+        };
 
-        toast({
-            title: 'Требуется оплата',
-            description: 'Для создания задания требуется 10 билетов',
-            variant: 'default',
-        });
+        try {
+            const response = await fetch('/api/v1/tasks', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${accessToken}`,
+                },
+                body: JSON.stringify(payload),
+            });
 
-        // Here would be code to handle payment and submission
+            if (!response.ok) {
+                throw new Error('Ошибка при создании задания');
+            }
+
+            toast({
+                title: 'Задание создано',
+                description: 'Ваше задание успешно отправлено',
+                variant: 'success',
+            });
+
+            // очистка формы
+            reset();
+            setStages([{ title: '', date: '' }]);
+        } catch (error) {
+            toast({
+                title: 'Ошибка',
+                description: 'Не удалось создать задание',
+                variant: 'destructive',
+            });
+        }
+
+        // toast({
+        //     title: 'Требуется оплата',
+        //     description: 'Для создания задания требуется 10 билетов',
+        //     variant: 'default',
+        // });
     };
 
     return (
@@ -66,9 +120,8 @@ const TaskCreate = () => {
                     <h1 className="text-3xl font-bold mb-8 text-center">
                         Создание задания
                     </h1>
-
                     <form
-                        onSubmit={handleSubmit}
+                        onSubmit={handleSubmit(onSubmit)}
                         className="honor-card">
                         <div className="mb-6">
                             <Label
@@ -76,15 +129,20 @@ const TaskCreate = () => {
                                 className="block mb-2">
                                 Заголовок задания
                             </Label>
-                            <Input
-                                id="title"
-                                name="title"
-                                value={formData.title}
-                                onChange={handleChange}
-                                className="honor-input"
-                                placeholder="Например: Ремонт дороги на ул. Ленина"
-                                required
-                            />
+                            <div className="relative">
+                                <BookType
+                                    className="absolute left-3 top-1/2 transform -translate-y-1/2 text-honor-darkGray"
+                                    size={18}
+                                />
+                                <Input
+                                    id="title"
+                                    name="title"
+                                    {...register('title')}
+                                    className={formInputClass(errors.title)}
+                                    placeholder="Например: Ремонт дороги на ул. Ленина"
+                                />
+                                <FormError error={errors.title} />
+                            </div>
                         </div>
 
                         <div className="mb-6">
@@ -101,12 +159,11 @@ const TaskCreate = () => {
                                 <Input
                                     id="address"
                                     name="address"
-                                    value={formData.address}
-                                    onChange={handleChange}
-                                    className="honor-input pl-10"
+                                    {...register('address')}
+                                    className={formInputClass(errors.address)}
                                     placeholder="Укажите точный адрес проблемы"
-                                    required
                                 />
+                                <FormError error={errors.address} />
                             </div>
                         </div>
 
@@ -116,15 +173,23 @@ const TaskCreate = () => {
                                 className="block mb-2">
                                 Описание проблемы
                             </Label>
-                            <Textarea
-                                id="description"
-                                name="description"
-                                value={formData.description}
-                                onChange={handleChange}
-                                className="honor-input min-h-[100px]"
-                                placeholder="Подробно опишите суть проблемы..."
-                                required
-                            />
+                            <div className="relative">
+                                <NotebookPen
+                                    className="absolute left-3 top-5 transform -translate-y-1/2 text-honor-darkGray"
+                                    size={18}
+                                />
+                                <Textarea
+                                    id="description"
+                                    name="description"
+                                    {...register('description')}
+                                    className={formInputClass(
+                                        errors.description,
+                                    )}
+                                    // className="honor-input min-h-[100px]"
+                                    placeholder="Подробно опишите суть проблемы..."
+                                />
+                                <FormError error={errors.description} />
+                            </div>
                         </div>
 
                         <div className="mb-6">
@@ -133,15 +198,19 @@ const TaskCreate = () => {
                                 className="block mb-2">
                                 Возможные пути решения
                             </Label>
-                            <Textarea
-                                id="solution"
-                                name="solution"
-                                value={formData.solution}
-                                onChange={handleChange}
-                                className="honor-input"
-                                placeholder="Опишите возможные варианты решения проблемы..."
-                                required
-                            />
+                            <div className="relative">
+                                <Lightbulb
+                                    className="absolute left-3 top-5 transform -translate-y-1/2 text-honor-darkGray"
+                                    size={18}
+                                />
+                                <Textarea
+                                    id="solution"
+                                    name="solution"
+                                    {...register('solution')}
+                                    className="honor-input pl-10"
+                                    placeholder="Опишите возможные варианты решения проблемы..."
+                                />
+                            </div>
                         </div>
 
                         <div className="mb-6">
@@ -159,11 +228,13 @@ const TaskCreate = () => {
                                     id="endDate"
                                     name="endDate"
                                     type="date"
-                                    value={formData.endDate}
-                                    onChange={handleChange}
-                                    className="honor-input pl-10"
-                                    required
+                                    {...register('endDate')}
+                                    // className="honor-input pl-10"
+                                    className={formInputClass(
+                                        errors.description,
+                                    )}
                                 />
+                                <FormError error={errors.endDate} />
                             </div>
                         </div>
 
@@ -189,19 +260,24 @@ const TaskCreate = () => {
                                     key={index}
                                     className="flex gap-2 mb-3">
                                     <div className="flex-1">
-                                        <Input
-                                            value={stage.title}
-                                            onChange={(e) =>
-                                                handleStageChange(
-                                                    index,
-                                                    'title',
-                                                    e.target.value,
-                                                )
-                                            }
-                                            className="honor-input"
-                                            placeholder="Название этапа"
-                                            required
-                                        />
+                                        <div className="relative">
+                                            <ClipboardCheck
+                                                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-honor-darkGray"
+                                                size={18}
+                                            />
+                                            <Input
+                                                value={stage.title}
+                                                onChange={(e) =>
+                                                    handleStageChange(
+                                                        index,
+                                                        'title',
+                                                        e.target.value,
+                                                    )
+                                                }
+                                                className="honor-input pl-10"
+                                                placeholder="Название этапа"
+                                            />
+                                        </div>
                                     </div>
                                     <div className="w-40">
                                         <Input
@@ -215,7 +291,6 @@ const TaskCreate = () => {
                                                 )
                                             }
                                             className="honor-input"
-                                            required
                                         />
                                     </div>
                                     {stages.length > 1 && (

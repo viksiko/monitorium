@@ -1,3 +1,4 @@
+import { TaskListItem } from '@monorepo/types';
 import {
     Body,
     Controller,
@@ -85,7 +86,7 @@ export class TaskController {
     @ApiOperation({ summary: '' })
     async getTasksByUser(
         @Req() req: Request & { user: User },
-    ): Promise<Task[] | null> {
+    ): Promise<TaskListItem[] | null> {
         const userId = req.user.id;
         return await this.taskService.getTasksByUser(userId);
     }

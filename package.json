@@ -31,7 +31,7 @@
     "test:back-cover": "jest --config apps/backend/jest.config.js --coverage",
     "test:front": "jest --config apps/frontend/jest.config.ts",
     "test:front-cover": "jest --config apps/frontend/jest.config.ts --coverage",
-    "test:file":"npx jest --config apps/backend/jest.config.js users.spec.ts"
+    "test:file":"npx jest --config apps/backend/jest.config.js app.spec.ts"
   },
   "devDependencies": {
     "@types/jest": "^30.0.0",

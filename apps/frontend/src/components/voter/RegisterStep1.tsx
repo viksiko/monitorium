@@ -41,6 +41,8 @@ const RegisterStep1 = ({ onSubmit, isLoading }: RegisterStep1Props) => {
                         size={18}
                     />
                     <Input
+                        id="fullName"
+                        name="fullName"
                         {...register('fullName')}
                         placeholder="Иванов Иван Иванович"
                         className={formInputClass(errors.fullName)}
@@ -61,6 +63,8 @@ const RegisterStep1 = ({ onSubmit, isLoading }: RegisterStep1Props) => {
                         size={18}
                     />
                     <Input
+                        id="email"
+                        name="email"
                         type="email"
                         {...register('email')}
                         className={formInputClass(errors.email)}
@@ -82,6 +86,8 @@ const RegisterStep1 = ({ onSubmit, isLoading }: RegisterStep1Props) => {
                         size={18}
                     />
                     <Input
+                        id="password"
+                        name="password"
                         type="password"
                         className={formInputClass(errors.password)}
                         placeholder="Введите пароль"
@@ -103,6 +109,8 @@ const RegisterStep1 = ({ onSubmit, isLoading }: RegisterStep1Props) => {
                         size={18}
                     />
                     <Input
+                        id="confirmPassword"
+                        name="confirmPassword"
                         type="password"
                         className={formInputClass(errors.confirmPassword)}
                         placeholder="Введите пароль"
@@ -124,6 +132,8 @@ const RegisterStep1 = ({ onSubmit, isLoading }: RegisterStep1Props) => {
                         size={18}
                     />
                     <Input
+                        id="phone"
+                        name="phone"
                         className={formInputClass(errors.phone)}
                         placeholder="+7 (___) ___-__-__"
                         {...register('phone', {

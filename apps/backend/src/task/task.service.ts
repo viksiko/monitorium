@@ -1,3 +1,4 @@
+import { TaskListItem } from '@monorepo/types';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { Task, TaskStage } from '@prisma/client';
 import { TASK_MESSAGES } from '@src/constants/api-messages.constants';
@@ -5,6 +6,7 @@ import { logger } from '@src/logger/winston.logger';
 import { PrismaService } from '@src/prisma/prisma.service';
 import { CreateTaskStageDto } from './dto/create-task-stage.dto';
 import { CreateTaskDto } from './dto/create-task.dto';
+import { mapTaskListItemToDto } from './task.mapper';
 
 @Injectable()
 export class TaskService {
@@ -12,14 +14,29 @@ export class TaskService {
 
     async create(userId: string, dto: CreateTaskDto): Promise<Task> {
         try {
-            return this.prisma.task.create({
+            const { stages, ...taskData } = dto;
+
+            // Создание задачи с возможными этапами
+            return await this.prisma.task.create({
                 data: {
-                    ...dto,
+                    ...taskData,
                     userId,
+
+                    ...(stages?.length && {
+                        stages: {
+                            create: stages.map((stage) => ({
+                                title: stage.title,
+                                date: new Date(stage.date),
+                            })),
+                        },
+                    }),
+                },
+                include: {
+                    stages: true, // если нужно вернуть этапы
                 },
             });
         } catch (error) {
-            logger.error('Failed create to task', {
+            logger.error('Failed create task', {
                 category: 'TaskService',
                 operation: 'create',
                 error: error instanceof Error ? error.message : error,
@@ -49,21 +66,25 @@ export class TaskService {
         }
     }
 
-    async getTasksByUser(userId: string): Promise<Task[] | null> {
+    async getTasksByUser(userId: string): Promise<TaskListItem[]> {
         try {
             const tasks = await this.prisma.task.findMany({
-                where: { userId }, // фильтр по пользователю
-                include: {
-                    stages: true,
-                    comments: true,
-                    taskFiles: true,
+                where: { userId },
+                select: {
+                    id: true,
+                    title: true,
+                    address: true,
+                    desiredResolutionDate: true,
+                    ikes: true,
+                    status: true,
+                    createdAt: true,
                 },
-                orderBy: { createdAt: 'desc' }, // новые задачи сверху
+                orderBy: { createdAt: 'desc' },
             });
 
-            return tasks;
+            return tasks.map(mapTaskListItemToDto);
         } catch (error) {
-            logger.error('Failed when getting the task gy user', {
+            logger.error('Failed when getting tasks list by user', {
                 category: 'TaskService',
                 operation: 'getTasksByUser',
                 error: error instanceof Error ? error.message : error,

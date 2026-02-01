@@ -113,6 +113,7 @@ const Login = () => {
                                 />
                                 <Input
                                     id="email"
+                                    name="email"
                                     {...register('email')}
                                     className={formInputClass(errors.email)}
                                     placeholder="example@mail.ru"
@@ -138,6 +139,7 @@ const Login = () => {
                                 />
                                 <Input
                                     id="password"
+                                    name="password"
                                     type="password"
                                     {...register('password')}
                                     className={formInputClass(errors.password)}

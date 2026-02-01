@@ -5,7 +5,7 @@ export const registerStep1Schema = z
         fullName: z
             .string()
             .min(1, 'Введите ФИО')
-            .min(5, 'ФИО должно быть не короче 5 символов'),
+            .min(3, 'ФИО должно быть не менее 3 символов'),
 
         email: z
             .string()

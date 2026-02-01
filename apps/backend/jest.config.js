@@ -20,6 +20,8 @@ module.exports = {
         '^@shared/filter/(.*)$': '<rootDir>/libs/filter/src/$1',
         '^@shared/interceptor': '<rootDir>/libs/interceptor/src',
         '^@shared/interceptor/(.*)$': '<rootDir>/libs/interceptor/src/$1',
+        '^@monorepo/types$': '<rootDir>/../../packages/types/src',
+        // '^@monorepo/types/(.*)$': '<rootDir>/../../packages/types/src/$1',
         // '^uuid$': require.resolve('uuid'),
     },
 

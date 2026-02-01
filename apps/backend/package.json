@@ -24,7 +24,7 @@
     "prisma:migrate": "dotenv -e ../../.env -- npx prisma migrate dev",
     "prisma:migrate-reset": "dotenv -e ../../.env -- npx prisma migrate reset",
     "prisma:migrate-init": "dotenv -e ../../.env -- npx prisma migrate dev --name init",
-    "prisma:migrate-resolve": "dotenv -e ../../.env -- npx prisma migrate resolve --applied 20260124133835_add_tasks_task_stage_task_file_task_comment",
+    "prisma:migrate-resolve": "dotenv -e ../../.env -- npx prisma migrate resolve --applied ...name_migration_file",
     "prisma:studio": "prisma studio",
     "prisma:validate": "dotenv -e ../../.env prisma validate",
     "prisma:format": "prisma format",
