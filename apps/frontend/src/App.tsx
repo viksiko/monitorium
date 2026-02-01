@@ -37,6 +37,8 @@ import ConfirmRegistrationFailed from './pages/ConfirmRegistrationFailed';
 import { AuthInit } from './hooks/useAuthInit';
 import PrivateRoute from './guards/PrivateRoute';
 import PublicRoute from './guards/PublicRoute';
+import { TaskDetails } from './components/dashboard';
+import ScrollToTop from './components/ui/ScrollToTop';
 
 const queryClient = new QueryClient();
 
@@ -49,6 +51,7 @@ const App = () => (
                     <Sonner />
                     <AuthInit>
                         <BrowserRouter>
+                            <ScrollToTop />
                             <Routes>
                                 {/* ================== PUBLIC (доступны всем) ================== */}
                                 <Route
@@ -121,6 +124,10 @@ const App = () => (
                                     <Route
                                         path="/tasks/create"
                                         element={<TaskCreate />}
+                                    />
+                                    <Route
+                                        path="/tasks/:taskId"
+                                        element={<TaskDetails />}
                                     />
                                     <Route
                                         path="/balance"

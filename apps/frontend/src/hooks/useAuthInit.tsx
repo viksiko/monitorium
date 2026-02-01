@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { api } from '@/lib/api';
 import { useAuthStore } from '@/shared/stores/auth.store';
 import { useQueryClient } from '@tanstack/react-query';
+import Loader from '@/components/ui/loader';
 
 type Props = {
     children: React.ReactNode;
@@ -31,7 +32,12 @@ export const AuthInit = ({ children }: Props) => {
         refresh();
     }, []);
 
-    if (loading) return <div>Loading...</div>;
+    if (loading)
+        return (
+            <>
+                <Loader />
+            </>
+        );
 
     return <>{children}</>;
 };

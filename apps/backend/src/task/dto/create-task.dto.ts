@@ -1,12 +1,15 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
+    IsArray,
     IsDate,
     IsNotEmpty,
     IsOptional,
     IsString,
     MinLength,
+    ValidateNested,
 } from 'class-validator';
+import { CreateTaskStageDto } from './create-task-stage.dto';
 
 export class CreateTaskDto {
     @IsString({ message: 'Заголовок должно быть строкой' })
@@ -43,4 +46,14 @@ export class CreateTaskDto {
     @IsDate({ message: 'Желаемая дата решения должно быть датой' })
     @ApiProperty({ example: '2024-12-31T00:00:00.000Z' })
     desiredResolutionDate?: Date;
+
+    @IsOptional()
+    @IsArray({ message: 'Этапы должны быть массивом' })
+    @ValidateNested({ each: true })
+    @Type(() => CreateTaskStageDto)
+    @ApiProperty({
+        type: [CreateTaskStageDto],
+        required: false,
+    })
+    stages?: CreateTaskStageDto[];
 }

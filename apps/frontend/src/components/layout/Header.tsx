@@ -169,9 +169,11 @@ const Header = () => {
                             </Link>
                         ) : (
                             <div className="flex items-center space-x-3">
-                                <span className="text-sm font-medium text-gray-700">
-                                    {user.name}
-                                </span>
+                                <Link
+                                    to="/dashboard"
+                                    className="text-sm font-medium text-gray-700 cursor-pointer hover:text-blue-600 hover:underline transition-all">
+                                    <span>{user.name}</span>
+                                </Link>
 
                                 <Button
                                     variant="outline"

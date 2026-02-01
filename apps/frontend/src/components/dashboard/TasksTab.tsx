@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -14,40 +14,35 @@ import {
     AlertTriangle,
 } from 'lucide-react';
 import EscalateTask from './EscalateTask';
-
-// Mock data
-const mockTasks = [
-    {
-        id: 1,
-        title: 'Ремонт дороги на ул. Ленина',
-        address: 'ул. Ленина, 10-20',
-        status: 'in-progress',
-        date: '2025-08-15',
-        likes: 24,
-        comments: 5,
-        createdAt: '2025-05-01',
-        lastResponseDays: 14,
-    },
-    {
-        id: 2,
-        title: 'Установка детской площадки',
-        address: 'ул. Пушкина, 42',
-        status: 'completed',
-        date: '2025-04-20',
-        likes: 56,
-        comments: 12,
-        createdAt: '2025-03-15',
-        lastResponseDays: 2,
-    },
-];
+import { useAuthStore } from '@/shared/stores/auth.store';
+import { Task } from '@monorepo/types';
+import Layout from '@/components/layout/Layout';
+import Loader from '@/components/ui/loader';
+import { useAuthorizedFetch } from '@/hooks/useAuthorizedFetch';
 
 const TasksTab = () => {
+    const accessToken = useAuthStore((state) => state.accessToken);
+
     const [escalatingTask, setEscalatingTask] = useState<{
         id: number;
         title: string;
     } | null>(null);
 
     const needsEscalation = (days: number) => days > 7;
+
+    const {
+        data: tasks,
+        loading,
+        error,
+    } = useAuthorizedFetch<Task[]>('/api/v1/tasks/user-tasks', accessToken);
+
+    if (loading) {
+        return <Loader />;
+    }
+
+    if (error) {
+        return <p className="text-center py-10 text-red-500">{error}</p>;
+    }
 
     return (
         <div className="space-y-6">
@@ -76,90 +71,97 @@ const TasksTab = () => {
                 </DialogContent>
             </Dialog>
 
-            {mockTasks.map((task) => (
-                <Card
-                    key={task.id}
-                    className="honor-card">
-                    <div className="flex justify-between items-start mb-4">
-                        <h3 className="text-xl font-bold">{task.title}</h3>
-                        <Badge
-                            className={
-                                task.status === 'completed'
-                                    ? 'bg-green-100 text-green-800'
-                                    : task.status === 'in-progress'
-                                      ? 'bg-blue-100 text-blue-800'
-                                      : 'bg-orange-100 text-orange-800'
-                            }>
-                            {task.status === 'completed'
-                                ? 'Выполнено'
-                                : task.status === 'in-progress'
-                                  ? 'В процессе'
-                                  : 'Запланировано'}
-                        </Badge>
-                    </div>
-
-                    <div className="flex items-center text-honor-darkGray text-sm mb-4">
-                        <MapPin
-                            size={16}
-                            className="mr-1"
-                        />
-                        <span>{task.address}</span>
-                        <span className="mx-2">•</span>
-                        <Calendar
-                            size={16}
-                            className="mr-1"
-                        />
-                        <span>
-                            До {new Date(task.date).toLocaleDateString('ru-RU')}
-                        </span>
-                    </div>
-
-                    <div className="flex justify-between items-center pt-3 border-t">
-                        <div className="flex space-x-4">
-                            <div className="flex items-center space-x-1 text-honor-darkGray">
-                                <ThumbsUp size={18} />
-                                <span>{task.likes}</span>
-                            </div>
-                            <div className="flex items-center space-x-1 text-honor-darkGray">
-                                <MessageSquare size={18} />
-                                <span>{task.comments}</span>
-                            </div>
+            {tasks.map((task) => (
+                <Link to={`/tasks/${task.id}`}>
+                    <Card
+                        key={task.id}
+                        className="honor-card mb-4 hover:shadow-lg">
+                        <div className="flex justify-between items-start mb-4">
+                            <h3 className="text-xl font-bold">{task.title}</h3>
+                            <Badge
+                                className={
+                                    task.status === 'NEW'
+                                        ? 'bg-green-100 text-green-800'
+                                        : task.status === 'IN_PROGRESS'
+                                          ? 'bg-blue-100 text-blue-800'
+                                          : 'bg-orange-100 text-orange-800'
+                                }>
+                                {task.status === 'COMPLETED'
+                                    ? 'Выполнено'
+                                    : task.status === 'IN_PROGRESS'
+                                      ? 'В процессе'
+                                      : 'В процессе'}
+                            </Badge>
                         </div>
-                        <div className="flex items-center">
-                            {task.status !== 'completed' &&
-                                needsEscalation(task.lastResponseDays) && (
-                                    <Button
-                                        variant="ghost"
-                                        className="text-amber-600 flex items-center mr-2 hover:bg-amber-50"
-                                        onClick={() =>
-                                            setEscalatingTask({
-                                                id: task.id,
-                                                title: task.title,
-                                            })
-                                        }>
-                                        <AlertTriangle
-                                            size={16}
-                                            className="mr-1"
-                                        />
-                                        Эскалировать
-                                    </Button>
-                                )}
-                            <span className="text-sm text-honor-darkGray">
-                                <Clock
-                                    size={16}
-                                    className="inline mr-1"
-                                />
-                                Создано{' '}
-                                {new Date(task.createdAt).toLocaleDateString(
-                                    'ru-RU',
-                                )}
+
+                        <div className="flex items-center text-honor-darkGray text-sm mb-4">
+                            <MapPin
+                                size={16}
+                                className="mr-1"
+                            />
+                            <span>{task.address}</span>
+                            <span className="mx-2">•</span>
+                            <Calendar
+                                size={16}
+                                className="mr-1"
+                            />
+                            <span>
+                                До{' '}
+                                {new Date(
+                                    task.desiredResolutionDate,
+                                ).toLocaleDateString('ru-RU')}
                             </span>
                         </div>
-                    </div>
-                </Card>
+
+                        <div className="flex justify-between items-center pt-3 border-t">
+                            <div className="flex space-x-4">
+                                <div className="flex items-center space-x-1 text-honor-darkGray">
+                                    <ThumbsUp size={18} />
+                                    <span>{task.ikes}</span>
+                                </div>
+                                {/* <div className="flex items-center space-x-1 text-honor-darkGray">
+                                <MessageSquare size={18} />
+                                <span>{task.comments}</span>
+                            </div> */}
+                            </div>
+                            <div className="flex items-center">
+                                {/* {task.status !== 'NEW' &&
+                                    needsEscalation(task.lastResponseDays) && (
+                                        <Button
+                                            variant="ghost"
+                                            className="text-amber-600 flex items-center mr-2 hover:bg-amber-50"
+                                            onClick={() =>
+                                                setEscalatingTask({
+                                                    id: task.id,
+                                                    title: task.title,
+                                                })
+                                            }>
+                                            <AlertTriangle
+                                                size={16}
+                                                className="mr-1"
+                                            />
+                                            Эскалировать
+                                        </Button>
+                                    )} */}
+                                <div className="flex flex-col items-end">
+                                    <span className="text-sm text-honor-darkGray">
+                                        <Clock
+                                            size={16}
+                                            className="inline mr-1"
+                                        />
+                                        Создано{' '}
+                                        {new Date(
+                                            task.createdAt,
+                                        ).toLocaleDateString('ru-RU')}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </Card>
+                </Link>
             ))}
 
-            {mockTasks.length === 0 && (
+            {tasks.length === 0 && (
                 <div className="text-center py-10">
                     <p className="text-honor-darkGray mb-4">
                         У вас пока нет заданий

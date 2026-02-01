@@ -27,7 +27,9 @@
             "@shared/middleware/*": ["libs/middleware/src/*"],
             "@shared/schema": ["libs/schema/src"],
             "@shared/schema/*": ["libs/schema/src/*"],
-            "@libs/*": ["apps/backend/libs/*"]
+            "@libs/*": ["apps/backend/libs/*"],
+            "@monorepo/types": ["../../packages/types/src"],
+            // "@monorepo/types/*": ["../../packages/types/src/*"]
         }
     }
 }
