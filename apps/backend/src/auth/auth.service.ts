@@ -44,6 +44,7 @@ export class AuthService {
     async register(registerDto: RegisterDto): Promise<{
         message: string;
     }> {
+        console.log('RegisterDto in AuthService:', registerDto);
         // 1. Проверка существования пользователя
         const existingUser = await this.userService.findUserByEmailOrPhone(
             registerDto.email,

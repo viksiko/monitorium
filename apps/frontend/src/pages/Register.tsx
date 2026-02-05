@@ -124,6 +124,22 @@ const Register = () => {
                             goBack={() => setStep(1)}
                         />
                     )}
+                    {/* 
+                    {step === 1 && (
+                        <RegisterStep1
+                            onSubmit={handleSubmitStep1}
+                            isLoading={isLoading}
+                        />
+                    )} */}
+
+                    {step === 2 && (
+                        <VerificationStep
+                            verificationCode={formData.verificationCode}
+                            handleChange={handleChange}
+                            handleSubmit={handleSubmitStep2}
+                            goBack={() => setStep(1)}
+                        />
+                    )}
 
                     <RegisterFooter />
 

@@ -67,7 +67,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
             toast({
                 title: 'Ошибка регистрации',
                 description:
-                    error.response?.data?.message ||
+                    error.response?.data?.data.message ||
                     'Произошла ошибка при регистрации.',
                 variant: 'destructive',
             });

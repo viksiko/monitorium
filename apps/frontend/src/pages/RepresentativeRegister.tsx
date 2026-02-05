@@ -95,7 +95,7 @@ const RepresentativeRegister = () => {
                         Регистрация представителя власти
                     </h1>
 
-                    <GosuslugiAuthButton
+                    {/* <GosuslugiAuthButton
                         isRepresentative={true}
                         className="mb-6"
                     />
@@ -106,7 +106,7 @@ const RepresentativeRegister = () => {
                             или
                         </span>
                         <Separator className="flex-grow" />
-                    </div>
+                    </div> 
 
                     <div className="bg-blue-50 border border-blue-200 p-4 rounded-lg mb-6">
                         <p className="text-sm text-honor-blue">
@@ -115,7 +115,7 @@ const RepresentativeRegister = () => {
                             автоматически подтверждает ваши официальные
                             полномочия.
                         </p>
-                    </div>
+                    </div> */}
 
                     {step === 1 && (
                         <RepresentativeStep1

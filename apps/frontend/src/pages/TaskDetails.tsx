@@ -17,6 +17,7 @@ import { Link, useParams } from 'react-router-dom';
 import Loader from '@/components/ui/loader';
 import { Badge } from '@/components/ui/badge';
 import { useAuthorizedFetch } from '@/hooks/useAuthorizedFetch';
+import { TaskStatusBadge } from '@/components/ui/task-status-badge';
 
 const TaskDetails = () => {
     // const [showModifications, setShowModifications] = useState<number | null>(
@@ -121,22 +122,9 @@ const TaskDetails = () => {
                                                 {task.title}
                                             </h2>
                                             <div className="flex items-center">
-                                                <Badge
-                                                    className={
-                                                        task.status === 'NEW'
-                                                            ? 'bg-green-100 text-green-800'
-                                                            : task.status ===
-                                                                'IN_PROGRESS'
-                                                              ? 'bg-blue-100 text-blue-800'
-                                                              : 'bg-orange-100 text-orange-800'
-                                                    }>
-                                                    {task.status === 'COMPLETED'
-                                                        ? 'Выполнено'
-                                                        : task.status ===
-                                                            'IN_PROGRESS'
-                                                          ? 'В процессе'
-                                                          : 'В процессе'}
-                                                </Badge>
+                                                <TaskStatusBadge
+                                                    status={task.status}
+                                                />
                                             </div>
                                         </div>
 
@@ -253,7 +241,9 @@ const TaskDetails = () => {
                                             <div className="flex space-x-4">
                                                 <div className="flex items-center space-x-1 text-honor-darkGray">
                                                     <ThumbsUp size={18} />
-                                                    <span>{task.ikes}</span>
+                                                    <span>
+                                                        {task.likesCountikes}
+                                                    </span>
                                                 </div>
                                                 <div className="flex items-center space-x-1 text-honor-darkGray">
                                                     <MessageSquare size={18} />
@@ -261,7 +251,9 @@ const TaskDetails = () => {
                                                 </div>
                                                 <div className="flex items-center space-x-1 text-honor-darkGray">
                                                     <Eye size={18} />
-                                                    <span>{task.views}</span>
+                                                    <span>
+                                                        {task.viewsCount}
+                                                    </span>
                                                 </div>
                                             </div>
                                             {/* <span className="text-sm text-honor-darkGray">
