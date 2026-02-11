@@ -4,7 +4,7 @@ import { PassportStrategy } from '@nestjs/passport';
 import { AUTHORIZATION_REQUIRED } from '@src/constants/api-messages.constants';
 import { JWT_ACCESS_SECRET_NOT_DEFINED } from '@src/constants/app.constants';
 import { JwtPayload } from '@src/types/auth';
-import { User } from '@src/types/user';
+import { UserResponse } from '@src/types/user';
 import { UserService } from '@src/user/user.service';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 
@@ -24,7 +24,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         });
     }
 
-    async validate(payload: JwtPayload): Promise<User> {
+    async validate(payload: JwtPayload): Promise<UserResponse> {
         const user = await this.userService.findUserById(payload.id);
 
         if (!user) {

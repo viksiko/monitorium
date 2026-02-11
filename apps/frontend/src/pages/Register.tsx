@@ -16,6 +16,8 @@ import { Separator } from '@/components/ui/separator';
 import { RegisterStep1FormValues } from '@/zod/registerStep1.schema';
 import axios from 'axios';
 import { useToast } from '@/components/ui/use-toast';
+import { api } from '@/lib/api';
+import { RegisterRoleEnum } from '@monorepo/types';
 
 const Register = () => {
     const { register } = useAuth();
@@ -33,6 +35,7 @@ const Register = () => {
         useAddress: false,
         verificationCode: '',
     });
+    const [userId, setUserId] = useState<string | null>(null);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value, type, checked } = e.target;
@@ -46,13 +49,17 @@ const Register = () => {
         setIsLoading(true);
 
         try {
-            await register({
-                email: data.email,
-                password: data.password,
-                name: data.fullName,
-                phone: data.phone || undefined,
-                // district: data.district || undefined,
-            });
+            const response = await register(
+                {
+                    email: data.email,
+                    password: data.password,
+                    name: data.fullName,
+                    phone: data.phone || undefined,
+                    // district: data.district || undefined,
+                    role: RegisterRoleEnum.VOTER,
+                },
+                // RegisterRoleEnum.VOTER,
+            );
 
             // const response = await axios.post('/api/v1/auth/register', {
             //     name: data.fullName,
@@ -65,6 +72,19 @@ const Register = () => {
             //     description: response?.data?.data?.message,
             //     variant: 'success',
             // });
+
+            const createdUserId = response.data.data.id;
+
+            setUserId(createdUserId);
+
+            // toast({
+            //     title: 'Регистрация успешна!',
+            //     description:
+            //         'Введите код, отправленный на почту, для подтверждения регистрации',
+            //     variant: 'success',
+            // });
+
+            setStep(2);
 
             // navigate('/dashboard');
         } catch (error) {
@@ -81,11 +101,28 @@ const Register = () => {
         }
     };
 
-    const handleSubmitStep2 = (e: React.FormEvent) => {
+    const handleSubmitStep2 = async (e: React.FormEvent) => {
         e.preventDefault();
-        // Пока что оставляем верификацию как заглушку
-        // В будущем здесь будет проверка кода верификации
-        navigate('/dashboard');
+        try {
+            await api.post('/api/v1/auth/confirm-registration', {
+                userId,
+                code: formData.verificationCode,
+            });
+
+            toast({
+                title: 'Регистрация завершена',
+                description: 'Теперь вы можете войти',
+                variant: 'success',
+            });
+
+            navigate('/confirm-registration');
+        } catch (error) {
+            toast({
+                title: 'Неверный код подтверждения регистрации',
+                description: 'Попробуйте ещё раз',
+                variant: 'destructive',
+            });
+        }
     };
 
     return (
@@ -111,12 +148,14 @@ const Register = () => {
                         <Separator className="flex-grow" />
                     </div> */}
 
-                    {step === 1 ? (
+                    {step === 1 && (
                         <RegisterStep1
                             onSubmit={handleSubmitStep1}
                             isLoading={isLoading}
                         />
-                    ) : (
+                    )}
+
+                    {step === 2 && (
                         <VerificationStep
                             verificationCode={formData.verificationCode}
                             handleChange={handleChange}

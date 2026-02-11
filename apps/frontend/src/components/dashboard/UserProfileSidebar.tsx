@@ -7,31 +7,31 @@ import { User, MapPin, Plus, Crown } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 
 const UserProfileSidebar = () => {
-    const { user, isLoading } = useAuth();
+    const { user } = useAuth();
 
-    if (isLoading) {
-        return (
-            <Card className="honor-card mb-6">
-                <div className="flex flex-col items-center p-6">
-                    <div className="h-24 w-24 bg-gray-200 rounded-full mb-4 animate-pulse"></div>
-                    <div className="h-6 w-32 bg-gray-200 rounded mb-2 animate-pulse"></div>
-                    <div className="h-4 w-24 bg-gray-200 rounded animate-pulse"></div>
-                </div>
-            </Card>
-        );
-    }
+    // if (loading) {
+    //     return (
+    //         <Card className="honor-card mb-6">
+    //             <div className="flex flex-col items-center p-6">
+    //                 <div className="h-24 w-24 bg-gray-200 rounded-full mb-4 animate-pulse"></div>
+    //                 <div className="h-6 w-32 bg-gray-200 rounded mb-2 animate-pulse"></div>
+    //                 <div className="h-4 w-24 bg-gray-200 rounded animate-pulse"></div>
+    //             </div>
+    //         </Card>
+    //     );
+    // }
 
-    if (!user) {
-        return (
-            <Card className="honor-card mb-6">
-                <div className="flex flex-col items-center p-6">
-                    <p className="text-honor-darkGray">
-                        Пользователь не найден
-                    </p>
-                </div>
-            </Card>
-        );
-    }
+    // if (!user) {
+    //     return (
+    //         <Card className="honor-card mb-6">
+    //             <div className="flex flex-col items-center p-6">
+    //                 <p className="text-honor-darkGray">
+    //                     Пользователь не найден
+    //                 </p>
+    //             </div>
+    //         </Card>
+    //     );
+    // }
 
     const getUserRoleText = () => {
         switch (user.role) {
@@ -81,11 +81,11 @@ const UserProfileSidebar = () => {
                         <span className="text-sm">{user.district}</span>
                     </div>
                 )}
-                {user.verified && (
+                {user.isVerified && (
                     <Badge className="mt-2 bg-green-500">Верифицирован</Badge>
                 )}
                 <Badge className="mt-2 bg-honor-blue">
-                    {user.balance} токенов
+                    {user.voterProfile.balance} токенов
                 </Badge>
             </div>
 
@@ -93,7 +93,9 @@ const UserProfileSidebar = () => {
                 <div className="grid grid-cols-3 text-center">
                     <div>
                         <p className="text-2xl font-bold text-honor-blue">
-                            {user.isRepresentative ? user.rating || 0 : '0'}
+                            {user.isRepresentative
+                                ? user.representativeProfile?.rating || 0
+                                : '0'}
                         </p>
                         <p className="text-xs text-honor-darkGray">
                             {user.isRepresentative ? 'Рейтинг' : 'Заданий'}
@@ -105,7 +107,7 @@ const UserProfileSidebar = () => {
                     </div>
                     <div>
                         <p className="text-2xl font-bold text-honor-blue">
-                            {user.balance}
+                            {user.voterProfile.balance}
                         </p>
                         <p className="text-xs text-honor-darkGray">Токенов</p>
                     </div>
@@ -118,20 +120,53 @@ const UserProfileSidebar = () => {
                         <h3 className="text-lg font-semibold mb-4">
                             Мой представитель
                         </h3>
-                        <div className="flex items-center p-3 border rounded-xl bg-gray-50">
-                            <div className="bg-honor-gray rounded-full p-2 mr-3">
-                                <User
-                                    size={24}
-                                    className="text-honor-blue"
-                                />
+                        {user.subscriptions && user.subscriptions.length > 0 ? (
+                            // Если подписки есть — выводим список
+                            <div className="space-y-3">
+                                {user.subscriptions.map((sub) => (
+                                    <div
+                                        key={sub.id}
+                                        className="flex items-center p-3 border rounded-xl bg-white shadow-sm">
+                                        <div className="bg-honor-gray rounded-full p-2 mr-3">
+                                            <User
+                                                size={24}
+                                                className="text-honor-blue"
+                                            />
+                                        </div>
+                                        <div>
+                                            <p className="font-medium">
+                                                {sub.representative?.name ||
+                                                    'Имя не указано'}
+                                            </p>
+                                            <p className="text-sm text-honor-darkGray">
+                                                {sub.representative
+                                                    .representativeProfile
+                                                    ?.position ||
+                                                    'Должность не указана'}
+                                            </p>
+                                        </div>
+                                    </div>
+                                ))}
                             </div>
-                            <div>
-                                <p className="font-medium">Не назначен</p>
-                                <p className="text-sm text-honor-darkGray">
-                                    Выберите представителя
-                                </p>
+                        ) : (
+                            // Если подписок нет — выводим заглушку
+                            <div className="flex items-center p-3 border rounded-xl bg-gray-50">
+                                <div className="bg-honor-gray rounded-full p-2 mr-3">
+                                    <User
+                                        size={24}
+                                        className="text-gray-400"
+                                    />
+                                </div>
+                                <div>
+                                    <p className="font-medium text-gray-500">
+                                        Не назначен
+                                    </p>
+                                    <p className="text-sm text-honor-darkGray">
+                                        Выберите представителя в каталоге
+                                    </p>
+                                </div>
                             </div>
-                        </div>
+                        )}
                     </>
                 )}
 
@@ -141,18 +176,18 @@ const UserProfileSidebar = () => {
                             Статистика
                         </h3>
                         <div className="space-y-2 mb-4">
-                            {user.position && (
+                            {user.representativeProfile?.position && (
                                 <p className="text-sm">
                                     <span className="font-medium">
                                         Должность:
                                     </span>{' '}
-                                    {user.position}
+                                    {user.representativeProfile.position}
                                 </p>
                             )}
-                            {user.party && (
+                            {user.representativeProfile?.party && (
                                 <p className="text-sm">
                                     <span className="font-medium">Партия:</span>{' '}
-                                    {user.party}
+                                    {user.representativeProfile.party}
                                 </p>
                             )}
                             <p className="text-sm">

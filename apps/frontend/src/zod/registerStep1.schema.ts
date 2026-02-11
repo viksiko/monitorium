@@ -12,9 +12,25 @@ export const registerStep1Schema = z
             .min(1, 'Введите email')
             .email('Введите корректный email'),
 
-        password: z.string().min(6, 'Пароль должен быть не менее 8 символов'),
+        password: z
+            .string()
+            .min(8, 'Пароль должен быть не менее 8 символов')
+            .refine((password) => /[A-Z]/.test(password), {
+                message: 'Пароль должен содержать хотя бы одну заглавную букву',
+            })
+            .refine((password) => /\d/.test(password), {
+                message: 'Пароль должен содержать хотя бы одну цифру',
+            })
+            .refine(
+                (password) =>
+                    /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(password),
+                {
+                    message:
+                        'Пароль должен содержать хотя бы один специальный символ',
+                },
+            ),
 
-        confirmPassword: z.string().min(6, 'Подтвердите пароль'),
+        confirmPassword: z.string().min(8, 'Подтвердите пароль'),
 
         phone: z
             .string()

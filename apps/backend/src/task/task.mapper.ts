@@ -4,14 +4,14 @@ import { $Enums, Task } from '@prisma/client';
 // маппер enum
 export const mapTaskStatus = (status: $Enums.TaskStatus): TaskStatus => {
     switch (status) {
-        case 'NEW':
-            return TaskStatus.NEW;
+        case 'PLANNED':
+            return TaskStatus.PLANNED;
         case 'IN_PROGRESS':
             return TaskStatus.IN_PROGRESS;
         case 'COMPLETED':
             return TaskStatus.COMPLETED;
-        case 'CANCELLED':
-            return TaskStatus.CANCELLED;
+        case 'REJECTED':
+            return TaskStatus.REJECTED;
     }
 };
 
@@ -23,7 +23,8 @@ export const mapTaskListItemToDto = (task: Task): TaskListItem => ({
     desiredResolutionDate: task.desiredResolutionDate
         ? task.desiredResolutionDate.toISOString()
         : undefined,
-    ikes: task.ikes,
+    likesCount: task.likesCount,
+    viewsCount: task.viewsCount,
     status: mapTaskStatus(task.status),
     createdAt: task.createdAt.toISOString(),
 });

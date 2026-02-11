@@ -18,7 +18,7 @@
     "db:generate": "npx prisma generate --schema=apps/backend/prisma/schema.prisma",
     "db:migrate": "cd apps/backend && npm run prisma:migrate",
     "db:deploy": "cd apps/backend && npm run prisma:deploy",
-    "db:reset": "cd apps/backend && npm run prisma:migrate-reset",
+    "db:migrate-reset": "cd apps/backend && npm run prisma:migrate-reset",
     "db:migrate-init": "cd apps/backend && npm run prisma:migrate-init",
     "db:migrate-resolve": "cd apps/backend && npm run prisma:migrate-resolve",
     "db:full-reset": "cd apps/backend && npm run prisma:reset-db && npm run prisma:delete-migrations && npm run prisma:init-migration",

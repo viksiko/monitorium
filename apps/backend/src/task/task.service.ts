@@ -1,6 +1,6 @@
 import { TaskListItem } from '@monorepo/types';
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { Task, TaskStage } from '@prisma/client';
+import { Task, TaskStage, User } from '@prisma/client';
 import { TASK_MESSAGES } from '@src/constants/api-messages.constants';
 import { logger } from '@src/logger/winston.logger';
 import { PrismaService } from '@src/prisma/prisma.service';
@@ -12,16 +12,46 @@ import { mapTaskListItemToDto } from './task.mapper';
 export class TaskService {
     constructor(private prisma: PrismaService) {}
 
-    async create(userId: string, dto: CreateTaskDto): Promise<Task> {
+    async createTask(authorId: string, dto: CreateTaskDto): Promise<Task> {
         try {
-            const { stages, ...taskData } = dto;
+            const { stages, assigneeId, ...taskData } = dto;
+
+            // Если указан исполнитель — проверяем, что это представитель
+            if (assigneeId) {
+                const assignee = await this.prisma.user.findUnique({
+                    where: { id: assigneeId },
+                    select: { role: true },
+                });
+
+                if (!assignee) {
+                    throw new Error('Assignee not found');
+                }
+
+                if (assignee.role !== 'REPRESENTATIVE') {
+                    throw new Error(
+                        'Task can be assigned only to representative',
+                    );
+                }
+            }
 
             // Создание задачи с возможными этапами
             return await this.prisma.task.create({
                 data: {
                     ...taskData,
-                    userId,
 
+                    // автор
+                    author: {
+                        connect: { id: authorId },
+                    },
+
+                    // исполнитель (опционально)
+                    ...(assigneeId && {
+                        assignee: {
+                            connect: { id: assigneeId },
+                        },
+                    }),
+
+                    // этапы
                     ...(stages?.length && {
                         stages: {
                             create: stages.map((stage) => ({
@@ -32,10 +62,11 @@ export class TaskService {
                     }),
                 },
                 include: {
-                    stages: true, // если нужно вернуть этапы
+                    stages: true,
                 },
             });
         } catch (error) {
+            console.error('Error creating task:', error);
             logger.error('Failed create task', {
                 category: 'TaskService',
                 operation: 'create',
@@ -66,29 +97,44 @@ export class TaskService {
         }
     }
 
-    async getTasksByUser(userId: string): Promise<TaskListItem[]> {
+    async getTasksByUser(user: User): Promise<TaskListItem[]> {
+        const where = user.isRepresentative
+            ? { assigneeId: user.id }
+            : { authorId: user.id };
+
         try {
             const tasks = await this.prisma.task.findMany({
-                where: { userId },
+                where: where,
                 select: {
                     id: true,
                     title: true,
                     address: true,
                     desiredResolutionDate: true,
-                    ikes: true,
+                    likesCount: true,
+                    viewsCount: true,
                     status: true,
                     createdAt: true,
+                    // Можно добавить данные об авторе, если представителю нужно их видеть
+                    // user: {
+                    //     select: {
+                    //         name: true,
+                    //     },
+                    // },
                 },
                 orderBy: { createdAt: 'desc' },
             });
 
+            // Используем ваш маппер
             return tasks.map(mapTaskListItemToDto);
         } catch (error) {
-            logger.error('Failed when getting tasks list by user', {
-                category: 'TaskService',
-                operation: 'getTasksByUser',
-                error: error instanceof Error ? error.message : error,
-            });
+            logger.error(
+                'Failed when getting tasks for representative or voter',
+                {
+                    category: 'TaskService',
+                    operation: 'getTasksByUser',
+                    error: error instanceof Error ? error.message : error,
+                },
+            );
 
             throw error;
         }

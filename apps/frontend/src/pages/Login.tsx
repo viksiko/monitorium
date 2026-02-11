@@ -56,11 +56,11 @@ const Login = () => {
             //     variant: 'success',
             // });
 
-            navigate('/dashboard', {
-                state: {
-                    loginSuccess: true,
-                },
-            });
+            // navigate('/dashboard', {
+            //     state: {
+            //         loginSuccess: true,
+            //     },
+            // });
         } catch (error) {
             // toast({
             //     title: 'Ошибка входа',

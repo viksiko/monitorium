@@ -1,4 +1,3 @@
-import React from 'react';
 import { Card } from '@/components/ui/card';
 import { Avatar } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -7,14 +6,22 @@ import { User, MapPin, ThumbsUp, CheckCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 interface Representative {
-    id: number;
+    id: string;
     name: string;
-    role: string;
-    district: string;
-    party: string;
-    tasksTotal: number;
-    tasksCompleted: number;
-    rating: number;
+    email: string;
+    role: 'REPRESENTATIVE';
+    isRepresentative: boolean;
+    isVerified: boolean;
+    representativeProfile: {
+        id: string;
+        position: string;
+        party: string;
+        rating: number;
+        tasksTotal: number;
+        tasksCompleted: number;
+        attendance: number;
+        lastActivity: string | null;
+    };
 }
 
 interface RepresentativeCardProps {
@@ -46,16 +53,25 @@ const RepresentativeCard = ({ representative }: RepresentativeCardProps) => {
                                             size={14}
                                             className="mr-1"
                                         />
-                                        <span>{representative.district}</span>
+                                        <span>
+                                            {
+                                                representative
+                                                    .representativeProfile
+                                                    .position
+                                            }
+                                        </span>
                                     </div>
                                     <Badge className="bg-honor-blue">
-                                        {representative.party}
+                                        {
+                                            representative.representativeProfile
+                                                .party
+                                        }
                                     </Badge>
                                 </div>
                             </div>
 
                             <div className="text-lg font-bold text-honor-blue">
-                                {representative.rating}
+                                {representative.representativeProfile.rating}
                                 <span className="text-xs text-honor-darkGray ml-1">
                                     рейтинг
                                 </span>
@@ -70,7 +86,11 @@ const RepresentativeCard = ({ representative }: RepresentativeCardProps) => {
                                         className="text-honor-blue mr-1"
                                     />
                                     <span className="text-sm">
-                                        {representative.tasksTotal} задач
+                                        {
+                                            representative.representativeProfile
+                                                .tasksTotal
+                                        }{' '}
+                                        задач
                                     </span>
                                 </div>
                                 <div className="flex items-center">
@@ -79,7 +99,10 @@ const RepresentativeCard = ({ representative }: RepresentativeCardProps) => {
                                         className="text-green-500 mr-1"
                                     />
                                     <span className="text-sm">
-                                        {representative.tasksCompleted}{' '}
+                                        {
+                                            representative.representativeProfile
+                                                .tasksCompleted
+                                        }{' '}
                                         выполнено
                                     </span>
                                 </div>

@@ -14,6 +14,7 @@ import {
     NotebookPen,
     Lightbulb,
     BookType,
+    User,
 } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { useAuthStore } from '@/shared/stores/auth.store';
@@ -22,11 +23,13 @@ import { createTaskSchema } from '@/zod/createTask.shema';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { FormError, formInputClass } from '@/components/ui/formInputClass';
 import { add } from 'date-fns';
+import { useAuth } from '@/context/AuthContext';
 
 const TaskCreate = () => {
     const accessToken = useAuthStore((state) => state.accessToken);
     const { toast } = useToast();
     const [stages, setStages] = useState([{ title: '', date: '' }]);
+    const { user } = useAuth();
 
     const {
         register,
@@ -73,6 +76,7 @@ const TaskCreate = () => {
                 title: stage.title,
                 date: new Date(stage.date).toISOString(),
             })),
+            assigneeId: user.subscriptions?.[0].representative.id, // берем первого представителя из подписок
         };
 
         try {

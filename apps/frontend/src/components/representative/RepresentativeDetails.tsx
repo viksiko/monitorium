@@ -1,4 +1,3 @@
-import React from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
@@ -10,7 +9,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import { Building, MapPin, Upload } from 'lucide-react';
+import { Building, Loader2, MapPin, Upload } from 'lucide-react';
 
 interface RepresentativeDetailsProps {
     formData: {
@@ -27,6 +26,7 @@ interface RepresentativeDetailsProps {
     handleFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
     handleSubmit: (e: React.FormEvent) => void;
     goBack: () => void;
+    isLoading: boolean;
 }
 
 const RepresentativeDetails = ({
@@ -36,6 +36,7 @@ const RepresentativeDetails = ({
     handleFileChange,
     handleSubmit,
     goBack,
+    isLoading,
 }: RepresentativeDetailsProps) => {
     // Function to clear the file input
     const clearFileInput = () => {
@@ -191,7 +192,7 @@ const RepresentativeDetails = ({
                                 accept="image/*,.pdf"
                                 className="hidden"
                                 onChange={handleFileChange}
-                                required
+                                // required
                             />
                             <Button
                                 type="button"
@@ -214,8 +215,13 @@ const RepresentativeDetails = ({
 
             <Button
                 type="submit"
+                disabled={isLoading}
                 className="w-full honor-button-primary mb-4">
-                Отправить заявку
+                {isLoading ? (
+                    <Loader2 className="h-8 w-8 animate-spin" />
+                ) : (
+                    'Отправить заявку'
+                )}
             </Button>
 
             <div className="text-center">

@@ -7,19 +7,19 @@ export interface Task {
     desiredResolutionDate?: string; // или Date, если будет преобразование
     userId: string;
     status: TaskStatus; // enum для статусов
-    ikes: number; // исправлено с "ikes" на "likes" (вероятно опечатка в JSON)
     createdAt: string; // или Date
     updatedAt: string; // или Date
     stages?: TaskStage[];
+    likesCount: number;
+    viewsCount: number;
     comments?: number;
-    views?: number;
 }
 
 export enum TaskStatus {
-    NEW = 'NEW',
+    PLANNED = 'PLANNED',
     IN_PROGRESS = 'IN_PROGRESS',
     COMPLETED = 'COMPLETED',
-    CANCELLED = 'CANCELLED',
+    REJECTED = 'REJECTED',
 }
 
 export interface TaskStage {
@@ -38,7 +38,9 @@ export type TaskListItem = Pick<
     | 'title'
     | 'address'
     | 'desiredResolutionDate'
-    | 'ikes'
     | 'status'
     | 'createdAt'
+    | 'likesCount'
+    | 'viewsCount'
+    | 'comments'
 >;

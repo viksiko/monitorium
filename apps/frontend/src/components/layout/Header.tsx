@@ -15,9 +15,6 @@ import { useLogout } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 
 const Header = () => {
-    // Mock ticket count - in a real app, this would come from user state
-    const ticketCount = 35;
-
     const navigate = useNavigate();
     const { user, isLoading } = useAuth();
     const { mutate: logout } = useLogout();
@@ -45,42 +42,48 @@ const Header = () => {
 
                     <nav className="hidden md:flex items-center space-x-6">
                         {user && (
-                            <Link
-                                to="/tasks/create"
-                                className="flex items-center space-x-1 text-honor-text hover:text-honor-blue transition-colors">
-                                <Plus size={20} />
-                                <span>Создать задание</span>
-                            </Link>
+                            <>
+                                <Link
+                                    to="/tasks/create"
+                                    className="flex items-center space-x-1 text-honor-text hover:text-honor-blue transition-colors">
+                                    <Plus size={20} />
+                                    <span>Создать задание</span>
+                                </Link>
+                                <Link
+                                    to="/map"
+                                    className="flex items-center space-x-1 text-honor-text hover:text-honor-blue transition-colors">
+                                    <MapPin size={20} />
+                                    <span>Карта округов</span>
+                                </Link>
+                                <Link
+                                    to="/representatives"
+                                    className="flex items-center space-x-1 text-honor-text hover:text-honor-blue transition-colors">
+                                    <User size={20} />
+                                    <span>Представители</span>
+                                </Link>
+                            </>
                         )}
-                        <Link
-                            to="/map"
-                            className="flex items-center space-x-1 text-honor-text hover:text-honor-blue transition-colors">
-                            <MapPin size={20} />
-                            <span>Карта округов</span>
-                        </Link>
-                        <Link
-                            to="/representatives"
-                            className="flex items-center space-x-1 text-honor-text hover:text-honor-blue transition-colors">
-                            <User size={20} />
-                            <span>Представители</span>
-                        </Link>
                     </nav>
 
                     <div className="flex items-center space-x-4">
                         {/* Ticket indicator */}
                         {user && (
                             <>
-                                <Link
-                                    to="/balance"
-                                    className="flex items-center px-3 py-1 rounded-full bg-honor-gray hover:bg-honor-blue/10 transition-colors">
-                                    <Ticket
-                                        size={16}
-                                        className="text-honor-blue mr-1"
-                                    />
-                                    <span className="text-sm font-medium">
-                                        {ticketCount}
-                                    </span>
-                                </Link>
+                                {!user.isRepresentative && (
+                                    <Link
+                                        to="/balance"
+                                        className="flex items-center px-3 py-1 rounded-full bg-honor-gray hover:bg-honor-blue/10 transition-colors">
+                                        <Ticket
+                                            size={16}
+                                            className="text-honor-blue mr-1"
+                                        />
+
+                                        <span className="text-sm font-medium">
+                                            {user.voterProfile.balance}
+                                        </span>
+                                    </Link>
+                                )}
+
                                 <Dialog>
                                     <DialogTrigger asChild>
                                         <Button
@@ -180,7 +183,7 @@ const Header = () => {
                                     size="sm"
                                     onClick={() => {
                                         logout();
-                                        navigate('/login');
+                                        // navigate('/login');
                                     }}>
                                     Выход
                                 </Button>

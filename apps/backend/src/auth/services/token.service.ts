@@ -53,6 +53,7 @@ export class TokenSevice {
                 email: payload.email,
                 phone: payload.phone || '',
                 role: payload.role,
+                isRepresentative: payload.isRepresentative,
             },
         };
     }

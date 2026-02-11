@@ -62,3 +62,14 @@ export const TASK_MESSAGES = {
     EMPTY_LIST: 'Список заданий пуст',
     INVALID_STATUS: 'Неверный статус задания',
 } as const;
+
+export const VERIFICATION_MESSAGES = {
+    CODE_NOT_FOUND: 'Код подтверждения регистрации не найден',
+    CODE_EXPIRED: 'Срок действия кода подтверждения регистрации истёк',
+    CODE_INVALID: 'Неверный код подтверждения регистрации',
+};
+
+export const REPRESENTATIVE_REQUEST_CREATED =
+    'Заявка на представителя успешно создана';
+
+export const USER_NOT_FOUND_MSG = 'Пользователь не найден';

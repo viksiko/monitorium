@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import { useToast } from '@/components/ui/use-toast';
 import {
@@ -9,10 +10,22 @@ import {
 } from '@/components/voter';
 import GosuslugiAuthButton from '@/components/auth/GosuslugiAuthButton';
 import { Separator } from '@/components/ui/separator';
+import { useAuth } from '@/context/AuthContext';
+import { RegisterStep1FormValues } from '@/zod/registerStep1.schema';
+import { api } from '@/lib/api';
+import { RegisterRoleEnum } from '@monorepo/types';
+import { Task } from '@monorepo/types';
 
 const RepresentativeRegister = () => {
+    const { register } = useAuth();
+    const navigate = useNavigate();
     const { toast } = useToast();
     const [step, setStep] = useState(1);
+    const [isLoading, setIsLoading] = useState(false);
+    const [userId, setUserId] = useState<string | null>(null);
+    const [isRepresentative, setIsRepresentative] = useState(false);
+    const [step3FormKey, setStep3FormKey] = useState(0);
+
     const [formData, setFormData] = useState({
         fullName: '',
         phone: '',
@@ -56,33 +69,137 @@ const RepresentativeRegister = () => {
         }
     };
 
-    const handleSubmitStep1 = (e: React.FormEvent) => {
-        e.preventDefault();
-        // В реальном приложении здесь был бы запрос на отправку кода верификации
-        toast({
-            title: 'Код подтверждения отправлен',
-            description:
-                'Мы отправили код подтверждения на указанный вами номер телефона',
-            variant: 'default',
-        });
-        setStep(2);
+    const handleSubmitStep1 = async (data: RegisterStep1FormValues) => {
+        setIsLoading(true);
+        try {
+            const response = await register(
+                {
+                    email: data.email,
+                    password: data.password,
+                    name: data.fullName,
+                    phone: data.phone || undefined,
+                    // district: data.district || undefined,
+                    role: RegisterRoleEnum.REPRESENTATIVE,
+                },
+                // RegisterRoleEnum.REPRESENTATIVE,
+            );
+
+            // const response = await axios.post('/api/v1/auth/register', {
+            //     name: data.fullName,
+            //     email: data.email,
+            //     password: data.password,
+            //     phone: data.phone,
+            // });
+            // toast({
+            //     title: 'Регистрация успешна!',
+            //     description: response?.data?.data?.message,
+            //     variant: 'success',
+            // });
+
+            const { id, isRepresentative } = response.data.data;
+            setIsRepresentative(isRepresentative);
+            setUserId(id);
+
+            // toast({
+            //     title: 'Регистрация успешна!',
+            //     description:
+            //         'Введите код, отправленный на почту, для подтверждения регистрации',
+            //     variant: 'success',
+            // });
+
+            setStep(2);
+
+            // navigate('/dashboard');
+        } catch (error) {
+            // console.error('e', error);
+            // toast({
+            //     title: 'Ошибка регистрации',
+            //     description:
+            //         error.response?.data?.data?.message ||
+            //         'Произошла ошибка при регистрации.',
+            //     variant: 'destructive',
+            // });
+        } finally {
+            setIsLoading(false);
+        }
     };
 
-    const handleSubmitStep2 = (e: React.FormEvent) => {
+    const handleSubmitStep2 = async (e: React.FormEvent) => {
         e.preventDefault();
-        // В реальном приложении здесь была бы проверка кода верификации
-        setStep(3);
+        try {
+            await api.post('/api/v1/auth/confirm-registration', {
+                userId,
+                code: formData.verificationCode,
+            });
+
+            if (isRepresentative) {
+                setStep(3); // только депутаты идут дальше
+                return;
+            } else {
+                toast({
+                    title: 'Регистрация завершена',
+                    description: 'Теперь вы можете войти',
+                    variant: 'success',
+                });
+
+                navigate('/confirm-registration');
+            }
+
+            navigate('/confirm-registration');
+        } catch (error) {
+            toast({
+                title: 'Неверный код подтверждения регистрации',
+                description: 'Попробуйте ещё раз',
+                variant: 'destructive',
+            });
+        }
     };
 
-    const handleSubmitStep3 = (e: React.FormEvent) => {
+    const handleSubmitStep3 = async (e: React.FormEvent) => {
+        setIsLoading(true);
         e.preventDefault();
-        // В реальном приложении здесь была бы отправка данных о представителе власти
-        toast({
-            title: 'Заявка отправлена!',
-            description:
-                'Ваша заявка на регистрацию отправлена и будет рассмотрена в ближайшее время.',
-            variant: 'default',
-        });
+
+        // Данные формы, вносимые на 3 шаге
+        const step3Data = {
+            userId: userId,
+            position: formData.position,
+            party: formData.party,
+            district: formData.district,
+            bio: formData.bio,
+            idCard: formData.idCard?.name ?? null,
+        };
+        console.warn('Данные шага 3 (форма представителя):', step3Data);
+
+        try {
+            await api.post('/api/v1/auth/representative-request', step3Data);
+
+            // Сбрасываем данные формы
+            setFormData((prev) => ({
+                ...prev,
+                position: '',
+                party: '',
+                district: '',
+                bio: '',
+                idCard: null,
+            }));
+            setStep3FormKey((k) => k + 1);
+
+            toast({
+                title: 'Заявка отправлена!',
+                description:
+                    'Ваша заявка на регистрацию отправлена и будет рассмотрена в ближайшее время.',
+                variant: 'success',
+            });
+        } catch (error) {
+            toast({
+                title: 'Данные не отпавились',
+                description: 'Попробуйте ещё раз попозже',
+                variant: 'destructive',
+            });
+        } finally {
+            setIsLoading(false);
+        }
+
         // Редирект на страницу ожидания верификации
         // window.location.href = '/verification-pending';
     };
@@ -95,7 +212,7 @@ const RepresentativeRegister = () => {
                         Регистрация представителя власти
                     </h1>
 
-                    <GosuslugiAuthButton
+                    {/* <GosuslugiAuthButton
                         isRepresentative={true}
                         className="mb-6"
                     />
@@ -106,7 +223,7 @@ const RepresentativeRegister = () => {
                             или
                         </span>
                         <Separator className="flex-grow" />
-                    </div>
+                    </div> 
 
                     <div className="bg-blue-50 border border-blue-200 p-4 rounded-lg mb-6">
                         <p className="text-sm text-honor-blue">
@@ -115,13 +232,12 @@ const RepresentativeRegister = () => {
                             автоматически подтверждает ваши официальные
                             полномочия.
                         </p>
-                    </div>
+                    </div> */}
 
                     {step === 1 && (
                         <RepresentativeStep1
-                            formData={formData}
-                            handleChange={handleChange}
-                            handleSubmit={handleSubmitStep1}
+                            onSubmit={handleSubmitStep1}
+                            isLoading={isLoading}
                         />
                     )}
 
@@ -131,17 +247,20 @@ const RepresentativeRegister = () => {
                             handleChange={handleChange}
                             handleSubmit={handleSubmitStep2}
                             goBack={() => setStep(1)}
+                            hasNextStep={isRepresentative}
                         />
                     )}
 
-                    {step === 3 && (
+                    {step === 3 && isRepresentative && (
                         <RepresentativeDetails
+                            key={step3FormKey}
                             formData={formData}
                             handleChange={handleChange}
                             handleSelectChange={handleSelectChange}
                             handleFileChange={handleFileChange}
                             handleSubmit={handleSubmitStep3}
                             goBack={() => setStep(2)}
+                            isLoading={isLoading}
                         />
                     )}
 

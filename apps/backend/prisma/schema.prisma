@@ -20,42 +20,145 @@ model User {
   phone    String? @unique
   district String? // Округ пользователя
 
-  isRepresentative Boolean @default(false)
-  role             Role    @default(USER)
-
-  // Поля для представителей власти
-  position       String? // "Депутат городской думы", "Глава района"
-  party          String? // Политическая партия
-  rating         Float?    @default(0.0)
-  tasksTotal     Int       @default(0)
-  tasksCompleted Int       @default(0)
-  attendance     Float?    @default(0.0) // Посещаемость в процентах
-  lastActivity   DateTime?
+  role Role
 
   // OAuth провайдеры
   gosuslugiId String? @unique
   sberId      String? @unique
   tinkoffId   String? @unique
 
-  // Баланс токенов
-  balance Int @default(0)
+  // Верифицирован и активная учтеная запись
+  isRepresentative Boolean   @default(false)
+  isVerified       Boolean   @default(false)
+  isActive         Boolean   @default(true)
+  deletedAt        DateTime?
+
+  tokens Token[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  tokens    Token[]
 
-  // Верифицирован и активная учтеная запись
-  isVerified Boolean   @default(false)
-  isActive   Boolean   @default(true)
-  deletedAt  DateTime?
+  // Связь 1-1 с профилем избирателя и представителя
+  voterProfile          VoterProfile?
+  representativeProfile RepresentativeProfile?
 
   // Связь с заданиями
-  tasks        Task[]
   taskComments TaskComment[]
+
+  // 📝 Созданные задачи
+  authoredTasks Task[] @relation("AuthoredTasks")
+
+  // 📥 Назначенные задачи
+  assignedTasks Task[] @relation("AssignedTasks")
+
+  tasks Task[]
+
+  // 🔔 Я подписался
+  subscriptions Subscription[] @relation("UserSubscriptions")
+
+  // 👥 На меня подписались
+  subscribers Subscription[] @relation("UserSubscribers")
 
   @@map("users")
 }
 
+// Задание
+model Task {
+  id                    String    @id @default(cuid())
+  title                 String
+  address               String
+  problemDescription    String
+  possibleSolutions     String?
+  desiredResolutionDate DateTime?
+
+  // Автор задачи
+  authorId String
+  author   User   @relation("AuthoredTasks", fields: [authorId], references: [id])
+
+  // Исполнитель / адресат
+  assigneeId String?
+  assignee   User?   @relation("AssignedTasks", fields: [assigneeId], references: [id])
+
+  stages TaskStage[] // Этапы решения
+  status TaskStatus  @default(PLANNED) // Статус задания
+
+  likesCount Int           @default(0) // Количество лайков
+  viewsCount Int           @default(0) // Количество просмотров
+  comments   TaskComment[] //  комментарии
+
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  taskFiles TaskFile[]
+  user      User?      @relation(fields: [userId], references: [id])
+  userId    String?
+
+  @@map("tasks")
+}
+
+// Этапе заданий
+model TaskStage {
+  id        String   @id @default(cuid())
+  taskId    String
+  title     String
+  date      DateTime
+  task      Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@map("task_stages")
+}
+
+// Профиль для избирателя
+model VoterProfile {
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Здесь можно хранить дополнительные данные о пользователе
+  balance Int @default(0) // Баланс токенов
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("voter_profiles")
+}
+
+// Профиль представителя власти
+model RepresentativeProfile {
+  id       String  @id @default(cuid())
+  userId   String  @unique
+  user     User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  position String // "Депутат городской думы", "Глава района"
+  party    String? // Политическая партия
+  bio      String? // О себе
+
+  rating         Float     @default(0.0)
+  tasksTotal     Int       @default(0)
+  tasksCompleted Int       @default(0)
+  attendance     Float     @default(0.0) // Посещаемость в процентах
+  lastActivity   DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("representative_profiles")
+}
+
+// Таблица для подписок
+model Subscription {
+  id               String   @id @default(cuid())
+  createdAt        DateTime @default(now())
+
+  subscriberId String
+  subscriber   User   @relation("UserSubscriptions", fields: [subscriberId], references: [id], onDelete: Cascade)
+
+  representativeId String
+  representative   User   @relation("UserSubscribers", fields: [representativeId], references: [id], onDelete: Cascade)
+
+  @@unique([subscriberId, representativeId])
+  @@map("subscriptions")
+}
+
+// Токены для аутентификации и верификации
 model Token {
   id          String    @id @default(cuid())
   userId      String
@@ -69,47 +172,6 @@ model Token {
   user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("tokens")
-}
-
-// Задание
-model Task {
-  id                    String    @id @default(cuid())
-  title                 String
-  address               String
-  problemDescription    String
-  possibleSolutions     String?
-  desiredResolutionDate DateTime?
-
-  //  Автор задания
-  userId String
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  stages TaskStage[] // Этапы решения
-  status TaskStatus  @default(NEW) // Статус задания
-
-  ikes     Int           @default(0) //  счет лайков
-  comments TaskComment[] //  комментарии
-
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
-  taskFiles TaskFile[]
-
-  @@map("tasks")
-}
-
-// Этапе заданий
-model TaskStage {
-  id     String @id @default(cuid())
-  taskId String
-
-  title String
-  date  DateTime
-
-  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime @default(now())
-
-  @@map("task_stages")
 }
 
 // Файлы для задания
@@ -142,7 +204,7 @@ model TaskComment {
 }
 
 enum Role {
-  USER
+  VOTER
   REPRESENTATIVE
   ADMIN
 }
@@ -154,8 +216,8 @@ enum TokenType {
 }
 
 enum TaskStatus {
-  NEW // новое задание
-  IN_PROGRESS // в процессе
-  COMPLETED // выполнено
-  CANCELLED // отменено
+  PLANNED // "Запланировано"
+  IN_PROGRESS // "В процессе"  
+  COMPLETED // "Выполнено"
+  REJECTED // "Отклонено"
 }

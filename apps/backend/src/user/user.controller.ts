@@ -22,11 +22,17 @@ import {
 } from '@src/constants/swagger/shared-responses.swagger';
 import {
     DEACTIVATE_OWN_ACCOUNT_ERROR_RESPONSE,
+    GET_CURRENT_USER_RESPONSE,
     USER_ACCOUNT_DEACTIVATED_RESPONSE,
     USER_LIST_SUCCESS_RESPONSE,
     USER_NOT_FOUND_RESPONSE,
 } from '@src/constants/swagger/user-responses.swagger';
-import { User, UserResponse } from '@src/types/user';
+import {
+    User,
+    UserResponse,
+    UserWithRepresentativeProfileDto,
+    UserWithVoterProfileDto,
+} from '@src/types/user';
 import { UserService } from './user.service';
 
 @Controller({
@@ -48,16 +54,39 @@ export class UserController {
         type: String,
         example: '/api/v1/users?email=user1@test.test',
     })
+    @ApiQuery({
+        name: 'role',
+        description: 'Фильтр по роли (voter | representative)',
+        required: false,
+        example: '/api/v1/users?role=representative',
+    })
     @ApiResponse(USER_LIST_SUCCESS_RESPONSE)
     @ApiResponse(AUTHENTICATION_ERROR_RESPONSES)
     @ApiResponse(DATABASE_ERROR_RESPONSE)
     async getUsers(
         @Query('email') email?: string,
-    ): Promise<UserResponse[] | User | null> {
-        if (email) {
-            return this.userService.findUserByEmail(email);
-        }
-        return this.userService.getUsers();
+        @Query('role') role?: string,
+    ): Promise<
+        (UserWithRepresentativeProfileDto | UserWithVoterProfileDto)[] | null
+    > {
+        // if (email) {
+        //     return this.userService.findUserByEmail(email);
+        // }
+        return this.userService.getUsers(role);
+    }
+
+    // получить данные текущего пользователя
+    @Get('profile')
+    @UseGuards(JwtAuthGuard)
+    @ApiOperation({ summary: 'Получить профиль текущего пользователя' })
+    @ApiHeader(HEADERS_AUTHORIZATION)
+    @ApiResponse(GET_CURRENT_USER_RESPONSE)
+    @ApiResponse(AUTHENTICATION_ERROR_RESPONSES)
+    @ApiResponse(DATABASE_ERROR_RESPONSE)
+    async getUserProfile(
+        @Req() req: Request & { user: { id: string } },
+    ): Promise<UserResponse | null> {
+        return this.userService.getUserProfile(req.user.id);
     }
 
     // Получить пользователя по id
@@ -75,7 +104,7 @@ export class UserController {
     @ApiResponse(USER_NOT_FOUND_RESPONSE)
     @ApiResponse(AUTHENTICATION_ERROR_RESPONSES)
     @ApiResponse(DATABASE_ERROR_RESPONSE)
-    async findUserById(@Param('id') id: string): Promise<User | null> {
+    async findUserById(@Param('id') id: string): Promise<UserResponse | null> {
         return this.userService.findUserById(id);
     }
 

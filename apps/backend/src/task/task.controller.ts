@@ -59,11 +59,12 @@ export class TaskController {
     @ApiOperation({ summary: 'Создать новое задание' })
     @ApiResponse(CREATE_TASK_SUCCESS_RESPONSE)
     @ApiResponse(CREATE_TASK_VALIDATION_ERROR_RESPONSE)
-    async create(
+    async createTask(
         @Req() req: Request & { user: User },
         @Body() dto: CreateTaskDto,
     ): Promise<Task> {
-        return await this.taskService.create(req.user.id, dto);
+        console.log(req.user);
+        return await this.taskService.createTask(req.user.id, dto);
     }
 
     // Получение всех задач (для администраторов)
@@ -77,18 +78,18 @@ export class TaskController {
         return this.taskService.findAll();
     }
 
-    // Получение всех задач текущего пользователя
+    // Получение всех задач избирателя или представителя власти
     @Get('user-tasks')
     @ApiOperation({
-        summary: 'Получить задания текущего пользователя',
+        summary:
+            '  Получить задания избирателя или представителя власти в зависимости от роли',
     })
     @ApiResponse(GET_ALL_TASKS_BY_USER)
-    @ApiOperation({ summary: '' })
-    async getTasksByUser(
+    async getTasksForRepresentative(
         @Req() req: Request & { user: User },
     ): Promise<TaskListItem[] | null> {
-        const userId = req.user.id;
-        return await this.taskService.getTasksByUser(userId);
+        const user = req.user;
+        return await this.taskService.getTasksByUser(user);
     }
 
     // Получение задания по ID

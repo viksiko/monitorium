@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { useNavigate } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 import {
@@ -19,9 +20,17 @@ import { Task } from '@monorepo/types';
 import Layout from '@/components/layout/Layout';
 import Loader from '@/components/ui/loader';
 import { useAuthorizedFetch } from '@/hooks/useAuthorizedFetch';
+import { TaskStatusBadge } from '../ui/task-status-badge';
+import { useAuth } from '@/context/AuthContext';
+import { useToast } from '@/components/ui/use-toast';
+import { api } from '@/lib/api';
 
 const TasksTab = () => {
-    const accessToken = useAuthStore((state) => state.accessToken);
+    const { user } = useAuth();
+    const { toast } = useToast();
+    const navigate = useNavigate();
+    const [loading, setLoading] = useState(true);
+    const [tasks, setTasks] = useState<Task[]>([]);
 
     const [escalatingTask, setEscalatingTask] = useState<{
         id: number;
@@ -30,33 +39,67 @@ const TasksTab = () => {
 
     const needsEscalation = (days: number) => days > 7;
 
-    const {
-        data: tasks,
-        loading,
-        error,
-    } = useAuthorizedFetch<Task[]>('/api/v1/tasks/user-tasks', accessToken);
+    useEffect(() => {
+        const fetchGetTasksRepresentative = async () => {
+            try {
+                const response = await api.get('/api/v1/tasks/user-tasks');
+
+                setTasks(response.data.data);
+            } catch (error) {
+                console.error('Ошибка загрузки заданий избирателя:', error);
+                setTasks([]);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchGetTasksRepresentative();
+    }, []);
+
+    const handleCreateTaskClick = (e: React.MouseEvent) => {
+        // Проверяем наличие подписок
+        const hasSubscriptions =
+            user.subscriptions && user.subscriptions.length > 0;
+
+        if (!user?.isRepresentative && !hasSubscriptions) {
+            // e.preventDefault(); // Останавливаем переход, если это ссылка
+
+            toast({
+                title: 'Ошибка создания',
+                description:
+                    'У вас нет активных подписок на представителей. Пожалуйста, подпишитесь, чтобы создавать задания.',
+                variant: 'destructive',
+            });
+            return;
+        }
+
+        // Если все ок — отправляем на страницу создания
+        navigate('/tasks/create');
+    };
 
     if (loading) {
-        return <Loader />;
-    }
-
-    if (error) {
-        return <p className="text-center py-10 text-red-500">{error}</p>;
+        return (
+            <div className="text-center">
+                <Loader />
+            </div>
+        );
     }
 
     return (
         <div className="space-y-6">
             <div className="flex justify-between items-center mb-4">
                 <h2 className="text-2xl font-bold">Мои задания</h2>
-                <Link to="/tasks/create">
-                    <Button className="honor-button-primary flex items-center">
-                        <Plus
-                            size={18}
-                            className="mr-2"
-                        />
-                        Создать задание
-                    </Button>
-                </Link>
+                {tasks.length !== 0 && (
+                    <Link to="/tasks/create">
+                        <Button className="honor-button-primary flex items-center">
+                            <Plus
+                                size={18}
+                                className="mr-2"
+                            />
+                            Создать задание
+                        </Button>
+                    </Link>
+                )}
             </div>
 
             <Dialog
@@ -72,26 +115,13 @@ const TasksTab = () => {
             </Dialog>
 
             {tasks.map((task) => (
-                <Link to={`/tasks/${task.id}`}>
-                    <Card
-                        key={task.id}
-                        className="honor-card mb-4 hover:shadow-lg">
+                <Link
+                    key={task.id}
+                    to={`/tasks/${task.id}`}>
+                    <Card className="honor-card mb-4 hover:shadow-lg">
                         <div className="flex justify-between items-start mb-4">
                             <h3 className="text-xl font-bold">{task.title}</h3>
-                            <Badge
-                                className={
-                                    task.status === 'NEW'
-                                        ? 'bg-green-100 text-green-800'
-                                        : task.status === 'IN_PROGRESS'
-                                          ? 'bg-blue-100 text-blue-800'
-                                          : 'bg-orange-100 text-orange-800'
-                                }>
-                                {task.status === 'COMPLETED'
-                                    ? 'Выполнено'
-                                    : task.status === 'IN_PROGRESS'
-                                      ? 'В процессе'
-                                      : 'В процессе'}
-                            </Badge>
+                            <TaskStatusBadge status={task.status} />
                         </div>
 
                         <div className="flex items-center text-honor-darkGray text-sm mb-4">
@@ -117,7 +147,7 @@ const TasksTab = () => {
                             <div className="flex space-x-4">
                                 <div className="flex items-center space-x-1 text-honor-darkGray">
                                     <ThumbsUp size={18} />
-                                    <span>{task.ikes}</span>
+                                    <span>{task.likesCount}</span>
                                 </div>
                                 {/* <div className="flex items-center space-x-1 text-honor-darkGray">
                                 <MessageSquare size={18} />
@@ -166,11 +196,12 @@ const TasksTab = () => {
                     <p className="text-honor-darkGray mb-4">
                         У вас пока нет заданий
                     </p>
-                    <Link to="/tasks/create">
-                        <Button className="honor-button-primary">
-                            Создать первое задание
-                        </Button>
-                    </Link>
+
+                    <Button
+                        className="honor-button-primary"
+                        onClick={handleCreateTaskClick}>
+                        Создать первое задание
+                    </Button>
                 </div>
             )}
         </div>

@@ -8,8 +8,9 @@ import {
     PASSWORD_RESET_SUCCESS,
     RATE_LIMIT_EXCEEDED_MESSAGE,
     REGISTRATION_CONFIRMED_MESSAGE,
-    REGISTRATION_SUCCESS,
+    REPRESENTATIVE_REQUEST_CREATED,
     USER_ALREADY_EXISTS,
+    VERIFICATION_MESSAGES,
 } from '../api-messages.constants';
 
 export const REGISTRATION_CONFIRMED_RESPONSE: ApiResponseOptions = {
@@ -82,13 +83,14 @@ export const REFRESH_SUCCESS_RESPONSE: ApiResponseOptions = {
 
 export const USER_REGISTER_SUCCESS_RESPONSE: ApiResponseOptions = {
     status: 201,
-    description: 'Пользователь успешно зарегистрирован',
+    description: 'Пользователь успешно записан в базу данных',
     schema: {
         example: {
             success: true,
             statusCode: 201,
             data: {
-                message: REGISTRATION_SUCCESS,
+                userid: 'cmlglij4n0003wsjf9ye7ykvm',
+                isRepresentative: false,
             },
         },
     },
@@ -117,6 +119,21 @@ export const RESET_PASSWORD_CHANGED: ApiResponseOptions = {
             statusCode: 201,
             data: {
                 message: PASSWORD_RESET_SUCCESS,
+            },
+        },
+    },
+};
+
+export const REPRESENTATIVE_REQUEST_CREATED_RESPONSE: ApiResponseOptions = {
+    status: 201,
+    description:
+        'Заявка на регистрацию представителя успешно создана и отправлена на модерацию',
+    schema: {
+        example: {
+            success: true,
+            statusCode: 201,
+            data: {
+                message: REPRESENTATIVE_REQUEST_CREATED,
             },
         },
     },
@@ -214,6 +231,86 @@ export const LOGIN_VALIDATION_ERROR_RESPONSE: ApiResponseOptions = {
     },
 };
 
+export const INVALID_VERIFICATION_CODE_RESPONSE: ApiResponseOptions = {
+    status: 400,
+    description: 'Ошибка верификации кода подтверждения регистрации',
+    content: {
+        'application/json': {
+            examples: {
+                a: {
+                    summary: 'Неверный код подтверждения регистрации',
+                    value: {
+                        success: false,
+                        statusCode: 400,
+                        data: {
+                            message: VERIFICATION_MESSAGES.CODE_INVALID,
+                        },
+                    },
+                },
+                b: {
+                    summary: 'Код подтверждения регистрации не найден',
+                    value: {
+                        success: false,
+                        statusCode: 400,
+                        data: {
+                            message: VERIFICATION_MESSAGES.CODE_NOT_FOUND,
+                        },
+                    },
+                },
+                c: {
+                    summary:
+                        'Срок действия кода подтверждения регистрации истёк',
+                    value: {
+                        success: false,
+                        statusCode: 400,
+                        data: {
+                            message: VERIFICATION_MESSAGES.CODE_EXPIRED,
+                        },
+                    },
+                },
+                d: {
+                    summary:
+                        'Отсутствуют необходимые поля или неверный формат данных',
+                    value: {
+                        success: false,
+                        statusCode: 400,
+                        data: {
+                            message: [
+                                [
+                                    'Код подтверждения должен состоять из 6 символов',
+                                    'ID пользователя не может быть пустым',
+                                    'Код подтверждения должен быть строкой',
+                                ],
+                            ],
+                        },
+                    },
+                },
+            },
+        },
+    },
+};
+
+export const REPRESENTATIVE_VALIDATION_ERROR_RESPONSE: ApiResponseOptions = {
+    status: 400,
+    description:
+        'Ошибка валидации данных при отправке заявки представителя власти на рассмотрение',
+    schema: {
+        example: {
+            success: false,
+            statusCode: 400,
+            data: {
+                message: [
+                    'ID пользователя не может быть пустым',
+                    'Должность не может быть пустым',
+                    'Политическая парития не может быть пустым',
+                    'Округ не может быть пустым',
+                    'Биография не может быть пустым',
+                ],
+            },
+        },
+    },
+};
+
 export const REFRESH_INVALID: ApiResponseOptions = {
     status: 401,
     description: 'RefreshToken недействителен, просрочен или пустой',
@@ -234,7 +331,13 @@ export const INVALID_TOKEN_RESPONSE: ApiResponseOptions = {
     status: 401,
     description: 'Неверный или просроченный токен',
     schema: {
-        example: AUTHORIZATION_REQUIRED,
+        example: {
+            success: false,
+            statusCode: 401,
+            data: {
+                message: AUTHORIZATION_REQUIRED,
+            },
+        },
     },
 };
 
