@@ -59,18 +59,6 @@ const App = () => (
                                     element={<Index />}
                                 />
                                 <Route
-                                    path="/map"
-                                    element={<Map />}
-                                />
-                                <Route
-                                    path="/representatives"
-                                    element={<Representatives />}
-                                />
-                                <Route
-                                    path="/representative/profile/:id"
-                                    element={<RepresentativeProfile />}
-                                />
-                                <Route
                                     path="/help"
                                     element={<Help />}
                                 />
@@ -106,6 +94,10 @@ const App = () => (
                                 {/* ================== PRIVATE (только для авторизованных) ================== */}
                                 <Route element={<PrivateRoute />}>
                                     <Route
+                                        path="/map"
+                                        element={<Map />}
+                                    />
+                                    <Route
                                         path="/dashboard"
                                         element={<Dashboard />}
                                     />
@@ -133,7 +125,6 @@ const App = () => (
                                         path="/balance"
                                         element={<Balance />}
                                     />
-
                                     {/* Representative */}
                                     <Route
                                         path="/representative/dashboard"
@@ -146,6 +137,15 @@ const App = () => (
                                     <Route
                                         path="/representative/statistics"
                                         element={<RepresentativeStatistics />}
+                                    />
+
+                                    <Route
+                                        path="/representatives"
+                                        element={<Representatives />}
+                                    />
+                                    <Route
+                                        path="/representative/profile/:id"
+                                        element={<RepresentativeProfile />}
                                     />
                                 </Route>
 

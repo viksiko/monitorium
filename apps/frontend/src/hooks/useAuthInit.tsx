@@ -18,10 +18,10 @@ export const AuthInit = ({ children }: Props) => {
         const refresh = async () => {
             try {
                 const { data } = await api.post('/api/v1/auth/refresh');
-                const { accessToken, userProfile } = data.data;
+                const { accessToken } = data.data;
 
                 setAccessToken(accessToken);
-                queryClient.setQueryData(['user'], userProfile);
+                // queryClient.setQueryData(['user'], userProfile);
             } catch (err) {
                 setAccessToken(null);
             } finally {

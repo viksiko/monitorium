@@ -1,4 +1,3 @@
-import React from 'react';
 import ErrorPage from '@/components/errors/ErrorPage';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';

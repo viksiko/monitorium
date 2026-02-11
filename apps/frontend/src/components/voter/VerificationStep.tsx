@@ -1,4 +1,3 @@
-import React from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
@@ -9,6 +8,7 @@ interface VerificationStepProps {
     handleChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
     handleSubmit: (e: React.FormEvent) => void;
     goBack: () => void;
+    hasNextStep?: boolean;
 }
 
 const VerificationStep = ({
@@ -16,6 +16,7 @@ const VerificationStep = ({
     handleChange,
     handleSubmit,
     goBack,
+    hasNextStep,
 }: VerificationStepProps) => {
     return (
         <form
@@ -30,8 +31,8 @@ const VerificationStep = ({
                     Подтвердите регистрацию
                 </h2>
                 <p className="text-honor-darkGray">
-                    Мы отправили код подтверждения на указанный вами номер
-                    телефона
+                    Мы отправили код подтверждения на указанную вами электронную
+                    почту
                 </p>
             </div>
 
@@ -64,7 +65,7 @@ const VerificationStep = ({
             <Button
                 type="submit"
                 className="w-full honor-button-primary mb-4">
-                Завершить регистрацию
+                {hasNextStep ? 'Продолжить' : 'Завершить регистрацию'}
             </Button>
 
             <div className="text-center">

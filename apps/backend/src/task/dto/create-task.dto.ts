@@ -56,4 +56,7 @@ export class CreateTaskDto {
         required: false,
     })
     stages?: CreateTaskStageDto[];
+
+    @IsOptional()
+    assigneeId?: string;
 }

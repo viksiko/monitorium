@@ -1,4 +1,4 @@
-import React, { createContext, useContext, ReactNode } from 'react';
+import { createContext, useContext, ReactNode } from 'react';
 import {
     useUser,
     useLogin,
@@ -8,18 +8,21 @@ import {
 } from '@/hooks/useAuth';
 import { User, RegisterData, LoginData, OAuthData } from '@/types/auth';
 import { useToast } from '@/components/ui/use-toast';
+import { useQueryClient } from '@tanstack/react-query';
+import { RegisterRoleEnum } from '@monorepo/types';
 
 interface AuthContextType {
     user: User | null | undefined;
     loading: boolean;
     isAuthenticated: boolean;
     login: (email: string, password: string) => Promise<void>;
-    register: (data: RegisterData) => Promise<void>;
+    register: (data: RegisterData) => Promise<any>;
     logout: () => void;
     loginWithGosuslugi: () => void;
     loginWithSber: () => void;
     loginWithTinkoff: () => void;
     isVerified: () => boolean;
+    refreshUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -28,6 +31,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
     children,
 }) => {
     const { data: user, isLoading: loading } = useUser();
+    const queryClient = useQueryClient();
     const loginMutation = useLogin();
     const registerMutation = useRegister();
     const oauthMutation = useOAuthLogin();
@@ -56,14 +60,17 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
 
     const register = async (data: RegisterData) => {
         try {
-            await registerMutation.mutateAsync(data);
+            const result = await registerMutation.mutateAsync(data);
+
             toast({
-                title: 'Регистрация успешна!',
+                title: 'Код подтверждения отправлен',
                 description:
-                    'Пожалуйста, проверьте вашу электронную почту для получения ссылки подтверждения.',
+                    'Мы отправили код подтверждения на указанный вами email',
                 variant: 'success',
             });
+            return result;
         } catch (error: any) {
+            console.error('Ошибка регистрации:', error);
             toast({
                 title: 'Ошибка регистрации',
                 description:
@@ -116,6 +123,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
         return user?.verified || false;
     };
 
+    const refreshUser = async () => {
+        await queryClient.invalidateQueries({
+            queryKey: ['user'],
+        });
+    };
+
     return (
         <AuthContext.Provider
             value={{
@@ -129,6 +142,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
                 loginWithSber,
                 loginWithTinkoff,
                 isVerified,
+                refreshUser,
             }}>
             {children}
         </AuthContext.Provider>

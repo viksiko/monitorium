@@ -4,8 +4,6 @@ import { $Enums, Task } from '@prisma/client';
 // маппер enum
 export const mapTaskStatus = (status: $Enums.TaskStatus): TaskStatus => {
     switch (status) {
-        case 'DELIVERED':
-            return TaskStatus.DELIVERED;
         case 'PLANNED':
             return TaskStatus.PLANNED;
         case 'IN_PROGRESS':

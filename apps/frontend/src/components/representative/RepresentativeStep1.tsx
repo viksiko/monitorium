@@ -1,13 +1,13 @@
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { MapPin, Mail, Phone, User, Lock, Loader2 } from 'lucide-react';
+import { User, Mail, Phone, Lock, Loader2 } from 'lucide-react';
+import {
+    RegisterStep1FormValues,
+    registerStep1Schema,
+} from '@/zod/registerStep1.schema';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import {
-    registerStep1Schema,
-    RegisterStep1FormValues,
-} from '@/zod/registerStep1.schema';
 import { FormError, formInputClass } from '../ui/formInputClass';
 
 interface RegisterStep1Props {
@@ -15,7 +15,7 @@ interface RegisterStep1Props {
     isLoading: boolean;
 }
 
-const RegisterStep1 = ({ onSubmit, isLoading }: RegisterStep1Props) => {
+const RepresentativeStep1 = ({ onSubmit, isLoading }: RegisterStep1Props) => {
     const {
         register,
         handleSubmit,
@@ -144,57 +144,6 @@ const RegisterStep1 = ({ onSubmit, isLoading }: RegisterStep1Props) => {
                 </div>
             </div>
 
-            {/* <div className="mb-6">
-                <div className="flex items-center mb-2">
-                    <input
-                        type="checkbox"
-                        {...register('useAddress')}
-                    />
-                    <label
-                        htmlFor="useAddress"
-                        className="ml-2 block text-sm">
-                        Указать адрес вместо избирательного участка
-                    </label>
-                </div>
-
-                {formData.useAddress ? (
-                    <div className="relative">
-                        <MapPin
-                            className="absolute left-3 top-1/2 transform -translate-y-1/2 text-honor-darkGray"
-                            size={18}
-                        />
-                        <Input
-                            id="address"
-                            name="address"
-                            value={formData.address}
-                            onChange={handleChange}
-                            className="honor-input pl-10"
-                            placeholder="Город, улица, дом"
-                            required={formData.useAddress}
-                        />
-                        <p className="text-xs text-honor-darkGray mt-1">
-                            Система автоматически определит ваш избирательный
-                            участок
-                        </p>
-                    </div>
-                ) : (
-                    <div className="relative">
-                        <MapPin
-                            className="absolute left-3 top-1/2 transform -translate-y-1/2 text-honor-darkGray"
-                            size={18}
-                        />
-                        <Input
-                            id="district"
-                            name="district"
-                            value={formData.district}
-                            onChange={handleChange}
-                            className="honor-input pl-10"
-                            placeholder="Номер избирательного участка (необязательно)"
-                        />
-                    </div>
-                )}
-            </div> */}
-
             <Button
                 type="submit"
                 disabled={isLoading}
@@ -207,12 +156,11 @@ const RegisterStep1 = ({ onSubmit, isLoading }: RegisterStep1Props) => {
             </Button>
 
             <div className="mt-4 text-xs text-honor-darkGray text-center">
-                Нажимая "Зарегистрироваться", вы соглашаетесь с правилами
-                использования платформы и даете согласие на обработку
-                персональных данных
+                Нажимая "Продолжить", вы соглашаетесь с правилами использования
+                платформы и даете согласие на обработку персональных данных
             </div>
         </form>
     );
 };
 
-export default RegisterStep1;
+export default RepresentativeStep1;

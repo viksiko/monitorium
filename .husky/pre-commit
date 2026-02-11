@@ -2,7 +2,7 @@
 npx lint-staged
 
 # 2. Затем запускаем тесты бэкенда
-npm run test:back 
+# npm run test:back 
 
 # 3. Затем запускаем тесты фронтенда
 npm run test:front

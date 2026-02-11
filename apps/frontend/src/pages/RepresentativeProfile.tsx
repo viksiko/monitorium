@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -19,201 +19,61 @@ import {
     Eye,
 } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
+import { api } from '@/lib/api';
+import Loader from '@/components/ui/loader';
+import { useAuth } from '@/context/AuthContext';
 
-// Mock data
-const mockTasks = [
-    {
-        id: 1,
-        title: 'Ремонт дороги на ул. Ленина',
-        address: 'ул. Ленина, 10-20',
-        description: 'Ямочный ремонт асфальтового покрытия на участке дороги',
-        solution: 'Выделены средства из бюджета, составлен план работ',
-        status: 'in-progress',
-        date: '2025-08-15',
-        modified: '2025-05-05',
-        modificationHistory: [
-            {
-                field: 'solution',
-                oldValue: 'Изучаем возможности ремонта',
-                newValue: 'Выделены средства из бюджета, составлен план работ',
-                date: '2025-05-05',
-            },
-        ],
-        stages: [
-            {
-                id: 1,
-                title: 'Выделение средств',
-                completed: true,
-                date: '2025-05-10',
-            },
-            {
-                id: 2,
-                title: 'Проведение конкурса подрядчиков',
-                completed: true,
-                date: '2025-06-20',
-            },
-            {
-                id: 3,
-                title: 'Начало работ',
-                completed: false,
-                date: '2025-07-05',
-            },
-            {
-                id: 4,
-                title: 'Завершение работ',
-                completed: false,
-                date: '2025-08-15',
-            },
-        ],
-        likes: 24,
-        comments: 5,
-        views: 156,
-    },
-    {
-        id: 2,
-        title: 'Установка детской площадки',
-        address: 'ул. Пушкина, 42',
-        description:
-            'Установка современной детской площадки во дворе жилого дома',
-        solution: 'Проект согласован с жителями, выбрано оборудование',
-        status: 'completed',
-        date: '2025-04-20',
-        modified: null,
-        modificationHistory: [],
-        stages: [
-            {
-                id: 1,
-                title: 'Согласование с жителями',
-                completed: true,
-                date: '2025-02-10',
-            },
-            {
-                id: 2,
-                title: 'Выбор оборудования',
-                completed: true,
-                date: '2025-02-25',
-            },
-            {
-                id: 3,
-                title: 'Подготовка площадки',
-                completed: true,
-                date: '2025-03-15',
-            },
-            {
-                id: 4,
-                title: 'Установка оборудования',
-                completed: true,
-                date: '2025-04-10',
-            },
-        ],
-        likes: 56,
-        comments: 12,
-        views: 230,
-    },
-    {
-        id: 3,
-        title: 'Озеленение сквера',
-        address: 'Центральный сквер',
-        description: 'Посадка деревьев и кустарников в центральном сквере',
-        solution: 'Определены виды деревьев, закуплены саженцы',
-        status: 'planned',
-        date: '2025-09-30',
-        modified: '2025-05-02',
-        modificationHistory: [
-            {
-                field: 'stages',
-                oldValue: '3 этапа',
-                newValue: '4 этапа',
-                date: '2025-05-02',
-            },
-            {
-                field: 'date',
-                oldValue: '2025-08-30',
-                newValue: '2025-09-30',
-                date: '2025-05-01',
-            },
-        ],
-        stages: [
-            {
-                id: 1,
-                title: 'Разработка плана озеленения',
-                completed: true,
-                date: '2025-04-15',
-            },
-            {
-                id: 2,
-                title: 'Закупка саженцев',
-                completed: false,
-                date: '2025-05-20',
-            },
-            {
-                id: 3,
-                title: 'Подготовка почвы',
-                completed: false,
-                date: '2025-06-10',
-            },
-            {
-                id: 4,
-                title: 'Высадка растений',
-                completed: false,
-                date: '2025-09-15',
-            },
-        ],
-        likes: 38,
-        comments: 8,
-        views: 142,
-    },
-];
-
-const mockRepresentative = {
-    id: '1',
-    name: 'Иванов Иван Иванович',
-    role: 'Депутат городской думы',
-    district: 'Округ №1',
-    party: 'Единая Россия',
-    bio: 'Депутат городской думы с 2020 года. Активно занимаюсь вопросами благоустройства и развития инфраструктуры округа.',
-    tasksTotal: 15,
-    tasksCompleted: 8,
-    rating: 4.7,
-    contactEmail: 'ivanov@duma.ru',
-    contactPhone: '+7 (123) 456-78-90',
-    officeAddress: 'ул. Советская, 25, каб. 301',
-    achievementBadges: [
-        { id: 1, name: '10 выполненных задач', icon: 'star' },
-        { id: 2, name: 'Высокий рейтинг', icon: 'award' },
-    ],
-};
-
-const mockPosts = [
-    {
-        id: 1,
-        title: 'Отчет о проделанной работе за первый квартал',
-        content:
-            'За первый квартал 2025 года нам удалось реализовать несколько важных проектов, включая ремонт дороги на улице Ленина и установку новой детской площадки. Все работы были выполнены в срок и в рамках выделенного бюджета. Мы продолжаем активно работать над улучшением качества жизни в нашем округе.',
-        date: '2025-04-01',
-        likes: 42,
-        comments: 7,
-        views: 230,
-    },
-    {
-        id: 2,
-        title: 'Встреча с жителями микрорайона',
-        content:
-            'Вчера провел встречу с жителями микрорайона. Обсудили насущные проблемы, в том числе: необходимость ремонта внутридворовых проездов, организацию парковочных мест, установку детских площадок. По результатам встречи принято решение о разработке комплексного плана благоустройства территории на ближайшие 2 года.',
-        date: '2025-05-01',
-        likes: 35,
-        comments: 9,
-        views: 187,
-    },
-];
+interface RepresentativeProfileData {
+    id: string;
+    name: string;
+    email: string;
+    phone: string | null;
+    role: string;
+    isRepresentative: boolean;
+    isVerified: boolean;
+    tasks: [];
+    representativeProfile: {
+        id: string;
+        position: string;
+        party: string;
+        rating: number;
+        bio: string;
+        tasksTotal: number;
+        tasksCompleted: number;
+        attendance: number;
+        lastActivity: string | null;
+    } | null;
+}
 
 const RepresentativeProfile = () => {
     const { id } = useParams();
     const { toast } = useToast();
+    const { user, refreshUser } = useAuth();
     const [liked, setLiked] = useState<Record<string, boolean>>({});
     const [showModifications, setShowModifications] = useState<number | null>(
         null,
     );
+
+    const [representative, setRepresentative] =
+        useState<RepresentativeProfileData | null>(null);
+    const [tasks, setTasks] = useState<any[]>([]);
+    const [posts, setPosts] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchRepresentative = async () => {
+            try {
+                const response = await api.get(`/api/v1/users/${id}`);
+                setRepresentative(response.data.data);
+            } catch (error) {
+                console.error('Ошибка загрузки профиля:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchRepresentative();
+    }, []);
 
     const handleLike = (type: string, id: number) => {
         const key = `${type}-${id}`;
@@ -227,13 +87,33 @@ const RepresentativeProfile = () => {
         });
     };
 
-    const handleSubscribe = () => {
-        toast({
-            title: 'Подписка оформлена',
-            description:
-                'Вы подписались на обновления этого представителя власти',
-            variant: 'default',
-        });
+    const handleSubscribe = async () => {
+        try {
+            await api.post('/api/v1/subscriptions', {
+                representativeId: representative.id,
+            });
+
+            await refreshUser();
+
+            toast({
+                title: 'Подписка оформлена',
+                description:
+                    'Вы подписались на обновления этого представителя власти',
+                variant: 'default',
+            });
+        } catch (error: any) {
+            console.error('Ошибка подписки:', error);
+
+            const message =
+                error?.response?.data?.message ||
+                'Не удалось оформить подписку';
+
+            toast({
+                title: 'Ошибка',
+                description: message,
+                variant: 'destructive',
+            });
+        }
     };
 
     const handleSendMessage = () => {
@@ -270,6 +150,28 @@ const RepresentativeProfile = () => {
         }
     };
 
+    if (loading) {
+        return (
+            <Layout>
+                <div className="honor-container">
+                    <Loader />
+                </div>
+            </Layout>
+        );
+    }
+
+    if (!representative) {
+        return (
+            <Layout>
+                <div className="honor-container py-12 text-center">
+                    Представитель не найден
+                </div>
+            </Layout>
+        );
+    }
+
+    console.log('representative', representative);
+
     return (
         <Layout>
             <div className="honor-container py-12">
@@ -282,10 +184,10 @@ const RepresentativeProfile = () => {
                                     <User size={48} />
                                 </Avatar>
                                 <h1 className="text-2xl font-bold text-center">
-                                    {mockRepresentative.name}
+                                    {representative.name}
                                 </h1>
                                 <p className="text-honor-darkGray">
-                                    {mockRepresentative.role}
+                                    {representative.role}
                                 </p>
                                 <div className="flex items-center mt-2">
                                     <MapPin
@@ -293,14 +195,14 @@ const RepresentativeProfile = () => {
                                         className="text-honor-blue mr-1"
                                     />
                                     <span className="text-sm">
-                                        {mockRepresentative.district}
+                                        {representative.name}
                                     </span>
                                 </div>
                                 <Badge className="mt-2 bg-honor-blue">
-                                    {mockRepresentative.party}
+                                    {representative.representativeProfile.party}
                                 </Badge>
 
-                                {mockRepresentative.achievementBadges.map(
+                                {/* {mockRepresentative.achievementBadges.map(
                                     (badge) => (
                                         <Badge
                                             key={badge.id}
@@ -308,14 +210,18 @@ const RepresentativeProfile = () => {
                                             {badge.name}
                                         </Badge>
                                     ),
-                                )}
+                                )} */}
                             </div>
 
                             <div className="border-t border-b py-4 mb-4">
                                 <div className="grid grid-cols-3 text-center">
                                     <div>
                                         <p className="text-2xl font-bold text-honor-blue">
-                                            {mockRepresentative.tasksTotal}
+                                            {
+                                                representative
+                                                    .representativeProfile
+                                                    .tasksTotal
+                                            }
                                         </p>
                                         <p className="text-xs text-honor-darkGray">
                                             Всего задач
@@ -323,7 +229,11 @@ const RepresentativeProfile = () => {
                                     </div>
                                     <div>
                                         <p className="text-2xl font-bold text-honor-blue">
-                                            {mockRepresentative.tasksCompleted}
+                                            {
+                                                representative
+                                                    .representativeProfile
+                                                    .tasksCompleted
+                                            }
                                         </p>
                                         <p className="text-xs text-honor-darkGray">
                                             Выполнено
@@ -331,7 +241,11 @@ const RepresentativeProfile = () => {
                                     </div>
                                     <div>
                                         <p className="text-2xl font-bold text-honor-blue">
-                                            {mockRepresentative.rating}
+                                            {
+                                                representative
+                                                    .representativeProfile
+                                                    .rating
+                                            }
                                         </p>
                                         <p className="text-xs text-honor-darkGray">
                                             Рейтинг
@@ -345,7 +259,7 @@ const RepresentativeProfile = () => {
                                     О представителе
                                 </h3>
                                 <p className="text-honor-darkGray text-sm">
-                                    {mockRepresentative.bio}
+                                    {representative.representativeProfile.bio}
                                 </p>
                             </div>
 
@@ -359,27 +273,21 @@ const RepresentativeProfile = () => {
                                             size={16}
                                             className="text-honor-blue mr-2 mt-1"
                                         />
-                                        <span>
-                                            {mockRepresentative.contactEmail}
-                                        </span>
+                                        <span>{representative.email}</span>
                                     </div>
                                     <div className="flex items-start">
                                         <Phone
                                             size={16}
                                             className="text-honor-blue mr-2 mt-1"
                                         />
-                                        <span>
-                                            {mockRepresentative.contactPhone}
-                                        </span>
+                                        <span>{representative.phone}</span>
                                     </div>
                                     <div className="flex items-start">
                                         <Building
                                             size={16}
                                             className="text-honor-blue mr-2 mt-1"
                                         />
-                                        <span>
-                                            {mockRepresentative.officeAddress}
-                                        </span>
+                                        <span>{representative.email}</span>
                                     </div>
                                 </div>
                             </div>
@@ -387,9 +295,11 @@ const RepresentativeProfile = () => {
                             <div className="flex flex-col space-y-3">
                                 <Button
                                     className="honor-button-primary"
-                                    onClick={handleSubscribe}>
+                                    onClick={handleSubscribe}
+                                    disabled={user.subscriptions.length > 0}>
                                     Подписаться
                                 </Button>
+
                                 <Button
                                     className="honor-button-secondary"
                                     onClick={handleSendMessage}>
@@ -418,7 +328,7 @@ const RepresentativeProfile = () => {
                             <TabsContent
                                 value="tasks"
                                 className="space-y-6">
-                                {mockTasks.map((task) => (
+                                {tasks.map((task) => (
                                     <Card
                                         key={task.id}
                                         className="honor-card">
@@ -616,7 +526,7 @@ const RepresentativeProfile = () => {
                                 ))}
                             </TabsContent>
 
-                            <TabsContent
+                            {/* <TabsContent
                                 value="blog"
                                 className="space-y-6">
                                 {mockPosts.map((post) => (
@@ -687,7 +597,7 @@ const RepresentativeProfile = () => {
                                         </Button>
                                     </Link>
                                 </div>
-                            </TabsContent>
+                            </TabsContent> */}
                         </Tabs>
                     </div>
                 </div>

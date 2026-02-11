@@ -1,3 +1,4 @@
+import { RegisterRoleEnum } from '@monorepo/types';
 import { ApiProperty } from '@nestjs/swagger';
 import {
     IsEmail,
@@ -47,6 +48,12 @@ export class RegisterDto {
         example: '89775557799',
     })
     phone: string;
+
+    @IsNotEmpty({ message: 'isRepresentative не может быть пустым' })
+    @ApiProperty({
+        example: 'false / true',
+    })
+    role: RegisterRoleEnum;
     // district: string;
     // isRepresentative: boolean;
     // position: string;

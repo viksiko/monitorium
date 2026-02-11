@@ -1,11 +1,11 @@
 -- CreateEnum
-CREATE TYPE "Role" AS ENUM ('USER', 'ADMIN');
+CREATE TYPE "Role" AS ENUM ('VOTER', 'REPRESENTATIVE', 'ADMIN');
 
 -- CreateEnum
 CREATE TYPE "TokenType" AS ENUM ('REFRESH', 'VERIFY_EMAIL', 'RESET_PASSWORD');
 
 -- CreateEnum
-CREATE TYPE "TaskStatus" AS ENUM ('DELIVERED', 'PLANNED', 'IN_PROGRESS', 'COMPLETED', 'REJECTED');
+CREATE TYPE "TaskStatus" AS ENUM ('PLANNED', 'IN_PROGRESS', 'COMPLETED', 'REJECTED');
 
 -- CreateTable
 CREATE TABLE "users" (
@@ -15,12 +15,11 @@ CREATE TABLE "users" (
     "password" TEXT,
     "phone" TEXT,
     "district" TEXT,
-    "balance" INTEGER NOT NULL DEFAULT 0,
-    "isRepresentative" BOOLEAN NOT NULL DEFAULT false,
-    "role" "Role" NOT NULL DEFAULT 'USER',
+    "role" "Role" NOT NULL,
     "gosuslugiId" TEXT,
     "sberId" TEXT,
     "tinkoffId" TEXT,
+    "isRepresentative" BOOLEAN NOT NULL DEFAULT false,
     "isVerified" BOOLEAN NOT NULL DEFAULT false,
     "isActive" BOOLEAN NOT NULL DEFAULT true,
     "deletedAt" TIMESTAMP(3),
@@ -31,11 +30,54 @@ CREATE TABLE "users" (
 );
 
 -- CreateTable
+CREATE TABLE "tasks" (
+    "id" TEXT NOT NULL,
+    "title" TEXT NOT NULL,
+    "address" TEXT NOT NULL,
+    "problemDescription" TEXT NOT NULL,
+    "possibleSolutions" TEXT,
+    "desiredResolutionDate" TIMESTAMP(3),
+    "authorId" TEXT NOT NULL,
+    "assigneeId" TEXT,
+    "status" "TaskStatus" NOT NULL DEFAULT 'PLANNED',
+    "likesCount" INTEGER NOT NULL DEFAULT 0,
+    "viewsCount" INTEGER NOT NULL DEFAULT 0,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "userId" TEXT,
+
+    CONSTRAINT "tasks_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "task_stages" (
+    "id" TEXT NOT NULL,
+    "taskId" TEXT NOT NULL,
+    "title" TEXT NOT NULL,
+    "date" TIMESTAMP(3) NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "task_stages_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "voter_profiles" (
+    "id" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
+    "balance" INTEGER NOT NULL DEFAULT 0,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "voter_profiles_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "representative_profiles" (
     "id" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
     "position" TEXT NOT NULL,
     "party" TEXT,
+    "bio" TEXT,
     "rating" DOUBLE PRECISION NOT NULL DEFAULT 0.0,
     "tasksTotal" INTEGER NOT NULL DEFAULT 0,
     "tasksCompleted" INTEGER NOT NULL DEFAULT 0,
@@ -45,6 +87,16 @@ CREATE TABLE "representative_profiles" (
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "representative_profiles_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "subscriptions" (
+    "id" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "subscriberId" TEXT NOT NULL,
+    "representativeId" TEXT NOT NULL,
+
+    CONSTRAINT "subscriptions_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -60,35 +112,6 @@ CREATE TABLE "tokens" (
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "tokens_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "tasks" (
-    "id" TEXT NOT NULL,
-    "title" TEXT NOT NULL,
-    "address" TEXT NOT NULL,
-    "problemDescription" TEXT NOT NULL,
-    "possibleSolutions" TEXT,
-    "desiredResolutionDate" TIMESTAMP(3),
-    "userId" TEXT NOT NULL,
-    "status" "TaskStatus" NOT NULL DEFAULT 'DELIVERED',
-    "likesCount" INTEGER NOT NULL DEFAULT 0,
-    "viewsCount" INTEGER NOT NULL DEFAULT 0,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-
-    CONSTRAINT "tasks_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "task_stages" (
-    "id" TEXT NOT NULL,
-    "taskId" TEXT NOT NULL,
-    "title" TEXT NOT NULL,
-    "date" TIMESTAMP(3) NOT NULL,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
-    CONSTRAINT "task_stages_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -131,22 +154,43 @@ CREATE UNIQUE INDEX "users_sberId_key" ON "users"("sberId");
 CREATE UNIQUE INDEX "users_tinkoffId_key" ON "users"("tinkoffId");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "voter_profiles_userId_key" ON "voter_profiles"("userId");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "representative_profiles_userId_key" ON "representative_profiles"("userId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "subscriptions_subscriberId_representativeId_key" ON "subscriptions"("subscriberId", "representativeId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "tokens_hashedToken_key" ON "tokens"("hashedToken");
 
 -- AddForeignKey
-ALTER TABLE "representative_profiles" ADD CONSTRAINT "representative_profiles_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "tasks" ADD CONSTRAINT "tasks_authorId_fkey" FOREIGN KEY ("authorId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "tokens" ADD CONSTRAINT "tokens_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "tasks" ADD CONSTRAINT "tasks_assigneeId_fkey" FOREIGN KEY ("assigneeId") REFERENCES "users"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "tasks" ADD CONSTRAINT "tasks_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "tasks" ADD CONSTRAINT "tasks_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "task_stages" ADD CONSTRAINT "task_stages_taskId_fkey" FOREIGN KEY ("taskId") REFERENCES "tasks"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "voter_profiles" ADD CONSTRAINT "voter_profiles_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "representative_profiles" ADD CONSTRAINT "representative_profiles_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "subscriptions" ADD CONSTRAINT "subscriptions_subscriberId_fkey" FOREIGN KEY ("subscriberId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "subscriptions" ADD CONSTRAINT "subscriptions_representativeId_fkey" FOREIGN KEY ("representativeId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "tokens" ADD CONSTRAINT "tokens_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "task_files" ADD CONSTRAINT "task_files_taskId_fkey" FOREIGN KEY ("taskId") REFERENCES "tasks"("id") ON DELETE CASCADE ON UPDATE CASCADE;

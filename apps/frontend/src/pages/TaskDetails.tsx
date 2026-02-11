@@ -242,7 +242,7 @@ const TaskDetails = () => {
                                                 <div className="flex items-center space-x-1 text-honor-darkGray">
                                                     <ThumbsUp size={18} />
                                                     <span>
-                                                        {task.likesCountikes}
+                                                        {task.likesCount}
                                                     </span>
                                                 </div>
                                                 <div className="flex items-center space-x-1 text-honor-darkGray">

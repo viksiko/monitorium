@@ -25,6 +25,10 @@ export default defineConfig(({ mode }) => ({
     resolve: {
         alias: {
             '@': path.resolve(__dirname, './src'),
+            '@monorepo/types': path.resolve(
+                __dirname,
+                '../../packages/types/src',
+            ),
         },
     },
 }));

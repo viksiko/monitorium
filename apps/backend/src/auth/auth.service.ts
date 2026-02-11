@@ -1,7 +1,9 @@
 import { UserProfile } from '@monorepo/types';
 import {
+    BadRequestException,
     ConflictException,
     Injectable,
+    NotFoundException,
     UnauthorizedException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -11,18 +13,23 @@ import {
     LOGOUT_SUCCESS_MSG,
     MAIL_DELIVERY_MESSAGE,
     REGISTRATION_CONFIRMED_MESSAGE,
-    REGISTRATION_SUCCESS,
+    REPRESENTATIVE_REQUEST_CREATED,
     USER_ALREADY_EXISTS,
+    USER_NOT_FOUND_MSG,
+    VERIFICATION_MESSAGES,
 } from '@src/constants/api-messages.constants';
 import { logger } from '@src/logger/winston.logger';
+import { User } from '@src/types/user';
 import { UserService } from '@src/user/user.service';
 import * as bcrypt from 'bcryptjs';
 import { Request, Response } from 'express';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { v4 as uuidv4 } from 'uuid';
+import { СonfirmRegistration } from './dto/confirmRegistration';
 import { ForgotPasswordDto } from './dto/forgotPassword.dto';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
+import { RepresentativeRequestDto } from './dto/representativeRequest.dto';
 import { ResetPasswordDto } from './dto/resetPassword.dto';
 import { CookieTokenService } from './services/cookieToken.service';
 import { MailService } from './services/mail.service';
@@ -41,10 +48,10 @@ export class AuthService {
     ) {}
 
     // Регистрация
-    async register(registerDto: RegisterDto): Promise<{
-        message: string;
-    }> {
-        console.log('RegisterDto in AuthService:', registerDto);
+    async register(
+        registerDto: RegisterDto,
+        // isRepresentative: boolean,
+    ): Promise<User> {
         // 1. Проверка существования пользователя
         const existingUser = await this.userService.findUserByEmailOrPhone(
             registerDto.email,
@@ -56,9 +63,12 @@ export class AuthService {
         }
 
         // 2. Создание пользователя
-        await this.userService.createUser(registerDto);
+        const user = await this.userService.createUser({
+            ...registerDto,
+            isRepresentative: registerDto.role === 'REPRESENTATIVE',
+        });
 
-        return { message: REGISTRATION_SUCCESS };
+        return user;
     }
 
     // Авторизация
@@ -82,6 +92,7 @@ export class AuthService {
             email: user.email,
             phone: user.phone,
             role: user.role,
+            isRepresentative: user.isRepresentative,
         };
 
         return this.tokenService.generateTokens(payload, response);
@@ -122,6 +133,7 @@ export class AuthService {
             email: verifyJwt.email,
             phone: verifyJwt.phone,
             role: verifyJwt.role,
+            isRepresentative: verifyJwt.isRepresentative,
         };
 
         return await this.tokenService.generateTokens(payload, response);
@@ -131,20 +143,11 @@ export class AuthService {
     async logout(
         request: Request,
         response: Response,
-    ): Promise<{
-        message: string;
-    }> {
+    ): Promise<{ message: string }> {
         const refreshToken = request.cookies['refreshToken'];
 
-        if (!refreshToken) {
-            throw new UnauthorizedException(AUTHORIZATION_REQUIRED);
-        }
-
-        const deletedCount =
+        if (refreshToken) {
             await this.tokenService.deleteTokensByHash(refreshToken);
-
-        if (deletedCount === 0) {
-            throw new UnauthorizedException(AUTHORIZATION_REQUIRED);
         }
 
         this.cookieTokenService.clearRefreshTokenCookie(response);
@@ -152,16 +155,16 @@ export class AuthService {
         return { message: LOGOUT_SUCCESS_MSG };
     }
 
-    // подтверждение регистрации
-    async confirmRegistration(token: string): Promise<{ message: string }> {
-        if (!token) {
-            throw new UnauthorizedException(AUTHORIZATION_REQUIRED);
-        }
+    // старый способ подтверждение регистрации
+    // async confirmRegistration(token: string): Promise<{ message: string }> {
+    //     if (!token) {
+    //         throw new UnauthorizedException(AUTHORIZATION_REQUIRED);
+    //     }
 
-        await this.userService.verifyUserByToken(token);
+    //     await this.userService.verifyUserByToken(token);
 
-        return { message: REGISTRATION_CONFIRMED_MESSAGE };
-    }
+    //     return { message: REGISTRATION_CONFIRMED_MESSAGE };
+    // }
 
     // запрос на восстановление пароля
     async forgotPassword(dto: ForgotPasswordDto): Promise<{ message: string }> {
@@ -274,5 +277,107 @@ export class AuthService {
         }
 
         return { message: 'Пароль успешно изменен' };
+    }
+
+    async confirmRegistration(dto: СonfirmRegistration): Promise<{
+        message: string;
+    }> {
+        const { userId, code } = dto;
+
+        try {
+            const token = await this.prisma.token.findFirst({
+                where: { userId, type: 'VERIFY_EMAIL' },
+            });
+
+            if (!token)
+                throw new BadRequestException(
+                    VERIFICATION_MESSAGES.CODE_NOT_FOUND,
+                );
+
+            if (token.exp < new Date())
+                throw new BadRequestException(
+                    VERIFICATION_MESSAGES.CODE_EXPIRED,
+                );
+
+            const hashed = this.tokenService.hashToken(
+                code,
+                this.configService.get('JWT_VERIFY_SALT'),
+            );
+            if (hashed !== token.hashedToken)
+                throw new BadRequestException(
+                    VERIFICATION_MESSAGES.CODE_INVALID,
+                );
+
+            const user = await this.prisma.user.findUnique({
+                where: { id: userId },
+            });
+            if (!user) throw new NotFoundException(USER_NOT_FOUND_MSG);
+
+            await this.prisma.$transaction(async (tx) => {
+                const updatedUser = await tx.user.update({
+                    where: { id: userId },
+                    data: { isVerified: true },
+                });
+
+                return updatedUser;
+            });
+            return { message: REGISTRATION_CONFIRMED_MESSAGE };
+        } catch (error) {
+            logger.error('Failed to verify user code', {
+                operation: 'verifyCode',
+                userId,
+                error: error instanceof Error ? error.message : error,
+            });
+            throw error;
+        }
+    }
+
+    async representativeRequest(
+        dto: RepresentativeRequestDto,
+    ): Promise<{ message: string }> {
+        const { userId, position } = dto;
+
+        try {
+            // Проверяем, что пользователь существует
+            const user = await this.prisma.user.findUnique({
+                where: { id: userId },
+            });
+
+            if (!user) {
+                throw new NotFoundException(USER_NOT_FOUND_MSG);
+            }
+
+            // Обновляем пользователя + создаём профиль представителя в транзакции
+            await this.prisma.$transaction(async (tx) => {
+                await tx.user.update({
+                    where: { id: userId },
+                    data: {
+                        isRepresentative: true,
+                        isVerified: true, // TODO: убрать, верификация будет делаться по другому
+                    },
+                });
+
+                await tx.representativeProfile.create({
+                    data: {
+                        userId,
+                        position: dto.position,
+                        party: dto.party,
+                        bio: dto.bio,
+                    },
+                });
+            });
+
+            return { message: REPRESENTATIVE_REQUEST_CREATED };
+        } catch (error) {
+            logger.error('Failed to create representative request', {
+                category: 'UserService',
+                operation: 'representativeRequest',
+                userId,
+                position,
+                error: error instanceof Error ? error.message : error,
+            });
+
+            throw error;
+        }
     }
 }

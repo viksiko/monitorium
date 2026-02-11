@@ -1,3 +1,4 @@
+import { RegisterRoleEnum } from '@monorepo/types';
 import {
     ConflictException,
     ForbiddenException,
@@ -6,6 +7,7 @@ import {
     NotFoundException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { Role } from '@prisma/client';
 import { RegisterDto } from '@src/auth/dto/register.dto';
 import { MailService } from '@src/auth/services/mail.service';
 import { TokenSevice } from '@src/auth/services/token.service';
@@ -19,9 +21,14 @@ import {
 } from '@src/constants/api-messages.constants';
 import { logger } from '@src/logger/winston.logger';
 import { PrismaService } from '@src/prisma/prisma.service';
-import { User, UserResponse } from '@src/types/user';
+import {
+    User,
+    UserResponse,
+    UserWithRepresentativeProfileDto,
+    UserWithVoterProfileDto,
+} from '@src/types/user';
+import { generateVerificationCode } from '@src/utils/generateVerificationCode';
 import * as bcrypt from 'bcryptjs';
-import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class UserService {
@@ -31,20 +38,76 @@ export class UserService {
         private tokenService: TokenSevice,
         private configService: ConfigService,
     ) {}
-    async getUsers(): Promise<UserResponse[]> {
+    async getUsers(
+        role?: string,
+    ): Promise<
+        (UserWithRepresentativeProfileDto | UserWithVoterProfileDto)[] | null
+    > {
         try {
-            return await this.prisma.user.findMany({
-                select: {
-                    id: true,
-                    name: true,
-                    email: true,
-                    role: true,
-                },
-            });
+            // если нужны представители — отдаём расширенные данные
+            if (role === 'representative') {
+                return this.prisma.user.findMany({
+                    where: {
+                        role: Role.REPRESENTATIVE,
+                        isVerified: true,
+                        isActive: true,
+                    },
+                    select: {
+                        id: true,
+                        name: true,
+                        email: true,
+                        phone: true,
+                        district: true,
+                        isVerified: true,
+                        representativeProfile: {
+                            select: {
+                                id: true,
+                                position: true,
+                                party: true,
+                                bio: true,
+                                rating: true,
+                                tasksTotal: true,
+                                tasksCompleted: true,
+                                attendance: true,
+                                lastActivity: true,
+                            },
+                        },
+                    },
+                    orderBy: {
+                        name: 'asc', // Сортировка по алфавиту
+                    },
+                });
+            }
+
+            if (role === 'voter')
+                return this.prisma.user.findMany({
+                    where: {
+                        role: 'VOTER',
+                        isActive: true,
+                    },
+                    select: {
+                        id: true,
+                        name: true,
+                        email: true,
+                        district: true,
+                        isVerified: true,
+                        voterProfile: {
+                            select: {
+                                id: true,
+                                userId: true,
+                            },
+                        },
+                    },
+                    orderBy: {
+                        name: 'asc', // Сортировка по алфавиту
+                    },
+                });
+
+            return null;
         } catch (error) {
-            logger.error('Failed to find all users', {
+            logger.error('Failed to find users', {
                 category: 'database',
-                operation: 'getAllUsers',
+                operation: 'getUsers',
                 error: error instanceof Error ? error.message : error,
             });
 
@@ -52,10 +115,135 @@ export class UserService {
         }
     }
 
-    async findUserById(id: string): Promise<User | null> {
+    async getUserProfile(userId: string): Promise<UserResponse | null> {
+        try {
+            const user = await this.prisma.user.findUnique({
+                where: { id: userId },
+                select: {
+                    id: true,
+                    name: true,
+                    email: true,
+                    phone: true,
+                    role: true,
+                    isRepresentative: true,
+                    isVerified: true,
+                    representativeProfile: {
+                        select: {
+                            id: true,
+                            position: true,
+                            party: true,
+                            bio: true,
+                            rating: true,
+                            tasksTotal: true,
+                            tasksCompleted: true,
+                            attendance: true,
+                            lastActivity: true,
+                        },
+                    },
+                    voterProfile: {
+                        select: {
+                            id: true,
+                            balance: true,
+                        },
+                    },
+                    subscriptions: {
+                        select: {
+                            id: true,
+                            createdAt: true,
+                            representative: {
+                                select: {
+                                    id: true,
+                                    name: true,
+
+                                    representativeProfile: {
+                                        select: {
+                                            id: true,
+                                            position: true,
+                                            party: true,
+                                            rating: true,
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            });
+
+            if (!user) return null;
+
+            return user;
+        } catch (error) {
+            logger.error('Failed to get current user', {
+                category: 'database',
+                operation: 'getCurrentUser',
+                error: error instanceof Error ? error.message : error,
+            });
+            throw new InternalServerErrorException(
+                'Ошибка при получении данных пользователя',
+            );
+        }
+    }
+
+    async findUserById(id: string): Promise<UserResponse | null> {
         try {
             return (
-                (await this.prisma.user.findUnique({ where: { id } })) || null
+                (await this.prisma.user.findUnique({
+                    where: { id },
+                    select: {
+                        id: true,
+                        name: true,
+                        email: true,
+                        phone: true,
+                        role: true,
+                        isRepresentative: true,
+                        isVerified: true,
+                        // tasks: true,
+
+                        representativeProfile: {
+                            select: {
+                                id: true,
+                                position: true,
+                                party: true,
+                                rating: true,
+                                bio: true,
+                                tasksTotal: true,
+                                tasksCompleted: true,
+                                attendance: true,
+                                lastActivity: true,
+                            },
+                        },
+
+                        voterProfile: {
+                            select: {
+                                id: true,
+                                balance: true,
+                            },
+                        },
+
+                        subscriptions: {
+                            select: {
+                                id: true,
+                                createdAt: true,
+                                representative: {
+                                    select: {
+                                        id: true,
+                                        name: true,
+
+                                        representativeProfile: {
+                                            select: {
+                                                id: true,
+                                                position: true,
+                                                party: true,
+                                                rating: true,
+                                            },
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                })) || null
             );
         } catch (error) {
             logger.error('Failed to find user by id', {
@@ -158,10 +346,12 @@ export class UserService {
         return user;
     }
 
-    async createUser(dto: RegisterDto): Promise<User> {
+    async createUser(
+        dto: RegisterDto & { isRepresentative: boolean },
+    ): Promise<User> {
         const { password, ...userData } = dto;
         const hashedPassword = await bcrypt.hash(password, 10);
-        const rawVerifyToken = uuidv4();
+        const rawVerifyCode = generateVerificationCode();
         let createdUser: User;
 
         // 1.  Используем транзакцию, чтобы оба создать пользователя и токен верификации
@@ -171,23 +361,43 @@ export class UserService {
                     data: {
                         ...userData,
                         password: hashedPassword,
+                        isVerified: false,
+                        role: dto.role,
+                        isRepresentative: dto.isRepresentative,
                     },
                 });
 
-                const hashedVerifyToken = this.tokenService.hashToken(
-                    rawVerifyToken,
+                // если это обычный пользователь — создаём VoterProfile
+                if (dto.role === RegisterRoleEnum.VOTER) {
+                    await tx.voterProfile.create({
+                        data: {
+                            userId: user.id,
+                        },
+                    });
+                }
+
+                // удаляем старые коды (на всякий случай)
+                await tx.token.deleteMany({
+                    where: {
+                        userId: user.id,
+                        type: 'VERIFY_EMAIL',
+                    },
+                });
+
+                const hashedVerifyCode = this.tokenService.hashToken(
+                    rawVerifyCode,
                     this.configService.get('JWT_VERIFY_SALT'),
                 );
 
                 const expiryDate = new Date();
-                expiryDate.setHours(expiryDate.getHours() + 24);
+                expiryDate.setMinutes(expiryDate.getMinutes() + 5); // ⏱ 5 минут
 
                 // создаем токен верфикации
                 await tx.token.create({
                     data: {
                         userId: user.id,
                         type: 'VERIFY_EMAIL',
-                        hashedToken: hashedVerifyToken,
+                        hashedToken: hashedVerifyCode,
                         exp: expiryDate,
                     },
                 });
@@ -207,9 +417,9 @@ export class UserService {
         // 2. Отправка Email
         try {
             console.log('отрпавка Email');
-            const emailSent = await this.mailService.sendVerificationEmail(
+            const emailSent = await this.mailService.sendVerificationCode(
                 createdUser.email,
-                rawVerifyToken,
+                rawVerifyCode,
             );
 
             if (!emailSent) {

@@ -11,14 +11,14 @@ import {
 import { useAuth } from '@/context/AuthContext';
 
 const Dashboard = () => {
-    const { user, isLoading } = useAuth();
+    const { user } = useAuth();
     const navigate = useNavigate();
 
-    useEffect(() => {
-        if (!isLoading && !user) {
-            navigate('/login');
-        }
-    }, [user, isLoading, navigate]);
+    // useEffect(() => {
+    //     if (!isLoading && !user) {
+    //         navigate('/login');
+    //     }
+    // }, [user, isLoading, navigate]);
 
     useEffect(() => {
         // Если пользователь - представитель власти, перенаправляем на специальный дашборд
@@ -27,20 +27,20 @@ const Dashboard = () => {
         }
     }, [user, navigate]);
 
-    if (isLoading) {
-        return (
-            <Layout>
-                <div className="honor-container py-12">
-                    <div className="flex justify-center items-center min-h-[400px]">
-                        <div className="text-center">
-                            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-honor-blue mx-auto mb-4"></div>
-                            <p className="text-honor-darkGray">Загрузка...</p>
-                        </div>
-                    </div>
-                </div>
-            </Layout>
-        );
-    }
+    // if (isLoading) {
+    //     return (
+    //         <Layout>
+    //             <div className="honor-container py-12">
+    //                 <div className="flex justify-center items-center min-h-[400px]">
+    //                     <div className="text-center">
+    //                         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-honor-blue mx-auto mb-4"></div>
+    //                         <p className="text-honor-darkGray">Загрузка...</p>
+    //                     </div>
+    //                 </div>
+    //             </div>
+    //         </Layout>
+    //     );
+    // }
 
     if (!user || user.isRepresentative) {
         return null; // Будет редирект

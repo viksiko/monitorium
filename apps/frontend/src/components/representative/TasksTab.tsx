@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -12,6 +12,9 @@ import {
     MessageSquare,
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { api } from '@/lib/api';
+import { useAuth } from '@/context/AuthContext';
+import Loader from '../ui/loader';
 
 // Task type definition
 type Task = {
@@ -26,53 +29,56 @@ type Task = {
     hasEscalation?: boolean;
 };
 
-// Mock data
-const mockTasks: Task[] = [
-    {
-        id: 1,
-        title: 'Ремонт дороги на ул. Ленина',
-        address: 'ул. Ленина, 10-20',
-        status: 'in-progress',
-        date: '2025-08-15',
-        likes: 24,
-        comments: 5,
-        createdAt: '2025-05-01',
-        hasEscalation: true,
-    },
-    {
-        id: 2,
-        title: 'Установка детской площадки',
-        address: 'ул. Пушкина, 42',
-        status: 'completed',
-        date: '2025-04-20',
-        likes: 56,
-        comments: 12,
-        createdAt: '2025-03-15',
-    },
-    {
-        id: 3,
-        title: 'Озеленение сквера',
-        address: 'Центральный сквер',
-        status: 'planned',
-        date: '2025-09-30',
-        likes: 38,
-        comments: 8,
-        createdAt: '2025-04-15',
-    },
-];
-
 const TasksTab = () => {
+    const [loading, setLoading] = useState(true);
+    const [tasks, setTasks] = useState<Task[]>([]);
+
+    useEffect(() => {
+        const fetchGetTasksRepresentative = async () => {
+            try {
+                const response = await api.get('/api/v1/tasks/user-tasks');
+
+                setTasks(response.data.data);
+            } catch (error) {
+                console.error('Ошибка загрузки задач представителя:', error);
+                setTasks([]);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchGetTasksRepresentative();
+    }, []);
+
     const handleUpdateTaskStatus = (taskId: number) => {
         toast.success('Статус обновлен', {
             description: 'Статус задачи успешно обновлен',
         });
     };
 
+    if (loading) {
+        return (
+            <div className="text-center">
+                <Loader />
+            </div>
+        );
+    }
+
+    if (tasks.length === 0) {
+        return (
+            <div className="honor-card text-center py-8">
+                <p className="text-honor-darkGray">
+                    По вашему запросу ничего не найдено
+                </p>
+            </div>
+        );
+    }
+
     return (
         <>
             <div className="flex justify-between items-center mb-4">
                 <h2 className="text-2xl font-bold">Мои задачи</h2>
-                <Link to="/tasks/create">
+                {/* <Link to="/tasks/create">
                     <Button className="honor-button-primary flex items-center">
                         <Plus
                             size={18}
@@ -80,10 +86,10 @@ const TasksTab = () => {
                         />
                         Создать задачу
                     </Button>
-                </Link>
+                </Link> */}
             </div>
 
-            {mockTasks.map((task) => (
+            {tasks.map((task) => (
                 <Card
                     key={task.id}
                     className="honor-card mb-6">
@@ -170,7 +176,7 @@ const TasksTab = () => {
                 </Card>
             ))}
 
-            {mockTasks.length === 0 && (
+            {tasks.length === 0 && (
                 <div className="text-center py-10">
                     <p className="text-honor-darkGray mb-4">
                         У вас пока нет задач

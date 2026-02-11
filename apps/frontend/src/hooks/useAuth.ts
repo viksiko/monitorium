@@ -8,18 +8,18 @@ import {
     OAuthData,
 } from '@/types/auth';
 import { useAuthStore } from '@/shared/stores/auth.store';
+import { RegisterRoleEnum } from '@monorepo/types';
 
 export const useRegister = () => {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: (
-            data: RegisterData,
-        ): Promise<{ data: { data: AuthResponse } }> =>
+        mutationFn: (data: RegisterData): Promise<{ data: RegisterData }> =>
             api.post('/api/v1/auth/register', data),
+
         // onSuccess: (response) => {
-        //     localStorage.setItem('token', response.data.data.token);
-        //     queryClient.setQueryData(['user'], response.data.data.user);
+        //   localStorage.setItem('token', response.data.data.token);
+        //   queryClient.setQueryData(['user'], response.data.data.user);
         // },
     });
 };
@@ -34,12 +34,13 @@ export const useLogin = () => {
         ): Promise<{ data: { data: AuthResponse } }> =>
             api.post('/api/v1/auth/login', data),
         onSuccess: (response) => {
-            // localStorage.setItem('token', response.data.data.accessToken);
             const { accessToken, userProfile } = response.data.data;
 
-            // 🔑 сохраняем accessToken в Zustand
+            if (!accessToken || !userProfile) {
+                throw new Error('Login failed: invalid response');
+            }
+
             setAccessToken(accessToken);
-            queryClient.setQueryData(['user'], userProfile);
         },
     });
 };
@@ -59,12 +60,27 @@ export const useOAuthLogin = () => {
     });
 };
 
-export const useUser = () =>
-    useQuery({
+export const useUser = () => {
+    const token = useAuthStore((s) => s.accessToken);
+
+    return useQuery({
         queryKey: ['user'],
+        queryFn: async () => {
+            const { data } = await api.get('/api/v1/users/profile');
+            return data.data;
+        },
+        enabled: !!token,
         retry: false,
-        staleTime: Infinity,
+        staleTime: 5 * 60 * 1000,
     });
+};
+
+// export const useUser = () =>
+//     useQuery({
+//         queryKey: ['user'],
+//         retry: false,
+//         staleTime: Infinity,
+//     });
 
 // Пока не используется, возможно можно будет переделать по refresh
 // export const useUser = () => {
@@ -87,7 +103,8 @@ export const useLogout = () => {
             api.post('/api/v1/auth/logout').then(() => undefined),
         onSuccess: () => {
             logoutStore();
-            queryClient.setQueryData(['user'], null);
+            // queryClient.setQueryData(['user'], null);
+            queryClient.removeQueries({ queryKey: ['user'] });
             queryClient.clear();
         },
     });

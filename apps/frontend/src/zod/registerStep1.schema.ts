@@ -23,7 +23,7 @@ export const registerStep1Schema = z
             })
             .refine(
                 (password) =>
-                    /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password),
+                    /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(password),
                 {
                     message:
                         'Пароль должен содержать хотя бы один специальный символ',

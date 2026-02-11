@@ -7,13 +7,9 @@ interface TaskStatusBadgeProps {
 
 const STATUS_CONFIG: Record<TaskStatus, { label: string; className: string }> =
     {
-        DELIVERED: {
-            label: 'Доставлено',
-            className: 'bg-purple-100 text-purple-800',
-        },
         PLANNED: {
             label: 'Запланировано',
-            className: 'bg-gray-100 text-gray-800',
+            className: 'bg-orange-100 text-orange-800',
         },
         IN_PROGRESS: {
             label: 'В процессе',

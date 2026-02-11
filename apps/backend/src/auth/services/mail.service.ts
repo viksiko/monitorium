@@ -19,51 +19,70 @@ export class MailService {
         });
     }
 
-    async sendVerificationEmail(
-        recipientEmail, // почта пользователя, потом добавить в 'to'
-        activationLink,
+    async sendVerificationCode(
+        recipientEmail: string,
+        code: string,
     ): Promise<boolean> {
-        const verificationUrl = `${process.env.API_URL}/api/v1/auth/confirm-registration?token=${activationLink}`;
-
         const mailOptions = {
             from: `"МОНИТОРИУМ" <${process.env.EMAIL_USER}>`,
-            to: `${process.env.EMAIL_USER}`,
-            subject: 'Подтверждение регистрации',
+            to: `${process.env.EMAIL_USER}`, // заменить на recipientEmail
+            subject: 'Код подтверждения регистрации',
             html: `
-                <div style="font-family: sans-serif; line-height: 1.5; color: #333;">
-                    <h1 style="color: #2c3e50;">Подтверждение регистрации</h1>
-                    <p>Добро пожаловать!</p>
-                    <p>Пожалуйста, перейдите по ссылке ниже, чтобы подтвердить ваш адрес электронной почты в системе <strong>"МОНИТОРИУМ"</strong></p>
-                    <p style="margin: 20px 0;">
-                        <a href="${verificationUrl}" 
-                        style="background-color: #007bff; color: white; padding: 12px 20px; text-decoration: none; border-radius: 5px; display: inline-block;">
-                        Подтвердить регистрацию
-                        </a>
-                    </p>
-                    <p style="font-size: 0.9em; color: #666;">
-                        Срок действия этой ссылки <strong>24 часа</strong>.
-                    </p>
-                    <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;" />
-                    <p style="font-size: 0.8em; color: #999;">
-                        Если вы не регистрировались, просто проигнорируйте это письмо.
-                    </p>
+            <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+                <h2 style="color: #2c3e50; margin-bottom: 10px;">
+                    Подтверждение регистрации
+                </h2>
+
+                <p>Здравствуйте!</p>
+
+                <p>
+                    Для завершения регистрации в системе 
+                    <strong>«МОНИТОРИУМ»</strong> введите следующий код:
+                </p>
+
+                <div style="
+                    font-size: 28px;
+                    font-weight: bold;
+                    letter-spacing: 6px;
+                    text-align: center;
+                    margin: 20px 0;
+                    padding: 15px;
+                    background-color: #f4f6f8;
+                    border-radius: 6px;
+                ">
+                    ${code}
                 </div>
-            `,
+
+                <p style="font-size: 0.95em;">
+                    Код действителен в течение <strong>5 минут</strong>.
+                </p>
+
+                <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;" />
+
+                <p style="font-size: 0.85em; color: #777;">
+                    Если вы не регистрировались в системе «МОНИТОРИУМ», 
+                    просто проигнорируйте это письмо.
+                </p>
+            </div>
+        `,
         };
 
         try {
             await this.transporter.sendMail(mailOptions);
-            logger.info(`The email has been sent - ${process.env.EMAIL_USER}`, {
+
+            logger.info(`Verification code email sent to ${recipientEmail}`, {
                 category: 'email',
-                operation: 'sendVerificationEmail',
+                operation: 'sendVerificationCode',
             });
+
             return true;
         } catch (error) {
-            logger.error('Error sending email', {
+            logger.error('Error sending verification code email', {
                 category: 'email',
-                operation: 'sendVerificationEmail',
+                operation: 'sendVerificationCode',
                 error: error instanceof Error ? error.message : error,
             });
+
             return false;
         }
     }

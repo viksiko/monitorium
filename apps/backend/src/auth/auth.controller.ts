@@ -1,26 +1,19 @@
 import { UserProfile } from '@monorepo/types';
-import {
-    Body,
-    Controller,
-    Get,
-    Post,
-    Query,
-    Req,
-    Res,
-    UseGuards,
-} from '@nestjs/common';
+import { Body, Controller, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { ApiOperation, ApiQuery, ApiResponse } from '@nestjs/swagger';
+import { ApiOperation, ApiResponse } from '@nestjs/swagger';
 import {
     AUTH_CONFLICT_RESPONSE,
     FORGOT_PASSWORD_SUCCESS_RESPONSE,
     INVALID_RESET_PASSWORD_TOKEN_RESPONSE,
-    INVALID_TOKEN_RESPONSE,
+    INVALID_VERIFICATION_CODE_RESPONSE,
     LOGIN_VALIDATION_ERROR_RESPONSE,
     LOGOUT_SUCCESS_RESPONSE,
     REFRESH_INVALID,
     REFRESH_SUCCESS_RESPONSE,
     REGISTRATION_CONFIRMED_RESPONSE,
+    REPRESENTATIVE_REQUEST_CREATED_RESPONSE,
+    REPRESENTATIVE_VALIDATION_ERROR_RESPONSE,
     RESET_PASSWORD_CHANGED,
     TOO_MANY_REQUESTS_RESPONSE,
     USER_CONFLICT_RESPONSE,
@@ -34,11 +27,14 @@ import {
     DATABASE_ERROR_RESPONSE,
     SERVER_ERROR_RESPONSES_REGISTR,
 } from '@src/constants/swagger/shared-responses.swagger';
+import { User } from '@src/types/user';
 import { Request, Response } from 'express';
 import { AuthService } from './auth.service';
+import { СonfirmRegistration } from './dto/confirmRegistration';
 import { ForgotPasswordDto } from './dto/forgotPassword.dto';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
+import { RepresentativeRequestDto } from './dto/representativeRequest.dto';
 import { ResetPasswordDto } from './dto/resetPassword.dto';
 import { CustomThrottlerGuard } from './guards/custom-throttler.guard';
 
@@ -53,15 +49,40 @@ export class AuthController {
     ) {}
 
     @Post('register')
-    @ApiOperation({ summary: 'Регистрация нового пользователя' })
+    @ApiOperation({ summary: 'Регистрация нового пользователя (Шаг 1)' })
     @ApiResponse(USER_REGISTER_SUCCESS_RESPONSE)
     @ApiResponse(VALIDATION_ERROR_RESPONSE)
     @ApiResponse(USER_CONFLICT_RESPONSE)
     @ApiResponse(SERVER_ERROR_RESPONSES_REGISTR)
-    async register(
-        @Body() registerDto: RegisterDto,
-    ): Promise<{ message: string }> {
+    async register(@Body() registerDto: RegisterDto): Promise<User> {
+        // const isRepresentative = registerDto.type === RegisterRoleEnum.REPRESENTATIVE;
         return this.authService.register(registerDto);
+    }
+
+    @Post('confirm-registration')
+    @ApiOperation({
+        summary: 'Подтверждение регистрации по коду (Шаг 2)',
+    })
+    @ApiResponse(REGISTRATION_CONFIRMED_RESPONSE)
+    @ApiResponse(INVALID_VERIFICATION_CODE_RESPONSE)
+    @ApiResponse(DATABASE_ERROR_RESPONSE)
+    async confirmRegistration(
+        @Body() dto: СonfirmRegistration,
+    ): Promise<{ message: string }> {
+        return await this.authService.confirmRegistration(dto);
+    }
+
+    @Post('representative-request')
+    @ApiOperation({
+        summary: 'Отправка заявки представителя власти на рассмотрение (Шаг 3)',
+    })
+    @ApiResponse(REPRESENTATIVE_REQUEST_CREATED_RESPONSE)
+    @ApiResponse(REPRESENTATIVE_VALIDATION_ERROR_RESPONSE)
+    @ApiResponse(DATABASE_ERROR_RESPONSE)
+    async representativeRequest(
+        @Body() dto: RepresentativeRequestDto,
+    ): Promise<{ message: string }> {
+        return await this.authService.representativeRequest(dto);
     }
 
     @Post('login')
@@ -136,36 +157,40 @@ export class AuthController {
         return await this.authService.resetPassword(resetPasswordDto);
     }
 
-    @Get('confirm-registration')
-    @ApiOperation({ summary: 'Подтверждение регистрации' })
-    @ApiOperation({ summary: 'Подтверждение регистрации по токену из Email' })
-    @ApiResponse(REGISTRATION_CONFIRMED_RESPONSE)
-    @ApiResponse(INVALID_TOKEN_RESPONSE)
-    @ApiResponse(DATABASE_ERROR_RESPONSE)
-    @ApiQuery({
-        name: 'token',
-        description: 'Токен подтверждения регистрации, отправленный на email',
-        required: true,
-        type: String,
-        example:
-            '/api/v1/auth/confirm?token=ee4340b9-0fe0-4c49-983d-2cd9283d0c29',
-    })
-    async confirmRegistration(
-        @Query('token') token: string,
-        @Res() res: Response,
-    ): Promise<void> {
-        try {
-            await this.authService.confirmRegistration(token);
+    // Старый способ подтверждения регистрации по токену из email, пока не используется, возможно можно будет переделать по refresh
 
-            return res.redirect(
-                `${process.env.VITE_FRONTEND_URL}/confirm-registration`,
-            );
-        } catch {
-            return res.redirect(
-                `${process.env.VITE_FRONTEND_URL}/confirm-registration-failed`,
-            );
-        }
-    }
+    // @Get('confirm-registration')
+    // @ApiOperation({
+    //     summary: 'Подтверждение регистрации !!! НЕ ИСПОЛЬЗУЕТСЯ !!!',
+    // })
+    // @ApiOperation({ summary: 'Подтверждение регистрации по токену из Email' })
+    // @ApiResponse(REGISTRATION_CONFIRMED_RESPONSE)
+    // @ApiResponse(INVALID_TOKEN_RESPONSE)
+    // @ApiResponse(DATABASE_ERROR_RESPONSE)
+    // @ApiQuery({
+    //     name: 'token',
+    //     description: 'Токен подтверждения регистрации, отправленный на email',
+    //     required: true,
+    //     type: String,
+    //     example:
+    //         '/api/v1/auth/confirm?token=ee4340b9-0fe0-4c49-983d-2cd9283d0c29',
+    // })
+    // async confirmRegistration(
+    //     @Query('token') token: string,
+    //     @Res() res: Response,
+    // ): Promise<void> {
+    //     try {
+    //         await this.authService.confirmRegistration(token);
+
+    //         return res.redirect(
+    //             `${process.env.VITE_FRONTEND_URL}/confirm-registration`,
+    //         );
+    //     } catch {
+    //         return res.redirect(
+    //             `${process.env.VITE_FRONTEND_URL}/confirm-registration-failed`,
+    //         );
+    //     }
+    // }
 
     // @Get('cookie')
     // testCookie(@Res({ passthrough: true }) response: Response) {

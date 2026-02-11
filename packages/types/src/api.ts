@@ -3,4 +3,5 @@ export interface UserProfile {
     email: string;
     phone: string;
     role: string;
+    isRepresentative: boolean;
 }
