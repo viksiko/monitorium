@@ -1,0 +1,28 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Launch App (first run)",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8080",
+      "webRoot": "${workspaceFolder}/apps/frontend",
+      "preLaunchTask": "Start app (first run)"
+    },
+    {
+      "name": "Launch App",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8080",
+      "webRoot": "${workspaceFolder}/apps/frontend",
+      "preLaunchTask": "Start app"
+    },
+    {
+      "name": "Launch App (Chrome, no preLaunch)",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8080",
+      "webRoot": "${workspaceFolder}/apps/frontend"
+    }
+  ]
+}
