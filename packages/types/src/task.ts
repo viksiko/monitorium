@@ -28,7 +28,7 @@ export interface TaskStage {
     title: string;
     date: string; // или Date, если будет преобразование
     createdAt: string; // или Date
-    completed: boolean;
+    isCompleted: boolean;
     updatedAt: string; // или Date
 }
 

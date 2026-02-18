@@ -9,6 +9,8 @@ export const api = axios.create({
 
 // Автоматически добавляем токен к запросам
 api.interceptors.request.use((config) => {
+    // console.log('BASE URL:', import.meta.env.VITE_API_URL); // разобраться почему undefined
+
     const token = useAuthStore.getState().accessToken;
 
     if (token) {

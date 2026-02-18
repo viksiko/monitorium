@@ -45,18 +45,16 @@ model User {
   // Связь с заданиями
   taskComments TaskComment[]
 
-  // 📝 Созданные задачи
+  // Созданные задачи
   authoredTasks Task[] @relation("AuthoredTasks")
 
-  // 📥 Назначенные задачи
+  // Назначенные задачи
   assignedTasks Task[] @relation("AssignedTasks")
 
-  tasks Task[]
-
-  // 🔔 Я подписался
+  // Я подписался
   subscriptions Subscription[] @relation("UserSubscriptions")
 
-  // 👥 На меня подписались
+  // На меня подписались
   subscribers Subscription[] @relation("UserSubscribers")
 
   @@map("users")
@@ -89,20 +87,20 @@ model Task {
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
   taskFiles TaskFile[]
-  user      User?      @relation(fields: [userId], references: [id])
-  userId    String?
+
 
   @@map("tasks")
 }
 
 // Этапе заданий
 model TaskStage {
-  id        String   @id @default(cuid())
-  taskId    String
-  title     String
-  date      DateTime
-  task      Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
-  createdAt DateTime @default(now())
+  id          String   @id @default(cuid())
+  taskId      String
+  title       String
+  date        DateTime
+  isCompleted Boolean  @default(false)
+  task        Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
 
   @@map("task_stages")
 }
@@ -145,8 +143,8 @@ model RepresentativeProfile {
 
 // Таблица для подписок
 model Subscription {
-  id               String   @id @default(cuid())
-  createdAt        DateTime @default(now())
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
 
   subscriberId String
   subscriber   User   @relation("UserSubscriptions", fields: [subscriberId], references: [id], onDelete: Cascade)

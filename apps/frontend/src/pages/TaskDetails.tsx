@@ -4,15 +4,7 @@ import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuthStore } from '@/shared/stores/auth.store';
 import { Task } from '@monorepo/types';
-import {
-    Calendar,
-    CircleChevronLeft,
-    Clock,
-    Eye,
-    MapPin,
-    MessageSquare,
-    ThumbsUp,
-} from 'lucide-react';
+import { Calendar, Check, CircleChevronLeft, Clock, Eye, MapPin, MessageSquare, ThumbsUp } from 'lucide-react';
 import { Link, useParams } from 'react-router-dom';
 import Loader from '@/components/ui/loader';
 import { Badge } from '@/components/ui/badge';
@@ -53,11 +45,7 @@ const TaskDetails = () => {
     const accessToken = useAuthStore((state) => state.accessToken);
     const { taskId } = useParams<{ taskId: string }>();
 
-    const {
-        data: task,
-        loading,
-        error,
-    } = useAuthorizedFetch<Task>(`/api/v1/tasks/${taskId}`, accessToken);
+    const { data: task, loading, error } = useAuthorizedFetch<Task>(`/api/v1/tasks/${taskId}`, accessToken);
 
     if (loading) {
         return (
@@ -118,13 +106,9 @@ const TaskDetails = () => {
                                         key={task.id}
                                         className="honor-card">
                                         <div className="flex justify-between items-start mb-4">
-                                            <h2 className="text-xl font-bold">
-                                                {task.title}
-                                            </h2>
+                                            <h2 className="text-xl font-bold">{task.title}</h2>
                                             <div className="flex items-center">
-                                                <TaskStatusBadge
-                                                    status={task.status}
-                                                />
+                                                <TaskStatusBadge status={task.status} />
                                             </div>
                                         </div>
 
@@ -187,48 +171,43 @@ const TaskDetails = () => {
                                                 className="mr-1"
                                             />
                                             <span>
-                                                До{' '}
-                                                {new Date(
-                                                    task.desiredResolutionDate,
-                                                ).toLocaleDateString('ru-RU')}
+                                                До {new Date(task.desiredResolutionDate).toLocaleDateString('ru-RU')}
                                             </span>
                                         </div>
 
                                         <div className="mb-4">
-                                            <p className="text-honor-darkGray mb-2">
-                                                {task.problemDescription}
-                                            </p>
-                                            <p className="text-sm font-medium">
-                                                Решение:{' '}
-                                                {task.possibleSolutions}
-                                            </p>
+                                            <p className="text-honor-darkGray mb-2">{task.problemDescription}</p>
+                                            <p className="text-sm font-medium">Решение: {task.possibleSolutions}</p>
                                         </div>
 
                                         <div className="mb-4">
-                                            <h3 className="text-lg font-semibold mb-2">
-                                                Этапы выполнения
-                                            </h3>
+                                            <h3 className="text-lg font-semibold mb-2">Этапы выполнения</h3>
                                             <div className="space-y-2">
                                                 {task.stages.map((stage) => (
                                                     <div
                                                         key={stage.id}
                                                         className="flex items-center">
                                                         <div
-                                                            className={`h-4 w-4 rounded-full mr-3 ${stage.completed ? 'bg-honor-blue' : 'border border-honor-darkGray'}`}></div>
+                                                            className={`h-4 w-4 flex items-center justify-center rounded-full mr-3 cursor-pointer transition-all ${
+                                                                stage.isCompleted
+                                                                    ? 'bg-honor-blue'
+                                                                    : 'border border-honor-darkGray'
+                                                            }`}>
+                                                            {stage.isCompleted && (
+                                                                <Check
+                                                                    size={10}
+                                                                    className="text-white"
+                                                                />
+                                                            )}
+                                                        </div>
                                                         <div className="flex-1">
                                                             <div className="flex justify-between">
                                                                 <p
-                                                                    className={`${stage.completed ? 'font-medium' : 'text-honor-darkGray'}`}>
-                                                                    {
-                                                                        stage.title
-                                                                    }
+                                                                    className={`${stage.isCompleted ? 'font-medium' : 'text-honor-darkGray'}`}>
+                                                                    {stage.title}
                                                                 </p>
                                                                 <p className="text-xs text-honor-darkGray">
-                                                                    {new Date(
-                                                                        stage.date,
-                                                                    ).toLocaleDateString(
-                                                                        'ru-RU',
-                                                                    )}
+                                                                    {new Date(stage.date).toLocaleDateString('ru-RU')}
                                                                 </p>
                                                             </div>
                                                         </div>
@@ -241,9 +220,7 @@ const TaskDetails = () => {
                                             <div className="flex space-x-4">
                                                 <div className="flex items-center space-x-1 text-honor-darkGray">
                                                     <ThumbsUp size={18} />
-                                                    <span>
-                                                        {task.likesCount}
-                                                    </span>
+                                                    <span>{task.likesCount}</span>
                                                 </div>
                                                 <div className="flex items-center space-x-1 text-honor-darkGray">
                                                     <MessageSquare size={18} />
@@ -251,9 +228,7 @@ const TaskDetails = () => {
                                                 </div>
                                                 <div className="flex items-center space-x-1 text-honor-darkGray">
                                                     <Eye size={18} />
-                                                    <span>
-                                                        {task.viewsCount}
-                                                    </span>
+                                                    <span>{task.viewsCount}</span>
                                                 </div>
                                             </div>
                                             {/* <span className="text-sm text-honor-darkGray">
@@ -269,12 +244,7 @@ const TaskDetails = () => {
                                                         size={16}
                                                         className="inline mr-1"
                                                     />
-                                                    Создано{' '}
-                                                    {new Date(
-                                                        task.createdAt,
-                                                    ).toLocaleDateString(
-                                                        'ru-RU',
-                                                    )}
+                                                    Создано {new Date(task.createdAt).toLocaleDateString('ru-RU')}
                                                 </span>
                                             </div>
                                         </div>
