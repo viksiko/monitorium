@@ -1,28 +1,11 @@
 import { TaskListItem } from '@monorepo/types';
-import {
-    Body,
-    Controller,
-    Delete,
-    Get,
-    Param,
-    Post,
-    Req,
-    UseGuards,
-} from '@nestjs/common';
-import {
-    ApiHeader,
-    ApiOperation,
-    ApiParam,
-    ApiResponse,
-} from '@nestjs/swagger';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Req, UseGuards } from '@nestjs/common';
+import { ApiHeader, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
 import { Task, TaskStage, User } from '@prisma/client';
 import { AdminGuard } from '@src/auth/guards/admin.guard';
 import { JwtAuthGuard } from '@src/auth/guards/jwt-auth.guard';
 import { HEADERS_AUTHORIZATION } from '@src/constants/swagger/api-headers.swagger';
-import {
-    PARAM_TASK_ID,
-    PARAM_TASK_ID_STAGE,
-} from '@src/constants/swagger/api-param.swagger';
+import { PARAM_TASK_ID, PARAM_TASK_ID_STAGE } from '@src/constants/swagger/api-param.swagger';
 import {
     AUTHENTICATION_ERROR_RESPONSES,
     DATABASE_ERROR_RESPONSE,
@@ -36,11 +19,13 @@ import {
     GET_ALL_TASKS_SUCCESS_RESPONSE,
     GET_TASK_BY_ID,
     GET_TASK_STAGES_BY_TASK,
+    NO_TASK_ACCESS_RESPONSE,
     TASK_DELETE_SUCCESS_RESPONSE,
     TASK_NOT_FOUND_RESPONSE,
 } from '@src/constants/swagger/task-responses.swagger';
 import { CreateTaskStageDto } from './dto/create-task-stage.dto';
 import { CreateTaskDto } from './dto/create-task.dto';
+import { UpdateTaskDto } from './dto/update-task.dto';
 import { TaskService } from './task.service';
 
 @UseGuards(JwtAuthGuard)
@@ -59,11 +44,7 @@ export class TaskController {
     @ApiOperation({ summary: 'Создать новое задание' })
     @ApiResponse(CREATE_TASK_SUCCESS_RESPONSE)
     @ApiResponse(CREATE_TASK_VALIDATION_ERROR_RESPONSE)
-    async createTask(
-        @Req() req: Request & { user: User },
-        @Body() dto: CreateTaskDto,
-    ): Promise<Task> {
-        console.log(req.user);
+    async createTask(@Req() req: Request & { user: User }, @Body() dto: CreateTaskDto): Promise<Task> {
         return await this.taskService.createTask(req.user.id, dto);
     }
 
@@ -81,13 +62,10 @@ export class TaskController {
     // Получение всех задач избирателя или представителя власти
     @Get('user-tasks')
     @ApiOperation({
-        summary:
-            '  Получить задания избирателя или представителя власти в зависимости от роли',
+        summary: '  Получить задания избирателя или представителя власти в зависимости от роли',
     })
     @ApiResponse(GET_ALL_TASKS_BY_USER)
-    async getTasksForRepresentative(
-        @Req() req: Request & { user: User },
-    ): Promise<TaskListItem[] | null> {
+    async getTasksForRepresentative(@Req() req: Request & { user: User }): Promise<TaskListItem[] | null> {
         const user = req.user;
         return await this.taskService.getTasksByUser(user);
     }
@@ -99,8 +77,8 @@ export class TaskController {
     })
     @ApiResponse(GET_TASK_BY_ID)
     @ApiParam(PARAM_TASK_ID)
-    findOne(@Param('id') id: string): Promise<Task | null> {
-        return this.taskService.findOne(id);
+    findOneTaskById(@Param('id') id: string): Promise<Task | null> {
+        return this.taskService.findOneTaskById(id);
     }
 
     // // Обновление задания
@@ -135,10 +113,7 @@ export class TaskController {
     @ApiResponse(TASK_NOT_FOUND_RESPONSE)
     @ApiResponse(CREATE_TASK_STAGES_VALIDATION_ERROR_RESPONSE)
     @ApiResponse(CREATE_TASK_STAGES_SUCCESS_RESPONSE)
-    async addStage(
-        @Param('taskId') taskId: string,
-        @Body() dto: CreateTaskStageDto,
-    ): Promise<TaskStage> {
+    async addStage(@Param('taskId') taskId: string, @Body() dto: CreateTaskStageDto): Promise<TaskStage> {
         return await this.taskService.addStage(taskId, dto);
     }
 
@@ -150,9 +125,24 @@ export class TaskController {
     })
     @ApiResponse(GET_TASK_STAGES_BY_TASK)
     @ApiResponse(TASK_NOT_FOUND_RESPONSE)
-    async getStages(
-        @Param('taskId') taskId: string,
-    ): Promise<TaskStage[] | null> {
+    async getStages(@Param('taskId') taskId: string): Promise<TaskStage[] | null> {
         return await this.taskService.getStages(taskId);
+    }
+
+    // Обновление задания
+    @Patch(':id')
+    @ApiOperation({
+        summary: 'Обновить данные задачи',
+    })
+    @ApiResponse(CREATE_TASK_SUCCESS_RESPONSE)
+    @ApiResponse(NO_TASK_ACCESS_RESPONSE)
+    @ApiResponse(TASK_NOT_FOUND_RESPONSE)
+    @ApiParam(PARAM_TASK_ID)
+    async updateTask(
+        @Param('id') id: string,
+        @Body() dto: UpdateTaskDto,
+        @Req() req: Request & { user: User },
+    ): Promise<Task> {
+        return await this.taskService.updateTask(id, dto, req.user);
     }
 }

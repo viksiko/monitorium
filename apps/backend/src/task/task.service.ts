@@ -1,11 +1,13 @@
 import { TaskListItem } from '@monorepo/types';
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { Task, TaskStage, User } from '@prisma/client';
 import { TASK_MESSAGES } from '@src/constants/api-messages.constants';
 import { logger } from '@src/logger/winston.logger';
 import { PrismaService } from '@src/prisma/prisma.service';
+import { UpdateTaskData } from '@src/types/task';
 import { CreateTaskStageDto } from './dto/create-task-stage.dto';
 import { CreateTaskDto } from './dto/create-task.dto';
+import { UpdateTaskDto } from './dto/update-task.dto';
 import { mapTaskListItemToDto } from './task.mapper';
 
 @Injectable()
@@ -28,9 +30,7 @@ export class TaskService {
                 }
 
                 if (assignee.role !== 'REPRESENTATIVE') {
-                    throw new Error(
-                        'Task can be assigned only to representative',
-                    );
+                    throw new Error('Task can be assigned only to representative');
                 }
             }
 
@@ -98,9 +98,7 @@ export class TaskService {
     }
 
     async getTasksByUser(user: User): Promise<TaskListItem[]> {
-        const where = user.isRepresentative
-            ? { assigneeId: user.id }
-            : { authorId: user.id };
+        const where = user.isRepresentative ? { assigneeId: user.id } : { authorId: user.id };
 
         try {
             const tasks = await this.prisma.task.findMany({
@@ -127,25 +125,26 @@ export class TaskService {
             // Используем ваш маппер
             return tasks.map(mapTaskListItemToDto);
         } catch (error) {
-            logger.error(
-                'Failed when getting tasks for representative or voter',
-                {
-                    category: 'TaskService',
-                    operation: 'getTasksByUser',
-                    error: error instanceof Error ? error.message : error,
-                },
-            );
+            logger.error('Failed when getting tasks for representative or voter', {
+                category: 'TaskService',
+                operation: 'getTasksByUser',
+                error: error instanceof Error ? error.message : error,
+            });
 
             throw error;
         }
     }
 
-    async findOne(id: string): Promise<Task | null> {
+    async findOneTaskById(id: string): Promise<Task | null> {
         try {
             return this.prisma.task.findUnique({
                 where: { id },
                 include: {
-                    stages: true,
+                    stages: {
+                        orderBy: {
+                            date: 'asc', // сортировка по возрастанию
+                        },
+                    },
                     comments: true,
                     taskFiles: true,
                 },
@@ -185,10 +184,7 @@ export class TaskService {
 
     /**Этапы заданий**/
     // Проверка, существует ли задача и добавление этапа
-    async addStage(
-        taskId: string,
-        dto: CreateTaskStageDto,
-    ): Promise<TaskStage> {
+    async addStage(taskId: string, dto: CreateTaskStageDto): Promise<TaskStage> {
         try {
             // Проверяем, что задача существует
             const task = await this.prisma.task.findUnique({
@@ -247,5 +243,82 @@ export class TaskService {
 
             throw error;
         }
+    }
+
+    async updateTask(id: string, dto: UpdateTaskDto, user: User): Promise<Task> {
+        const task = await this.prisma.task.findUnique({
+            where: { id },
+            include: { stages: true },
+        });
+
+        if (!task) {
+            throw new NotFoundException(TASK_MESSAGES.NOT_FOUND);
+        }
+
+        if (task.assigneeId !== user.id) {
+            throw new ForbiddenException(TASK_MESSAGES.NO_ACCESS);
+        }
+
+        const data: UpdateTaskData = {
+            possibleSolutions: dto.possibleSolutions,
+            desiredResolutionDate: dto.desiredResolutionDate,
+            status: dto.status,
+        };
+
+        // удаление этапов
+        if (dto.deletedStageIds?.length) {
+            await this.prisma.taskStage.deleteMany({
+                where: {
+                    id: { in: dto.deletedStageIds },
+                    taskId: task.id,
+                },
+            });
+        }
+
+        // Обновление этапов
+        if (dto.stages) {
+            for (const stage of dto.stages) {
+                const isTempId = stage.id?.startsWith('temp');
+                if (!isTempId) {
+                    // Обновляем существующий этап
+                    await this.prisma.taskStage.updateMany({
+                        where: {
+                            id: stage.id,
+                            taskId: task.id,
+                        },
+                        data: {
+                            title: stage.title,
+                            date: new Date(stage.date),
+                            isCompleted: stage.isCompleted,
+                        },
+                    });
+                } else {
+                    // Создаем новый этап
+                    await this.prisma.taskStage.create({
+                        data: {
+                            title: stage.title,
+                            date: new Date(stage.date),
+                            taskId: task.id,
+                            isCompleted: stage.isCompleted,
+                        },
+                    });
+                }
+            }
+        }
+
+        // Обновляем саму задачу
+        return await this.prisma.task.update({
+            where: { id },
+            data,
+            include: {
+                stages: {
+                    orderBy: {
+                        date: 'asc',
+                    },
+                },
+                comments: true,
+                taskFiles: true,
+            },
+        });
     }
 }
