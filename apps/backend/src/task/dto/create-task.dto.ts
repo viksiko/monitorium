@@ -1,14 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import {
-    IsArray,
-    IsDate,
-    IsNotEmpty,
-    IsOptional,
-    IsString,
-    MinLength,
-    ValidateNested,
-} from 'class-validator';
+import { IsArray, IsDate, IsNotEmpty, IsOptional, IsString, MinLength, ValidateNested } from 'class-validator';
 import { CreateTaskStageDto } from './create-task-stage.dto';
 
 export class CreateTaskDto {
@@ -28,16 +20,14 @@ export class CreateTaskDto {
     @MinLength(2, { message: 'Описание должно быть не менее 2 символов' })
     @IsNotEmpty({ message: 'Описание не может быть пустым' })
     @ApiProperty({
-        example:
-            'Протекает труба на втором этаже, вода капает на лестничную площадку',
+        example: 'Протекает труба на втором этаже, вода капает на лестничную площадку',
     })
     problemDescription: string;
 
     @IsOptional()
     @IsString({ message: 'Пути решения должны быть строкой' })
     @ApiProperty({
-        example:
-            'Необходимо заменить участок трубы или установить запорную арматуру',
+        example: 'Необходимо заменить участок трубы или установить запорную арматуру',
     })
     possibleSolutions?: string;
 
@@ -48,6 +38,13 @@ export class CreateTaskDto {
     desiredResolutionDate?: Date;
 
     @IsOptional()
+    @IsString({ message: 'Идентификатор получателя должны быть строкой' })
+    @ApiProperty({
+        example: 'cmlrse2jc000984jf1xkxuvdr',
+    })
+    assigneeId?: string;
+
+    @IsOptional()
     @IsArray({ message: 'Этапы должны быть массивом' })
     @ValidateNested({ each: true })
     @Type(() => CreateTaskStageDto)
@@ -55,8 +52,8 @@ export class CreateTaskDto {
         type: [CreateTaskStageDto],
         required: false,
     })
+    @ApiProperty({
+        type: [CreateTaskStageDto],
+    })
     stages?: CreateTaskStageDto[];
-
-    @IsOptional()
-    assigneeId?: string;
 }

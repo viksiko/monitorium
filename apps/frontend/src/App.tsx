@@ -39,6 +39,8 @@ import PrivateRoute from './guards/PrivateRoute';
 import PublicRoute from './guards/PublicRoute';
 import { TaskDetails } from './components/dashboard';
 import ScrollToTop from './components/ui/ScrollToTop';
+import { RoleRoute } from './guards/RoleRoute';
+import TaskEdit from './pages/TaskEdit';
 
 const queryClient = new QueryClient();
 
@@ -121,6 +123,13 @@ const App = () => (
                                         path="/tasks/:taskId"
                                         element={<TaskDetails />}
                                     />
+
+                                    <Route element={<RoleRoute allowedRoles={['REPRESENTATIVE']} />}>
+                                        <Route
+                                            path="/tasks/:taskId/edit"
+                                            element={<TaskEdit />}
+                                        />
+                                    </Route>
                                     <Route
                                         path="/balance"
                                         element={<Balance />}
