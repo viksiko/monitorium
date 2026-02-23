@@ -13,3 +13,27 @@ export const PARAM_TASK_ID_STAGE = {
     type: String,
     example: '/api/v1/tasks/{taskId}/stages',
 };
+
+export const PARAM_TASK_USER_ID = {
+    name: 'id',
+    description: 'Обязательный параметр',
+    required: true,
+    type: String,
+    example: '/api/v1/tasks/{userId}',
+};
+
+export const PARAM_POST_ID = {
+    name: 'id',
+    description: 'Обязательный параметр',
+    required: true,
+    type: String,
+    example: '/api/v1/posts/{taskId}',
+};
+
+export const PARAM_POST_USER_ID = {
+    name: 'id',
+    description: 'Обязательный параметр',
+    required: true,
+    type: String,
+    example: '/api/v1/posts/{userId}',
+};

@@ -21,12 +21,7 @@ import {
 } from '@src/constants/api-messages.constants';
 import { logger } from '@src/logger/winston.logger';
 import { PrismaService } from '@src/prisma/prisma.service';
-import {
-    User,
-    UserResponse,
-    UserWithRepresentativeProfileDto,
-    UserWithVoterProfileDto,
-} from '@src/types/user';
+import { User, UserResponse, UserWithRepresentativeProfileDto, UserWithVoterProfileDto } from '@src/types/user';
 import { generateVerificationCode } from '@src/utils/generateVerificationCode';
 import * as bcrypt from 'bcryptjs';
 
@@ -38,11 +33,7 @@ export class UserService {
         private tokenService: TokenSevice,
         private configService: ConfigService,
     ) {}
-    async getUsers(
-        role?: string,
-    ): Promise<
-        (UserWithRepresentativeProfileDto | UserWithVoterProfileDto)[] | null
-    > {
+    async getUsers(role?: string): Promise<(UserWithRepresentativeProfileDto | UserWithVoterProfileDto)[] | null> {
         try {
             // если нужны представители — отдаём расширенные данные
             if (role === 'representative') {
@@ -127,6 +118,7 @@ export class UserService {
                     role: true,
                     isRepresentative: true,
                     isVerified: true,
+                    isActive: true,
                     representativeProfile: {
                         select: {
                             id: true,
@@ -179,9 +171,7 @@ export class UserService {
                 operation: 'getCurrentUser',
                 error: error instanceof Error ? error.message : error,
             });
-            throw new InternalServerErrorException(
-                'Ошибка при получении данных пользователя',
-            );
+            throw new InternalServerErrorException('Ошибка при получении данных пользователя');
         }
     }
 
@@ -198,6 +188,7 @@ export class UserService {
                         role: true,
                         isRepresentative: true,
                         isVerified: true,
+                        isActive: true,
                         // tasks: true,
 
                         representativeProfile: {
@@ -334,10 +325,7 @@ export class UserService {
         }
 
         // Проверка пароля
-        const isPasswordValid = await bcrypt.compare(
-            password,
-            user.password as string,
-        );
+        const isPasswordValid = await bcrypt.compare(password, user.password as string);
 
         if (!isPasswordValid) {
             throw new ConflictException(INVALID_CREDENTIALS_MSG);
@@ -346,9 +334,7 @@ export class UserService {
         return user;
     }
 
-    async createUser(
-        dto: RegisterDto & { isRepresentative: boolean },
-    ): Promise<User> {
+    async createUser(dto: RegisterDto & { isRepresentative: boolean }): Promise<User> {
         const { password, ...userData } = dto;
         const hashedPassword = await bcrypt.hash(password, 10);
         const rawVerifyCode = generateVerificationCode();
@@ -417,16 +403,11 @@ export class UserService {
         // 2. Отправка Email
         try {
             console.log('отрпавка Email');
-            const emailSent = await this.mailService.sendVerificationCode(
-                createdUser.email,
-                rawVerifyCode,
-            );
+            const emailSent = await this.mailService.sendVerificationCode(createdUser.email, rawVerifyCode);
 
             if (!emailSent) {
                 // Если отправка не удалась, инициируем откат через блок catch
-                throw new InternalServerErrorException(
-                    EMAIL_VERIFICATION_FAILED,
-                );
+                throw new InternalServerErrorException(EMAIL_VERIFICATION_FAILED);
             }
         } catch (error) {
             logger.error('Email verification failed', {
@@ -479,10 +460,7 @@ export class UserService {
         });
     }
 
-    async findUserByEmailOrPhone(
-        email: string,
-        phone: string,
-    ): Promise<User | null> {
+    async findUserByEmailOrPhone(email: string, phone: string): Promise<User | null> {
         try {
             return await this.prisma.user.findFirst({
                 where: {
@@ -500,10 +478,7 @@ export class UserService {
         }
     }
 
-    async deactivateUser(
-        paramId: string,
-        currentUserId: string,
-    ): Promise<{ message: string }> {
+    async deactivateUser(paramId: string, currentUserId: string): Promise<{ message: string }> {
         if (paramId !== currentUserId) {
             throw new ForbiddenException(DEACTIVATE_OWN_ACCOUNT_ONLY);
         }

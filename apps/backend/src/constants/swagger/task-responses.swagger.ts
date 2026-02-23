@@ -3,7 +3,7 @@ import { TASK_MESSAGES } from '../api-messages.constants';
 
 export const TASK_DELETE_SUCCESS_RESPONSE: ApiResponseOptions = {
     status: 200,
-    description: 'Успешное соединение',
+    description: 'Успешное удаление задания',
     schema: {
         example: {
             success: true,
@@ -260,31 +260,27 @@ export const CREATE_TASK_SUCCESS_RESPONSE: ApiResponseOptions = {
             success: true,
             statusCode: 201,
             data: {
-                success: true,
-                statusCode: 201,
-                data: {
-                    id: 'cmkv9sd0g000114jfvw2rkul3',
-                    title: 'Утечка воды в подъезде',
-                    address: 'ул. Ленина, д. 10, кв. 5',
-                    problemDescription: 'Протекает труба на втором этаже, вода капает на лестничную площадку',
-                    possibleSolutions: 'Необходимо заменить участок трубы или установить запорную арматуру',
-                    desiredResolutionDate: '2024-12-31T00:00:00.000Z',
-                    userId: 'cmkcmh53k0000f4jfuke45ev6',
-                    status: 'PLANNED',
-                    likes: 0,
-                    createdAt: '2026-01-26T14:35:48.064Z',
-                    updatedAt: '2026-01-26T14:35:48.064Z',
-                    stages: [
-                        {
-                            id: 'cmls0gpeb0001ngjfm0p4gqhx',
-                            taskId: 'cmls0gpe80000ngjfprtwsptv',
-                            title: 'Проверка труб',
-                            date: '2024-12-31T00:00:00.000Z',
-                            isCompleted: false,
-                            createdAt: '2026-02-18T12:31:11.501Z',
-                        },
-                    ],
-                },
+                id: 'cmkv9sd0g000114jfvw2rkul3',
+                title: 'Утечка воды в подъезде',
+                address: 'ул. Ленина, д. 10, кв. 5',
+                problemDescription: 'Протекает труба на втором этаже, вода капает на лестничную площадку',
+                possibleSolutions: 'Необходимо заменить участок трубы или установить запорную арматуру',
+                desiredResolutionDate: '2024-12-31T00:00:00.000Z',
+                userId: 'cmkcmh53k0000f4jfuke45ev6',
+                status: 'PLANNED',
+                likes: 0,
+                createdAt: '2026-01-26T14:35:48.064Z',
+                updatedAt: '2026-01-26T14:35:48.064Z',
+                stages: [
+                    {
+                        id: 'cmls0gpeb0001ngjfm0p4gqhx',
+                        taskId: 'cmls0gpe80000ngjfprtwsptv',
+                        title: 'Проверка труб',
+                        date: '2024-12-31T00:00:00.000Z',
+                        isCompleted: false,
+                        createdAt: '2026-02-18T12:31:11.501Z',
+                    },
+                ],
             },
         },
     },

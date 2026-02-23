@@ -1,0 +1,193 @@
+import { ApiResponseOptions } from '@nestjs/swagger';
+
+export const GET_ALL_POSTS_SUCCESS_RESPONSE: ApiResponseOptions = {
+    status: 200,
+    description: 'Возвращает все публикации из базы данных (требуются права администратора)',
+    content: {
+        'application/json': {
+            examples: {
+                TasksFound: {
+                    summary: 'Ответ со списком всех заданий',
+                    value: {
+                        success: true,
+                        statusCode: 200,
+                        data: [
+                            {
+                                id: 'cmly9x5zr0001vcjfd0r2sl2z',
+                                title: 'Отчёт о проделанной работе за январь',
+                                content: 'За январь было выполнено 12 задач, проведено 3 встречи с жителями...',
+                                publishedAt: '2026-02-22T21:42:33.047Z',
+                                authorId: 'cmly1ul430001i4jfvmfbtkog',
+                                likesCount: 0,
+                                viewsCount: 0,
+                                createdAt: '2026-02-22T21:42:33.054Z',
+                                updatedAt: '2026-02-22T21:42:33.054Z',
+                                files: [],
+                            },
+                            {
+                                id: 'cmlyy8gxn000084jf82gl1n6e',
+                                title: 'Встреча с жителями микрорайона',
+                                content: 'Вчера провел встречу с жителями микрорайона. Обсудили насущные...',
+                                publishedAt: '2026-02-22T21:42:33.047Z',
+                                authorId: 'cmlw5eb1z0000ywjfohd3nni2',
+                                likesCount: 0,
+                                viewsCount: 0,
+                                createdAt: '2026-02-22T21:42:33.054Z',
+                                updatedAt: '2026-02-22T21:42:33.054Z',
+                                files: [],
+                            },
+                        ],
+                    },
+                },
+                TasksNotFound: {
+                    summary: 'Публикации не найдены',
+                    value: {
+                        success: true,
+                        statusCode: 200,
+                        data: null,
+                    },
+                },
+            },
+        },
+    },
+};
+
+export const GET_ALL_POST_BY_USER: ApiResponseOptions = {
+    status: 200,
+    description: 'Возвращает все публикации пользователя',
+    content: {
+        'application/json': {
+            examples: {
+                TasksFound: {
+                    summary: 'Ответ со списком всех публикаций одного пользователя',
+                    value: {
+                        success: true,
+                        statusCode: 200,
+                        data: [
+                            {
+                                id: 'cmly9x5zr0001vcjfd0r2sl2z',
+                                title: 'Отчёт о проделанной работе за январь',
+                                content: 'За январь было выполнено 12 задач, проведено 3 встречи с жителями...',
+                                publishedAt: '2026-02-22T21:42:33.047Z',
+                                authorId: 'cmly1ul430001i4jfvmfbtkog',
+                                likesCount: 0,
+                                viewsCount: 0,
+                                createdAt: '2026-02-22T21:42:33.054Z',
+                                updatedAt: '2026-02-22T21:42:33.054Z',
+                                files: [],
+                            },
+                            {
+                                id: 'cmly9x5zr0001vcjfd0r2sl2z',
+                                title: 'Встреча с жителями микрорайона',
+                                content: 'Вчера провел встречу с жителями микрорайона. Обсудили насущные...',
+                                publishedAt: '2026-02-22T21:42:33.047Z',
+                                authorId: 'cmlw5eb1z0000ywjfohd3nni2',
+                                likesCount: 0,
+                                viewsCount: 0,
+                                createdAt: '2026-02-22T21:42:33.054Z',
+                                updatedAt: '2026-02-22T21:42:33.054Z',
+                                files: [],
+                            },
+                        ],
+                    },
+                },
+                TasksNotFound: {
+                    summary: 'Публикацц не найдены',
+                    value: {
+                        success: true,
+                        statusCode: 200,
+                        data: null,
+                    },
+                },
+            },
+        },
+    },
+};
+
+export const GET_POST_BY_ID: ApiResponseOptions = {
+    status: 200,
+    description: 'Возвращает одну публикацию по id',
+    content: {
+        'application/json': {
+            examples: {
+                TasksFound: {
+                    summary: 'Ответ со одиной публикацей по id',
+                    value: {
+                        success: true,
+                        statusCode: 200,
+                        data: {
+                            id: 'cmly9x5zr0001vcjfd0r2sl2z',
+                            title: 'Отчёт о проделанной работе за январь',
+                            content: 'За январь было выполнено 12 задач, проведено 3 встречи с жителями...',
+                            publishedAt: '2026-02-22T21:42:33.047Z',
+                            authorId: 'cmly1ul430001i4jfvmfbtkog',
+                            likesCount: 0,
+                            viewsCount: 0,
+                            createdAt: '2026-02-22T21:42:33.054Z',
+                            updatedAt: '2026-02-22T21:42:33.054Z',
+                            author: {
+                                name: 'Иван Иванов',
+                                representativeProfile: {
+                                    position: 'Депутат городской думы',
+                                },
+                            },
+                            files: [],
+                        },
+                    },
+                },
+                TasksNotFound: {
+                    summary: 'Публикация не найдена',
+                    value: {
+                        success: true,
+                        statusCode: 200,
+                        data: null,
+                    },
+                },
+            },
+        },
+    },
+};
+
+export const CREATE_POST_SUCCESS_RESPONSE: ApiResponseOptions = {
+    status: 201,
+    description: 'Успешное создание публикации',
+    schema: {
+        example: {
+            success: true,
+            statusCode: 201,
+            data: {
+                id: 'cmly9x5zr0001vcjfd0r2sl2z',
+                title: 'Отчёт о проделанной работе за январь',
+                content: 'За январь было выполнено 12 задач, проведено 3 встречи с жителями...',
+                publishedAt: '2026-02-22T21:42:33.047Z',
+                authorId: 'cmly1ul430001i4jfvmfbtkog',
+                likesCount: 0,
+                viewsCount: 0,
+                createdAt: '2026-02-22T21:42:33.054Z',
+                updatedAt: '2026-02-22T21:42:33.054Z',
+                files: [],
+            },
+        },
+    },
+};
+
+export const CREATE_POST_VALIDATION_ERROR_RESPONSE: ApiResponseOptions = {
+    status: 400,
+    description: 'Ошибка валидации данных при создании публикации',
+    schema: {
+        example: {
+            success: false,
+            statusCode: 400,
+            data: {
+                message: [
+                    'Заголовок не может быть пустым',
+                    'Заголовок должно быть не менее 2 символов',
+                    'Заголовок должно быть строкой',
+                    'Содержание не может быть пустым',
+                    'Содержание должно быть не менее 2 символов',
+                    'Содержание должно быть строкой',
+                ],
+            },
+        },
+    },
+};

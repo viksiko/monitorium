@@ -5,6 +5,7 @@ import { LoggerMiddleware } from '@shared/middleware';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
+import { PostModule } from './post/post.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { SubscriptionsModule } from './subscriptions/subscriptions.module';
 import { TaskModule } from './task/task.module';
@@ -24,6 +25,7 @@ import { UserModule } from './user/user.module';
         ]),
         TaskModule,
         SubscriptionsModule,
+        PostModule,
     ],
     controllers: [AppController],
     providers: [AppService],

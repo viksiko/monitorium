@@ -5,10 +5,11 @@ import { Task, TaskStage, User } from '@prisma/client';
 import { AdminGuard } from '@src/auth/guards/admin.guard';
 import { JwtAuthGuard } from '@src/auth/guards/jwt-auth.guard';
 import { HEADERS_AUTHORIZATION } from '@src/constants/swagger/api-headers.swagger';
-import { PARAM_TASK_ID, PARAM_TASK_ID_STAGE } from '@src/constants/swagger/api-param.swagger';
+import { PARAM_TASK_ID, PARAM_TASK_ID_STAGE, PARAM_TASK_USER_ID } from '@src/constants/swagger/api-param.swagger';
 import {
     AUTHENTICATION_ERROR_RESPONSES,
     DATABASE_ERROR_RESPONSE,
+    FORBIDDEN_RESOURCE_RESPONSE,
 } from '@src/constants/swagger/shared-responses.swagger';
 import {
     CREATE_TASK_STAGES_SUCCESS_RESPONSE,
@@ -55,19 +56,31 @@ export class TaskController {
         summary: 'Получить все задания (требуются права администратора)',
     })
     @ApiResponse(GET_ALL_TASKS_SUCCESS_RESPONSE)
-    findAll(): Promise<Task[]> {
+    @ApiResponse(FORBIDDEN_RESOURCE_RESPONSE)
+    findAll(): Promise<TaskListItem[] | null> {
         return this.taskService.findAll();
     }
 
     // Получение всех задач избирателя или представителя власти
     @Get('user-tasks')
     @ApiOperation({
-        summary: '  Получить задания избирателя или представителя власти в зависимости от роли',
+        summary: 'Получить задания избирателя или представителя власти в зависимости от роли',
     })
     @ApiResponse(GET_ALL_TASKS_BY_USER)
-    async getTasksForRepresentative(@Req() req: Request & { user: User }): Promise<TaskListItem[] | null> {
+    async getTasksByUser(@Req() req: Request & { user: User }): Promise<TaskListItem[] | null> {
         const user = req.user;
         return await this.taskService.getTasksByUser(user);
+    }
+
+    // Получение всех задач по userid
+    @Get('user/:id')
+    @ApiOperation({
+        summary: 'Получить задания избирателя или представителя власти в зависимости от ID пользователя',
+    })
+    @ApiResponse(GET_ALL_TASKS_BY_USER)
+    @ApiParam(PARAM_TASK_USER_ID)
+    async getTasksByUserId(@Param('id') id: string): Promise<TaskListItem[] | null> {
+        return await this.taskService.getTasksByUserId(id);
     }
 
     // Получение задания по ID

@@ -69,7 +69,7 @@ export class TaskService {
             console.error('Error creating task:', error);
             logger.error('Failed create task', {
                 category: 'TaskService',
-                operation: 'create',
+                operation: 'createTask',
                 error: error instanceof Error ? error.message : error,
             });
 
@@ -77,15 +77,17 @@ export class TaskService {
         }
     }
 
-    async findAll(): Promise<Task[]> {
+    async findAll(): Promise<TaskListItem[] | null> {
         try {
-            return await this.prisma.task.findMany({
+            const tasks = await this.prisma.task.findMany({
                 include: {
                     stages: true,
                     comments: true,
                     taskFiles: true,
                 },
             });
+
+            return tasks.length > 0 ? tasks.map(mapTaskListItemToDto) : null;
         } catch (error) {
             logger.error('Failed when getting the task list', {
                 category: 'TaskService',
@@ -97,7 +99,7 @@ export class TaskService {
         }
     }
 
-    async getTasksByUser(user: User): Promise<TaskListItem[]> {
+    async getTasksByUser(user: User): Promise<TaskListItem[] | null> {
         const where = user.isRepresentative ? { assigneeId: user.id } : { authorId: user.id };
 
         try {
@@ -123,11 +125,46 @@ export class TaskService {
             });
 
             // Используем ваш маппер
-            return tasks.map(mapTaskListItemToDto);
+            return tasks.length > 0 ? tasks.map(mapTaskListItemToDto) : null;
         } catch (error) {
             logger.error('Failed when getting tasks for representative or voter', {
                 category: 'TaskService',
                 operation: 'getTasksByUser',
+                error: error instanceof Error ? error.message : error,
+            });
+
+            throw error;
+        }
+    }
+
+    async getTasksByUserId(userId: string): Promise<TaskListItem[] | null> {
+        try {
+            const tasks = await this.prisma.task.findMany({
+                where: { assigneeId: userId },
+                select: {
+                    id: true,
+                    title: true,
+                    address: true,
+                    desiredResolutionDate: true,
+                    likesCount: true,
+                    viewsCount: true,
+                    status: true,
+                    createdAt: true,
+                    // Можно добавить данные об авторе, если представителю нужно их видеть
+                    // user: {
+                    //     select: {
+                    //         name: true,
+                    //     },
+                    // },
+                },
+                orderBy: { createdAt: 'desc' },
+            });
+
+            return tasks.length > 0 ? tasks.map(mapTaskListItemToDto) : null;
+        } catch (error) {
+            logger.error('Failed when getting tasks for representative or voter', {
+                category: 'TaskService',
+                operation: 'getTasksByUserId',
                 error: error instanceof Error ? error.message : error,
             });
 

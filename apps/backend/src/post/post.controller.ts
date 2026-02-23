@@ -1,0 +1,92 @@
+import { Post as IPost, PostWithoutAuthor } from '@monorepo/types';
+import { Body, Controller, Get, Param, Post, Req, UseGuards } from '@nestjs/common';
+import { ApiHeader, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
+import { User } from '@prisma/client';
+import { AdminGuard } from '@src/auth/guards/admin.guard';
+import { JwtAuthGuard } from '@src/auth/guards/jwt-auth.guard';
+import { RepresentativeGuard } from '@src/auth/guards/representative.guard';
+import { HEADERS_AUTHORIZATION } from '@src/constants/swagger/api-headers.swagger';
+import { PARAM_POST_ID, PARAM_POST_USER_ID } from '@src/constants/swagger/api-param.swagger';
+import {
+    CREATE_POST_SUCCESS_RESPONSE,
+    CREATE_POST_VALIDATION_ERROR_RESPONSE,
+    GET_ALL_POST_BY_USER,
+    GET_ALL_POSTS_SUCCESS_RESPONSE,
+    GET_POST_BY_ID,
+} from '@src/constants/swagger/post-responses.swagger';
+import {
+    AUTHENTICATION_ERROR_RESPONSES,
+    DATABASE_ERROR_RESPONSE,
+    FORBIDDEN_RESOURCE_RESPONSE,
+} from '@src/constants/swagger/shared-responses.swagger';
+import { CreatePostDto } from './dto/create-post.dto';
+import { PostService } from './post.service';
+
+@UseGuards(JwtAuthGuard)
+@ApiHeader(HEADERS_AUTHORIZATION)
+@ApiResponse(AUTHENTICATION_ERROR_RESPONSES)
+@ApiResponse(DATABASE_ERROR_RESPONSE)
+@Controller({
+    path: 'posts',
+    version: '1',
+})
+export class PostController {
+    constructor(private readonly postService: PostService) {}
+
+    // Создать публикацию (только для представителей)
+    @UseGuards(RepresentativeGuard)
+    @Post()
+    @ApiOperation({ summary: 'Создать новую публикацию в блоге' })
+    @ApiResponse(CREATE_POST_SUCCESS_RESPONSE)
+    @ApiResponse(CREATE_POST_VALIDATION_ERROR_RESPONSE)
+    createPost(@Body() dto: CreatePostDto, @Req() req: Request & { user: User }): Promise<PostWithoutAuthor> {
+        const authorId = req.user.id; // из JWT
+        return this.postService.createPost(authorId, dto);
+    }
+
+    // Все публикации (только для администраторов)
+    @UseGuards(AdminGuard)
+    @Get()
+    @ApiOperation({
+        summary: 'Получить все публикации (требуются права администратора)',
+    })
+    @ApiResponse(GET_ALL_POSTS_SUCCESS_RESPONSE)
+    @ApiResponse(FORBIDDEN_RESOURCE_RESPONSE)
+    fifindAllPostsdAll(): Promise<PostWithoutAuthor[] | null> {
+        return this.postService.findAllPosts();
+    }
+
+    // Все публикации одного пользователя (доступно всем авторизованным пользователям)
+    @Get('user/:id')
+    @ApiOperation({
+        summary: 'Получить все публикации пользователя по ID',
+    })
+    @ApiParam(PARAM_POST_USER_ID)
+    @ApiResponse(GET_ALL_POST_BY_USER)
+    findAllPostsByUserId(@Param('id') id: string): Promise<PostWithoutAuthor[] | null> {
+        return this.postService.findAllPostsByUserId(id);
+    }
+
+    // Одна публикация по ID (доступно всем авторизованным пользователям)
+    @Get(':id')
+    @ApiOperation({
+        summary: 'Получить публикацию по ID',
+    })
+    @ApiParam(PARAM_POST_ID)
+    @ApiResponse(GET_POST_BY_ID)
+    findOnePostById(@Param('id') id: string): Promise<IPost | null> {
+        return this.postService.findOnePostById(id);
+    }
+
+    // // Обновить
+    // @Patch(':id')
+    // update(@Param('id') id: string, @Body() dto: UpdatePostDto) {
+    //     return this.postService.update(id, dto);
+    // }
+
+    // // Удалить
+    // @Delete(':id')
+    // remove(@Param('id') id: string) {
+    //     return this.postService.remove(id);
+    // }
+}

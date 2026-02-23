@@ -23,9 +23,7 @@ interface Representative {
 }
 
 const RepresentativesList = () => {
-    const [representatives, setRepresentatives] = useState<Representative[]>(
-        [],
-    );
+    const [representatives, setRepresentatives] = useState<Representative[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -60,9 +58,7 @@ const RepresentativesList = () => {
     if (representatives.length === 0) {
         return (
             <div className="honor-card text-center py-8">
-                <p className="text-honor-darkGray">
-                    По вашему запросу ничего не найдено
-                </p>
+                <p className="text-honor-darkGray">По вашему запросу ничего не найдено</p>
             </div>
         );
     }
@@ -70,10 +66,9 @@ const RepresentativesList = () => {
     return (
         <div className="space-y-4">
             {representatives.map((rep) => (
-                <RepresentativeCard
-                    key={rep.id}
-                    representative={rep}
-                />
+                <div key={rep.id}>
+                    <RepresentativeCard representative={rep} />
+                </div>
             ))}
         </div>
     );

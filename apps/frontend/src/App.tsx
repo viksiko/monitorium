@@ -40,7 +40,9 @@ import PublicRoute from './guards/PublicRoute';
 import { TaskDetails } from './components/dashboard';
 import ScrollToTop from './components/ui/ScrollToTop';
 import { RoleRoute } from './guards/RoleRoute';
-import TaskEdit from './pages/TaskEdit';
+import TaskDetailsEdit from './pages/TaskDetailsEdit';
+import PostCreate from './components/representative/PostCreate';
+import PostDetails from './pages/PostDetails';
 
 const queryClient = new QueryClient();
 
@@ -66,10 +68,6 @@ const App = () => (
                                 />
                                 <Route
                                     path="/blog"
-                                    element={<Blog />}
-                                />
-                                <Route
-                                    path="/blog/:id"
                                     element={<Blog />}
                                 />
                                 <Route
@@ -123,11 +121,10 @@ const App = () => (
                                         path="/tasks/:taskId"
                                         element={<TaskDetails />}
                                     />
-
                                     <Route element={<RoleRoute allowedRoles={['REPRESENTATIVE']} />}>
                                         <Route
                                             path="/tasks/:taskId/edit"
-                                            element={<TaskEdit />}
+                                            element={<TaskDetailsEdit />}
                                         />
                                     </Route>
                                     <Route
@@ -155,6 +152,14 @@ const App = () => (
                                     <Route
                                         path="/representative/profile/:id"
                                         element={<RepresentativeProfile />}
+                                    />
+                                    <Route
+                                        path="/posts/create"
+                                        element={<PostCreate />}
+                                    />
+                                    <Route
+                                        path="/posts/:postId"
+                                        element={<PostDetails />}
                                     />
                                 </Route>
 
