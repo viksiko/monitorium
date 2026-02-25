@@ -1,15 +1,19 @@
 import { create } from 'zustand';
 
-type AuthState = {
+type AuthStatus = undefined | 'fresh' | 'unauthorized';
+
+export type AuthState = {
     accessToken: string | null;
-    setAccessToken: (token: string | null) => void;
+    status: AuthStatus;
+    setAccessToken: (token: string | null, status: AuthStatus) => void;
     logout: () => void;
 };
 
 export const useAuthStore = create<AuthState>((set) => ({
     accessToken: null,
+    status: undefined,
 
-    setAccessToken: (token) => set({ accessToken: token }),
+    setAccessToken: (accessToken, status) => set({ accessToken, status }),
 
-    logout: () => set({ accessToken: null }),
+    logout: () => set({ accessToken: null, status: 'unauthorized' }),
 }));

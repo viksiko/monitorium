@@ -10,34 +10,34 @@ type Props = {
 
 // Надо будет переделать, возможно отказаться от этого хука полностью и сделать логику в useAuth.ts
 export const AuthInit = ({ children }: Props) => {
-    const setAccessToken = useAuthStore((state) => state.setAccessToken);
+    const { accessToken, status } = useAuthStore((authState) => authState);
     const [loading, setLoading] = useState(true);
     const queryClient = useQueryClient();
 
-    useEffect(() => {
-        const refresh = async () => {
-            try {
-                const { data } = await api.post('/api/v1/auth/refresh');
-                const { accessToken } = data.data;
+    // useEffect(() => {
+    //     const refresh = async () => {
+    //         try {
+    //             const { data } = await api.post('/api/v1/auth/refresh');
+    //             const { accessToken } = data.data;
 
-                setAccessToken(accessToken);
-                // queryClient.setQueryData(['user'], userProfile);
-            } catch (err) {
-                setAccessToken(null);
-            } finally {
-                setLoading(false);
-            }
-        };
+    //             setAccessToken(accessToken, 'fresh');
+    //             // queryClient.setQueryData(['user'], userProfile);
+    //         } catch (err) {
+    //             setAccessToken(null, 'unauthorized');
+    //         } finally {
+    //             setLoading(false);
+    //         }
+    //     };
 
-        refresh();
-    }, []);
+    //     refresh();
+    // }, []);
 
-    if (loading)
-        return (
-            <>
-                <Loader />
-            </>
-        );
+    // if (loading)
+    //     return (
+    //         <>
+    //             <Loader />
+    //         </>
+    //     );
 
     return <>{children}</>;
 };
