@@ -40,12 +40,8 @@ const RepresentativeCard = ({ representative }: RepresentativeCardProps) => {
                     <div className="flex-1">
                         <div className="flex justify-between items-start">
                             <div>
-                                <h3 className="text-lg font-bold">
-                                    {representative.name}
-                                </h3>
-                                <p className="text-honor-darkGray">
-                                    {representative.role}
-                                </p>
+                                <h3 className="text-lg font-bold">{representative.name}</h3>
+                                <p className="text-honor-darkGray">{representative.role}</p>
 
                                 <div className="flex items-center space-x-4 mt-1">
                                     <div className="flex items-center text-sm text-honor-darkGray">
@@ -53,28 +49,23 @@ const RepresentativeCard = ({ representative }: RepresentativeCardProps) => {
                                             size={14}
                                             className="mr-1"
                                         />
-                                        <span>
+                                        {/* <span>
                                             {
                                                 representative
                                                     .representativeProfile
                                                     .position
                                             }
-                                        </span>
+                                        </span> */}
                                     </div>
                                     <Badge className="bg-honor-blue">
-                                        {
-                                            representative.representativeProfile
-                                                .party
-                                        }
+                                        {representative.representativeProfile.party}
                                     </Badge>
                                 </div>
                             </div>
 
                             <div className="text-lg font-bold text-honor-blue">
                                 {representative.representativeProfile.rating}
-                                <span className="text-xs text-honor-darkGray ml-1">
-                                    рейтинг
-                                </span>
+                                <span className="text-xs text-honor-darkGray ml-1">рейтинг</span>
                             </div>
                         </div>
 
@@ -86,11 +77,7 @@ const RepresentativeCard = ({ representative }: RepresentativeCardProps) => {
                                         className="text-honor-blue mr-1"
                                     />
                                     <span className="text-sm">
-                                        {
-                                            representative.representativeProfile
-                                                .tasksTotal
-                                        }{' '}
-                                        задач
+                                        {representative.representativeProfile.tasksTotal} задач
                                     </span>
                                 </div>
                                 <div className="flex items-center">
@@ -99,11 +86,7 @@ const RepresentativeCard = ({ representative }: RepresentativeCardProps) => {
                                         className="text-green-500 mr-1"
                                     />
                                     <span className="text-sm">
-                                        {
-                                            representative.representativeProfile
-                                                .tasksCompleted
-                                        }{' '}
-                                        выполнено
+                                        {representative.representativeProfile.tasksCompleted} выполнено
                                     </span>
                                 </div>
                             </div>

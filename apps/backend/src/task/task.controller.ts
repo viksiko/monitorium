@@ -16,7 +16,6 @@ import {
     CREATE_TASK_STAGES_VALIDATION_ERROR_RESPONSE,
     CREATE_TASK_SUCCESS_RESPONSE,
     CREATE_TASK_VALIDATION_ERROR_RESPONSE,
-    GET_ALL_TASKS_BY_USER,
     GET_ALL_TASKS_SUCCESS_RESPONSE,
     GET_TASK_BY_ID,
     GET_TASK_STAGES_BY_TASK,
@@ -24,6 +23,7 @@ import {
     TASK_DELETE_SUCCESS_RESPONSE,
     TASK_NOT_FOUND_RESPONSE,
 } from '@src/constants/swagger/task-responses.swagger';
+import { USER_NOT_FOUND_RESPONSE } from '@src/constants/swagger/user-responses.swagger';
 import { CreateTaskStageDto } from './dto/create-task-stage.dto';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
@@ -57,17 +57,17 @@ export class TaskController {
     })
     @ApiResponse(GET_ALL_TASKS_SUCCESS_RESPONSE)
     @ApiResponse(FORBIDDEN_RESOURCE_RESPONSE)
-    findAll(): Promise<TaskListItem[] | null> {
-        return this.taskService.findAll();
+    getAllTasks(): Promise<TaskListItem[] | null> {
+        return this.taskService.getAllTasks();
     }
 
-    // Получение всех задач избирателя или представителя власти
+    // Получение всех задач текущего пользователя
     @Get('user-tasks')
     @ApiOperation({
-        summary: 'Получить задания избирателя или представителя власти в зависимости от роли',
+        summary: 'Получить все задания текущего пользователя',
     })
-    @ApiResponse(GET_ALL_TASKS_BY_USER)
-    async getTasksByUser(@Req() req: Request & { user: User }): Promise<TaskListItem[] | null> {
+    @ApiResponse(GET_ALL_TASKS_SUCCESS_RESPONSE)
+    async getTasksByUser(@Req() req: Request & { user: User }): Promise<TaskListItem[]> {
         const user = req.user;
         return await this.taskService.getTasksByUser(user);
     }
@@ -75,11 +75,12 @@ export class TaskController {
     // Получение всех задач по userid
     @Get('user/:id')
     @ApiOperation({
-        summary: 'Получить задания избирателя или представителя власти в зависимости от ID пользователя',
+        summary: 'Получить все задания по ID пользователя',
     })
-    @ApiResponse(GET_ALL_TASKS_BY_USER)
+    @ApiResponse(GET_ALL_TASKS_SUCCESS_RESPONSE)
+    @ApiResponse(USER_NOT_FOUND_RESPONSE)
     @ApiParam(PARAM_TASK_USER_ID)
-    async getTasksByUserId(@Param('id') id: string): Promise<TaskListItem[] | null> {
+    async getTasksByUserId(@Param('id') id: string): Promise<TaskListItem[]> {
         return await this.taskService.getTasksByUserId(id);
     }
 
@@ -89,9 +90,10 @@ export class TaskController {
         summary: 'Получить задание по ID',
     })
     @ApiResponse(GET_TASK_BY_ID)
+    @ApiResponse(TASK_NOT_FOUND_RESPONSE)
     @ApiParam(PARAM_TASK_ID)
-    findOneTaskById(@Param('id') id: string): Promise<Task | null> {
-        return this.taskService.findOneTaskById(id);
+    getTaskById(@Param('id') id: string): Promise<Task> {
+        return this.taskService.getTaskById(id);
     }
 
     // // Обновление задания
@@ -138,7 +140,7 @@ export class TaskController {
     })
     @ApiResponse(GET_TASK_STAGES_BY_TASK)
     @ApiResponse(TASK_NOT_FOUND_RESPONSE)
-    async getStages(@Param('taskId') taskId: string): Promise<TaskStage[] | null> {
+    async getStages(@Param('taskId') taskId: string): Promise<TaskStage[]> {
         return await this.taskService.getStages(taskId);
     }
 

@@ -33,7 +33,7 @@ const PostCreate = () => {
             toast({
                 title: 'Публикация создана',
                 description: 'Ваша публикация успешно создана и опубликована',
-                variant: 'default',
+                variant: 'success',
             });
 
             setNewPostTitle('');

@@ -7,8 +7,6 @@ export class RepresentativeGuard implements CanActivate {
     canActivate(context: ExecutionContext): boolean {
         const request = context.switchToHttp().getRequest();
 
-        console.log(' request.user', request.user);
-
         if (
             request.user?.role !== Role.REPRESENTATIVE ||
             !request.user?.isRepresentative ||

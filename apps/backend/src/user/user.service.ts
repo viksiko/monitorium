@@ -18,6 +18,7 @@ import {
     EMAIL_VERIFICATION_FAILED,
     INVALID_CREDENTIALS_MSG,
     USER_DEACTIVATED_SUCCESS,
+    USER_NOT_FOUND,
 } from '@src/constants/api-messages.constants';
 import { logger } from '@src/logger/winston.logger';
 import { PrismaService } from '@src/prisma/prisma.service';
@@ -33,72 +34,21 @@ export class UserService {
         private tokenService: TokenSevice,
         private configService: ConfigService,
     ) {}
-    async getUsers(role?: string): Promise<(UserWithRepresentativeProfileDto | UserWithVoterProfileDto)[] | null> {
+
+    async getAllUsers(): Promise<User[]> {
         try {
-            // если нужны представители — отдаём расширенные данные
-            if (role === 'representative') {
-                return this.prisma.user.findMany({
-                    where: {
-                        role: Role.REPRESENTATIVE,
-                        isVerified: true,
-                        isActive: true,
-                    },
-                    select: {
-                        id: true,
-                        name: true,
-                        email: true,
-                        phone: true,
-                        district: true,
-                        isVerified: true,
-                        representativeProfile: {
-                            select: {
-                                id: true,
-                                position: true,
-                                party: true,
-                                bio: true,
-                                rating: true,
-                                tasksTotal: true,
-                                tasksCompleted: true,
-                                attendance: true,
-                                lastActivity: true,
-                            },
-                        },
-                    },
-                    orderBy: {
-                        name: 'asc', // Сортировка по алфавиту
-                    },
-                });
-            }
-
-            if (role === 'voter')
-                return this.prisma.user.findMany({
-                    where: {
-                        role: 'VOTER',
-                        isActive: true,
-                    },
-                    select: {
-                        id: true,
-                        name: true,
-                        email: true,
-                        district: true,
-                        isVerified: true,
-                        voterProfile: {
-                            select: {
-                                id: true,
-                                userId: true,
-                            },
-                        },
-                    },
-                    orderBy: {
-                        name: 'asc', // Сортировка по алфавиту
-                    },
-                });
-
-            return null;
+            return await this.prisma.user.findMany({
+                omit: {
+                    password: true, // исключаем password
+                },
+                orderBy: {
+                    name: 'asc',
+                },
+            });
         } catch (error) {
-            logger.error('Failed to find users', {
+            logger.error('Failed to find user by email', {
                 category: 'database',
-                operation: 'getUsers',
+                operation: 'getAllUsers',
                 error: error instanceof Error ? error.message : error,
             });
 
@@ -106,7 +56,77 @@ export class UserService {
         }
     }
 
-    async getUserProfile(userId: string): Promise<UserResponse | null> {
+    async getUsersByFilter(query: {
+        role?: string;
+    }): Promise<UserWithRepresentativeProfileDto[] | UserWithVoterProfileDto[]> {
+        try {
+            const { role } = query;
+
+            return await this.prisma.user.findMany({
+                where: {
+                    role: role === 'representative' ? Role.REPRESENTATIVE : Role.VOTER,
+                },
+                select: {
+                    id: true,
+                    name: true,
+                    email: true,
+                    phone: true,
+                    district: true,
+                    isVerified: true,
+                    representativeProfile: {
+                        select: {
+                            id: true,
+                            position: true,
+                            party: true,
+                            bio: true,
+                            rating: true,
+                            tasksTotal: true,
+                            tasksCompleted: true,
+                            attendance: true,
+                            lastActivity: true,
+                        },
+                    },
+                    voterProfile: {
+                        select: {
+                            id: true,
+                            userId: true,
+                        },
+                    },
+                },
+                orderBy: { name: 'asc' },
+            });
+        } catch (error) {
+            logger.error('Failed to find users', {
+                category: 'database',
+                operation: 'getUsersByFilter',
+                error: error instanceof Error ? error.message : error,
+            });
+
+            throw error;
+        }
+    }
+
+    async getUserByEmail(email: string): Promise<User> {
+        try {
+            const user = await this.prisma.user.findUnique({
+                where: { email },
+            });
+
+            if (!user) throw new NotFoundException(USER_NOT_FOUND);
+
+            return user;
+        } catch (error) {
+            logger.error('Failed to find user by email', {
+                category: 'database',
+                operation: 'getUserByEmail',
+                error: error instanceof Error ? error.message : error,
+            });
+
+            throw error;
+        }
+    }
+
+    async getUserProfile(userId: string): Promise<UserResponse> {
         try {
             const user = await this.prisma.user.findUnique({
                 where: { id: userId },
@@ -135,7 +155,7 @@ export class UserService {
                     voterProfile: {
                         select: {
                             id: true,
-                            balance: true,
+                            // balance: true, // надо будет ли это? может, не стоит отдавать баланс в этом эндпоинте?
                         },
                     },
                     subscriptions: {
@@ -162,84 +182,13 @@ export class UserService {
                 },
             });
 
-            if (!user) return null;
+            if (!user) throw new NotFoundException(USER_NOT_FOUND);
 
             return user;
         } catch (error) {
             logger.error('Failed to get current user', {
                 category: 'database',
-                operation: 'getCurrentUser',
-                error: error instanceof Error ? error.message : error,
-            });
-            throw new InternalServerErrorException('Ошибка при получении данных пользователя');
-        }
-    }
-
-    async findUserById(id: string): Promise<UserResponse | null> {
-        try {
-            return (
-                (await this.prisma.user.findUnique({
-                    where: { id },
-                    select: {
-                        id: true,
-                        name: true,
-                        email: true,
-                        phone: true,
-                        role: true,
-                        isRepresentative: true,
-                        isVerified: true,
-                        isActive: true,
-                        // tasks: true,
-
-                        representativeProfile: {
-                            select: {
-                                id: true,
-                                position: true,
-                                party: true,
-                                rating: true,
-                                bio: true,
-                                tasksTotal: true,
-                                tasksCompleted: true,
-                                attendance: true,
-                                lastActivity: true,
-                            },
-                        },
-
-                        voterProfile: {
-                            select: {
-                                id: true,
-                                balance: true,
-                            },
-                        },
-
-                        subscriptions: {
-                            select: {
-                                id: true,
-                                createdAt: true,
-                                representative: {
-                                    select: {
-                                        id: true,
-                                        name: true,
-
-                                        representativeProfile: {
-                                            select: {
-                                                id: true,
-                                                position: true,
-                                                party: true,
-                                                rating: true,
-                                            },
-                                        },
-                                    },
-                                },
-                            },
-                        },
-                    },
-                })) || null
-            );
-        } catch (error) {
-            logger.error('Failed to find user by id', {
-                category: 'database',
-                operation: 'findUserById',
+                operation: 'getUserProfile',
                 error: error instanceof Error ? error.message : error,
             });
 
@@ -247,17 +196,71 @@ export class UserService {
         }
     }
 
-    async findUserByEmail(email: string): Promise<User | null> {
+    async getUserById(id: string): Promise<UserResponse> {
         try {
-            return (
-                (await this.prisma.user.findUnique({
-                    where: { email },
-                })) || null
-            );
+            const user = await this.prisma.user.findUnique({
+                where: { id },
+                select: {
+                    id: true,
+                    name: true,
+                    email: true,
+                    phone: true,
+                    role: true,
+                    isRepresentative: true,
+                    isVerified: true,
+                    isActive: true,
+
+                    representativeProfile: {
+                        select: {
+                            id: true,
+                            position: true,
+                            party: true,
+                            rating: true,
+                            bio: true,
+                            tasksTotal: true,
+                            tasksCompleted: true,
+                            attendance: true,
+                            lastActivity: true,
+                        },
+                    },
+
+                    voterProfile: {
+                        select: {
+                            id: true,
+                            // balance: true, // надо будет ли это? может, не стоит отдавать баланс в этом эндпоинте?
+                        },
+                    },
+
+                    subscriptions: {
+                        select: {
+                            id: true,
+                            createdAt: true,
+                            representative: {
+                                select: {
+                                    id: true,
+                                    name: true,
+                                    representativeProfile: {
+                                        select: {
+                                            id: true,
+                                            position: true,
+                                            party: true,
+                                            rating: true,
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            });
+
+            if (!user) throw new NotFoundException(USER_NOT_FOUND);
+
+            return user;
         } catch (error) {
-            logger.error('Failed to find user by email', {
+            logger.error('Failed to find user by id', {
                 category: 'database',
-                operation: 'findUserByEmail',
+                operation: 'getUserById',
                 error: error instanceof Error ? error.message : error,
             });
 

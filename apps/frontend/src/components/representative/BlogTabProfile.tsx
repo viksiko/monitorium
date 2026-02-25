@@ -35,7 +35,7 @@ const BlogTabProfile = ({ userId }: { userId: string }) => {
         );
     }
 
-    if (posts === null || posts.length === 0) {
+    if (posts.length === 0) {
         return (
             <div className="honor-card text-center py-8">
                 <p className="text-honor-darkGray">Публикации отсутсвуют</p>

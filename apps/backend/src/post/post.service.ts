@@ -1,5 +1,6 @@
 import { Post, PostWithoutAuthor } from '@monorepo/types';
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { POST_NOT_FOUND, USER_NOT_FOUND } from '@src/constants/api-messages.constants';
 import { logger } from '@src/logger/winston.logger';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreatePostDto } from './dto/create-post.dto';
@@ -34,7 +35,7 @@ export class PostService {
         }
     }
 
-    async findAllPosts(): Promise<PostWithoutAuthor[] | null> {
+    async getAllPosts(): Promise<PostWithoutAuthor[]> {
         try {
             const posts = await this.prisma.post.findMany({
                 orderBy: { publishedAt: 'desc' },
@@ -43,11 +44,11 @@ export class PostService {
                 },
             });
 
-            return posts.length > 0 ? posts : null;
+            return posts;
         } catch (error) {
             logger.error('Failed when getting the post list', {
                 category: 'PostService',
-                operation: 'findAllPosts',
+                operation: 'getAllPosts',
                 error: error instanceof Error ? error.message : error,
             });
 
@@ -55,27 +56,36 @@ export class PostService {
         }
     }
 
-    async findAllPostsByUserId(userId: string): Promise<PostWithoutAuthor[] | null> {
+    async getPostsByUserId(userId: string): Promise<PostWithoutAuthor[]> {
         try {
+            const user = await this.prisma.user.findUnique({
+                where: { id: userId },
+                select: { id: true },
+            });
+
+            if (!user) {
+                throw new NotFoundException(USER_NOT_FOUND);
+            }
+
             const posts = await this.prisma.post.findMany({
                 where: { authorId: userId },
                 orderBy: { publishedAt: 'desc' },
                 include: {
                     files: true,
-                    author: {
-                        select: {
-                            id: true,
-                            name: true,
-                        },
-                    },
+                    // author: {
+                    //     select: {
+                    //         id: true,
+                    //         name: true,
+                    //     },
+                    // },
                 },
             });
 
-            return posts.length > 0 ? posts : null;
+            return posts;
         } catch (error) {
             logger.error('Failed when getting posts by user id', {
                 category: 'PostService',
-                operation: 'findAllPostsByUserId',
+                operation: 'getPostsByUserId',
                 error: error instanceof Error ? error.message : error,
             });
 
@@ -83,9 +93,9 @@ export class PostService {
         }
     }
 
-    async findOnePostById(id: string): Promise<Post | null> {
+    async getPostById(id: string): Promise<Post> {
         try {
-            return await this.prisma.post.findUnique({
+            const post = await this.prisma.post.findUnique({
                 where: { id },
                 include: {
                     author: {
@@ -101,10 +111,14 @@ export class PostService {
                     files: true,
                 },
             });
+
+            if (!post) throw new NotFoundException(POST_NOT_FOUND);
+
+            return post;
         } catch (error) {
             logger.error('Failed when getting the post by id', {
                 category: 'PostService',
-                operation: 'findOnePostById',
+                operation: 'getPostById',
                 error: error instanceof Error ? error.message : error,
             });
 

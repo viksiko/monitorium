@@ -13,12 +13,14 @@ import {
     GET_ALL_POST_BY_USER,
     GET_ALL_POSTS_SUCCESS_RESPONSE,
     GET_POST_BY_ID,
+    POST_NOT_FOUND_RESPONSE,
 } from '@src/constants/swagger/post-responses.swagger';
 import {
     AUTHENTICATION_ERROR_RESPONSES,
     DATABASE_ERROR_RESPONSE,
     FORBIDDEN_RESOURCE_RESPONSE,
 } from '@src/constants/swagger/shared-responses.swagger';
+import { USER_NOT_FOUND_RESPONSE } from '@src/constants/swagger/user-responses.swagger';
 import { CreatePostDto } from './dto/create-post.dto';
 import { PostService } from './post.service';
 
@@ -52,30 +54,32 @@ export class PostController {
     })
     @ApiResponse(GET_ALL_POSTS_SUCCESS_RESPONSE)
     @ApiResponse(FORBIDDEN_RESOURCE_RESPONSE)
-    fifindAllPostsdAll(): Promise<PostWithoutAuthor[] | null> {
-        return this.postService.findAllPosts();
+    getAllPosts(): Promise<PostWithoutAuthor[] | null> {
+        return this.postService.getAllPosts();
     }
 
     // Все публикации одного пользователя (доступно всем авторизованным пользователям)
     @Get('user/:id')
     @ApiOperation({
-        summary: 'Получить все публикации пользователя по ID',
+        summary: 'Получить все публикации пользователя по ID пользователя',
     })
     @ApiParam(PARAM_POST_USER_ID)
+    @ApiResponse(USER_NOT_FOUND_RESPONSE)
     @ApiResponse(GET_ALL_POST_BY_USER)
-    findAllPostsByUserId(@Param('id') id: string): Promise<PostWithoutAuthor[] | null> {
-        return this.postService.findAllPostsByUserId(id);
+    getPostsByUserId(@Param('id') id: string): Promise<PostWithoutAuthor[] | null> {
+        return this.postService.getPostsByUserId(id);
     }
 
     // Одна публикация по ID (доступно всем авторизованным пользователям)
     @Get(':id')
     @ApiOperation({
-        summary: 'Получить публикацию по ID',
+        summary: 'Получить публикацию по ID публикации',
     })
     @ApiParam(PARAM_POST_ID)
+    @ApiResponse(POST_NOT_FOUND_RESPONSE)
     @ApiResponse(GET_POST_BY_ID)
-    findOnePostById(@Param('id') id: string): Promise<IPost | null> {
-        return this.postService.findOnePostById(id);
+    getPostById(@Param('id') id: string): Promise<IPost | null> {
+        return this.postService.getPostById(id);
     }
 
     // // Обновить

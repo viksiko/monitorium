@@ -10,6 +10,8 @@ import { useToast } from '@/components/ui/use-toast';
 import { useApi } from '@/hooks/useApi';
 import { Post } from '@monorepo/types';
 
+// Компонент не используется, вместо него используется PostCreate в pages
+
 const PostCreate = () => {
     const { toast } = useToast();
     const [newPostTitle, setNewPostTitle] = useState('');

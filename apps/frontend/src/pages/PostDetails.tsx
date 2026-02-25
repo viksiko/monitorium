@@ -18,8 +18,6 @@ const PostDetails = () => {
     const { postId } = useParams<{ postId: string }>();
     const { data: post, loading, error } = useAuthorizedFetch<Post>(`/api/v1/posts/${postId}`, accessToken);
 
-    console.log('post', post);
-
     if (loading) {
         return (
             <Layout>

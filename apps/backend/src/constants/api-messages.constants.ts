@@ -55,6 +55,8 @@ export const TASK_MESSAGES = {
     // Дополнительные
     EMPTY_LIST: 'Список заданий пуст',
     INVALID_STATUS: 'Неверный статус задания',
+    ASSIGNEE_NOT_FOUND: 'Исполнитель не найден',
+    TASK_ASSIGNEE_MUST_BE_REPRESENTATIVE: 'Исполнитель должен быть представителем',
 } as const;
 
 export const VERIFICATION_MESSAGES = {
@@ -65,4 +67,8 @@ export const VERIFICATION_MESSAGES = {
 
 export const REPRESENTATIVE_REQUEST_CREATED = 'Заявка на представителя успешно создана';
 
-export const USER_NOT_FOUND_MSG = 'Пользователь не найден';
+export const USER_NOT_FOUND = 'Пользователь не найден';
+
+export const POST_NOT_FOUND = 'Публикация не найдена';
+
+export const INVALID_ROLE = 'Недопустимая роль';

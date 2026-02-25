@@ -15,7 +15,7 @@ import {
     REGISTRATION_CONFIRMED_MESSAGE,
     REPRESENTATIVE_REQUEST_CREATED,
     USER_ALREADY_EXISTS,
-    USER_NOT_FOUND_MSG,
+    USER_NOT_FOUND,
     VERIFICATION_MESSAGES,
 } from '@src/constants/api-messages.constants';
 import { logger } from '@src/logger/winston.logger';
@@ -156,7 +156,7 @@ export class AuthService {
 
     // запрос на восстановление пароля
     async forgotPassword(dto: ForgotPasswordDto): Promise<{ message: string }> {
-        const user = await this.userService.findUserByEmail(dto.email);
+        const user = await this.userService.getUserByEmail(dto.email);
 
         // Если юзера нет, мы не кидаем ошибку, а просто имитируем успех
         if (!user) {
@@ -281,7 +281,7 @@ export class AuthService {
             const user = await this.prisma.user.findUnique({
                 where: { id: userId },
             });
-            if (!user) throw new NotFoundException(USER_NOT_FOUND_MSG);
+            if (!user) throw new NotFoundException(USER_NOT_FOUND);
 
             await this.prisma.$transaction(async (tx) => {
                 const updatedUser = await tx.user.update({
@@ -312,7 +312,7 @@ export class AuthService {
             });
 
             if (!user) {
-                throw new NotFoundException(USER_NOT_FOUND_MSG);
+                throw new NotFoundException(USER_NOT_FOUND);
             }
 
             // Обновляем пользователя + создаём профиль представителя в транзакции

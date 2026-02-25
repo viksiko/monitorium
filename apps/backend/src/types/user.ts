@@ -231,7 +231,7 @@ export interface UserResponse {
 
     voterProfile?: {
         id: string;
-        balance: number;
+        // balance: number;
     } | null;
 
     subscriptions: Array<{

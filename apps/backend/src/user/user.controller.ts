@@ -1,40 +1,27 @@
-import {
-    Controller,
-    Get,
-    Param,
-    Patch,
-    Query,
-    Req,
-    UseGuards,
-} from '@nestjs/common';
-import {
-    ApiHeader,
-    ApiOperation,
-    ApiParam,
-    ApiQuery,
-    ApiResponse,
-} from '@nestjs/swagger';
+import { Controller, Get, Param, Patch, Query, Req, UseGuards } from '@nestjs/common';
+import { ApiHeader, ApiOperation, ApiParam, ApiQuery, ApiResponse } from '@nestjs/swagger';
+import { AdminGuard } from '@src/auth/guards/admin.guard';
 import { JwtAuthGuard } from '@src/auth/guards/jwt-auth.guard';
 import { HEADERS_AUTHORIZATION } from '@src/constants/swagger/api-headers.swagger';
 import {
     AUTHENTICATION_ERROR_RESPONSES,
     DATABASE_ERROR_RESPONSE,
+    FORBIDDEN_RESOURCE_RESPONSE,
 } from '@src/constants/swagger/shared-responses.swagger';
 import {
     DEACTIVATE_OWN_ACCOUNT_ERROR_RESPONSE,
     GET_CURRENT_USER_RESPONSE,
     USER_ACCOUNT_DEACTIVATED_RESPONSE,
+    USER_BAD_REQUEST_RESPONSE,
+    USER_FILTER_LIST_SUCCESS_RESPONSE,
     USER_LIST_SUCCESS_RESPONSE,
     USER_NOT_FOUND_RESPONSE,
 } from '@src/constants/swagger/user-responses.swagger';
-import {
-    User,
-    UserResponse,
-    UserWithRepresentativeProfileDto,
-    UserWithVoterProfileDto,
-} from '@src/types/user';
+import { User, UserResponse, UserWithRepresentativeProfileDto, UserWithVoterProfileDto } from '@src/types/user';
+import { UsersFilterDto } from './dto/UsersFilterDto';
 import { UserService } from './user.service';
 
+@UseGuards(JwtAuthGuard)
 @Controller({
     path: 'users',
     version: '1',
@@ -42,56 +29,72 @@ import { UserService } from './user.service';
 export class UserController {
     constructor(private readonly userService: UserService) {}
 
-    // Получить всех пользователей или одного по email
+    // Получить всех пользователей
+    @UseGuards(AdminGuard)
     @Get()
-    @UseGuards(JwtAuthGuard)
-    @ApiOperation({ summary: 'Получить всех пользователей или найти по email' })
+    @ApiOperation({ summary: 'Получить всех пользователей (требуются права администратора)' })
     @ApiHeader(HEADERS_AUTHORIZATION)
-    @ApiQuery({
-        name: 'email',
-        description: 'Опциональный email для поиска конкретного пользователя',
-        required: false,
-        type: String,
-        example: '/api/v1/users?email=user1@test.test',
-    })
+    @ApiResponse(USER_LIST_SUCCESS_RESPONSE)
+    @ApiResponse(FORBIDDEN_RESOURCE_RESPONSE)
+    @ApiResponse(AUTHENTICATION_ERROR_RESPONSES)
+    @ApiResponse(DATABASE_ERROR_RESPONSE)
+    async getAllUsers(): Promise<User[]> {
+        return this.userService.getAllUsers();
+    }
+
+    // Получить всех пользователей по фильтру
+    @Get('filter')
+    @ApiOperation({ summary: 'Получить пользователей по параметрам фильтрации' })
+    @ApiHeader(HEADERS_AUTHORIZATION)
     @ApiQuery({
         name: 'role',
         description: 'Фильтр по роли (voter | representative)',
         required: false,
-        example: '/api/v1/users?role=representative',
+        example: '/api/v1/users/filter?role=representative',
     })
-    @ApiResponse(USER_LIST_SUCCESS_RESPONSE)
+    @ApiResponse(USER_FILTER_LIST_SUCCESS_RESPONSE)
     @ApiResponse(AUTHENTICATION_ERROR_RESPONSES)
+    @ApiResponse(USER_BAD_REQUEST_RESPONSE)
     @ApiResponse(DATABASE_ERROR_RESPONSE)
-    async getUsers(
-        @Query('email') email?: string,
-        @Query('role') role?: string,
-    ): Promise<
-        (UserWithRepresentativeProfileDto | UserWithVoterProfileDto)[] | null
-    > {
-        // if (email) {
-        //     return this.userService.findUserByEmail(email);
-        // }
-        return this.userService.getUsers(role);
+    async getUsersByFilter(
+        @Query() query: UsersFilterDto,
+    ): Promise<UserWithRepresentativeProfileDto[] | UserWithVoterProfileDto[]> {
+        return this.userService.getUsersByFilter(query);
     }
+
+    // // Получить всех пользователей или одного по email
+    // @Get()
+    // @ApiOperation({ summary: 'Найти пользователей по email' })
+    // @ApiHeader(HEADERS_AUTHORIZATION)
+    // @ApiQuery({
+    //     name: 'email',
+    //     description: 'Опциональный email для поиска конкретного пользователя',
+    //     required: false,
+    //     type: String,
+    //     example: '/api/v1/users/search?email=user@test.com',
+    // })
+    // @ApiResponse(USER_LIST_SUCCESS_RESPONSE)
+    // @ApiResponse(AUTHENTICATION_ERROR_RESPONSES)
+    // @ApiResponse(USER_NOT_FOUND_RESPONSE)
+    // @ApiResponse(DATABASE_ERROR_RESPONSE)
+    // async getUserByEmail(@Query('email') email: string): Promise<User> {
+    //     return this.userService.getUserByEmail(email);
+    // }
 
     // получить данные текущего пользователя
     @Get('profile')
-    @UseGuards(JwtAuthGuard)
     @ApiOperation({ summary: 'Получить профиль текущего пользователя' })
     @ApiHeader(HEADERS_AUTHORIZATION)
     @ApiResponse(GET_CURRENT_USER_RESPONSE)
     @ApiResponse(AUTHENTICATION_ERROR_RESPONSES)
+    @ApiResponse(USER_NOT_FOUND_RESPONSE)
     @ApiResponse(DATABASE_ERROR_RESPONSE)
-    async getUserProfile(
-        @Req() req: Request & { user: { id: string } },
-    ): Promise<UserResponse | null> {
+    async getUserProfile(@Req() req: Request & { user: { id: string } }): Promise<UserResponse> {
         return this.userService.getUserProfile(req.user.id);
     }
 
     // Получить пользователя по id
     @Get(':id')
-    @UseGuards(JwtAuthGuard)
     @ApiOperation({ summary: 'Получить пользователя по Id' })
     @ApiHeader(HEADERS_AUTHORIZATION)
     @ApiParam({
@@ -101,15 +104,16 @@ export class UserController {
         type: String,
         example: '/api/v1/users/cmik6d2sm0000mojf4oz1jraa',
     })
+    @ApiResponse(GET_CURRENT_USER_RESPONSE)
     @ApiResponse(USER_NOT_FOUND_RESPONSE)
     @ApiResponse(AUTHENTICATION_ERROR_RESPONSES)
+    @ApiResponse(USER_NOT_FOUND_RESPONSE)
     @ApiResponse(DATABASE_ERROR_RESPONSE)
-    async findUserById(@Param('id') id: string): Promise<UserResponse | null> {
-        return this.userService.findUserById(id);
+    async getUserById(@Param('id') id: string): Promise<UserResponse> {
+        return this.userService.getUserById(id);
     }
 
     // Деактивация пользователя
-    @UseGuards(JwtAuthGuard)
     @Patch(':id/deactivate')
     @ApiOperation({ summary: 'Деакивация (удаление) пользователя' })
     @ApiHeader(HEADERS_AUTHORIZATION)
@@ -126,10 +130,7 @@ export class UserController {
     @ApiResponse(DATABASE_ERROR_RESPONSE)
 
     // @Roles('Admin', 'Self') // Проверяем, что запрос делает либо админ, либо сам пользователь
-    async deactivateUser(
-        @Param('id') id: string,
-        @Req() req: Request & { user: User },
-    ): Promise<{ message: string }> {
+    async deactivateUser(@Param('id') id: string, @Req() req: Request & { user: User }): Promise<{ message: string }> {
         return await this.userService.deactivateUser(id, req.user.id);
     }
 }

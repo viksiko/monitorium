@@ -44,7 +44,7 @@ const TasksTabProfile = ({ userId }: { userId: string }) => {
         );
     }
 
-    if (tasks === null || tasks.length === 0) {
+    if (tasks.length === 0) {
         return (
             <div className="honor-card text-center py-8">
                 <p className="text-honor-darkGray">Задачи отсутствуют</p>

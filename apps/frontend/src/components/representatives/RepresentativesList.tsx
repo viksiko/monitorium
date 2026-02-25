@@ -29,7 +29,7 @@ const RepresentativesList = () => {
     useEffect(() => {
         const fetchRepresentatives = async () => {
             try {
-                const response = await api.get('/api/v1/users', {
+                const response = await api.get('/api/v1/users/filter', {
                     params: {
                         role: 'representative',
                     },
