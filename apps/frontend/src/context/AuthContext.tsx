@@ -1,20 +1,16 @@
-import { createContext, useContext, ReactNode } from 'react';
-import {
-    useUser,
-    useLogin,
-    useRegister,
-    useLogout,
-    useOAuthLogin,
-} from '@/hooks/useAuth';
+import { createContext, useContext, ReactNode, useEffect, useCallback } from 'react';
+import { useUser, useLogin, useRegister, useLogout, useOAuthLogin, useRefreshToken } from '@/hooks/useAuth';
 import { User, RegisterData, LoginData, OAuthData } from '@/types/auth';
 import { useToast } from '@/components/ui/use-toast';
 import { useQueryClient } from '@tanstack/react-query';
 import { RegisterRoleEnum } from '@monorepo/types';
+import { useAuthStore } from '@/shared/stores/auth.store';
 
 interface AuthContextType {
     user: User | null | undefined;
     loading: boolean;
     isAuthenticated: boolean;
+    refreshToken: () => Promise<void>;
     login: (email: string, password: string) => Promise<void>;
     register: (data: RegisterData) => Promise<any>;
     logout: () => void;
@@ -27,16 +23,49 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider: React.FC<{ children: ReactNode }> = ({
-    children,
-}) => {
-    const { data: user, isLoading: loading } = useUser();
+export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+    const { accessToken, status, setAccessToken } = useAuthStore((authState) => authState);
+    const refreshTokenMutation = useRefreshToken();
+    const { data: user, isLoading: loading, isError, error } = useUser();
     const queryClient = useQueryClient();
     const loginMutation = useLogin();
     const registerMutation = useRegister();
     const oauthMutation = useOAuthLogin();
     const logoutMutation = useLogout();
     const { toast } = useToast();
+
+    // Используем для первоначального запроса токена при загрузке страницы.
+    // Потому что accessToken может быть undefined и токен просрочен.
+    useEffect(() => {
+        refreshToken();
+    }, []);
+
+    const refreshToken = useCallback(async () => {
+        if (status === 'unauthorized' || (status === 'fresh' && accessToken)) return;
+
+        if (status && user) return;
+
+        // Если есть ошибка получения профиля пользователя, то токен ВОЗМОЖНО просрочен.
+
+        // TODO: Сделать проверку актуальности токена по специальному методу проверки токена, а
+        // не по ошибкам получения юзера (потому что они могут быть иного рода)
+
+        try {
+            await refreshTokenMutation.mutateAsync();
+            toast({
+                title: 'Токен обновлен',
+                description: 'Токен успешно обновлен.',
+                variant: 'success',
+            });
+        } catch (error) {
+            console.error('Refresh token failed', error);
+            toast({
+                title: 'Ошибка обновления токена',
+                description: 'Произошла ошибка при обновлении токена.',
+                variant: 'destructive',
+            });
+        }
+    }, [status, accessToken, user, refreshTokenMutation, toast]);
 
     const login = async (email: string, password: string) => {
         try {
@@ -49,9 +78,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
         } catch (error: any) {
             toast({
                 title: 'Ошибка входа',
-                description:
-                    error.response?.data?.message ||
-                    'Неверный email или пароль.',
+                description: error.response?.data?.message || 'Неверный email или пароль.',
                 variant: 'destructive',
             });
             throw error;
@@ -64,8 +91,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
 
             toast({
                 title: 'Код подтверждения отправлен',
-                description:
-                    'Мы отправили код подтверждения на указанный вами email',
+                description: 'Мы отправили код подтверждения на указанный вами email',
                 variant: 'success',
             });
             return result;
@@ -73,9 +99,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
             console.error('Ошибка регистрации:', error);
             toast({
                 title: 'Ошибка регистрации',
-                description:
-                    error.response?.data?.data.message ||
-                    'Произошла ошибка при регистрации.',
+                description: error.response?.data?.data.message || 'Произошла ошибка при регистрации.',
                 variant: 'destructive',
             });
             throw error;
@@ -135,6 +159,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
                 user,
                 loading,
                 isAuthenticated: !!user,
+                refreshToken,
                 login,
                 register,
                 logout,
@@ -150,9 +175,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
 };
 
 export const useAuth = () => {
-    const context = useContext(AuthContext);
-    if (context === undefined) {
+    const auth = useContext(AuthContext);
+    if (auth === undefined) {
         throw new Error('useAuth must be used within an AuthProvider');
     }
-    return context;
+    return auth;
 };

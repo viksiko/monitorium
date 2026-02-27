@@ -1,8 +1,8 @@
-import { useUser } from '@/hooks/useAuth';
+import { useAuth } from '@/context/AuthContext';
 import { Navigate, Outlet } from 'react-router-dom';
 
 const PublicRoute = () => {
-    const { data: user } = useUser();
+    const { user } = useAuth();
 
     if (user) {
         return (

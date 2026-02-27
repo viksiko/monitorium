@@ -34,7 +34,6 @@ import Analytics from './pages/Analytics';
 import DistrictDetails from './pages/DistrictDetails';
 import ConfirmRegistration from './pages/ConfirmRegistration';
 import ConfirmRegistrationFailed from './pages/ConfirmRegistrationFailed';
-import { AuthInit } from './hooks/useAuthInit';
 import PrivateRoute from './guards/PrivateRoute';
 import PublicRoute from './guards/PublicRoute';
 import { TaskDetails } from './components/dashboard';
@@ -51,7 +50,7 @@ const App = () => (
                 <ErrorBoundary>
                     <Toaster />
                     <Sonner />
-                    <AuthInit>
+                    <div>
                         <BrowserRouter>
                             <ScrollToTop />
                             <Routes>
@@ -193,7 +192,7 @@ const App = () => (
                                 />
                             </Routes>
                         </BrowserRouter>
-                    </AuthInit>
+                    </div>
                 </ErrorBoundary>
             </AuthProvider>
         </TooltipProvider>

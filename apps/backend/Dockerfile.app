@@ -37,4 +37,4 @@ COPY --from=builder /app/apps/backend/prisma ./prisma
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder /app/apps/backend/prisma.config.ts ./prisma.config.ts
 
-CMD ["node", "dist/main"]
+CMD ["sh", "-c", "npx prisma migrate deploy --schema ./prisma/schema.prisma && node dist/main"]
