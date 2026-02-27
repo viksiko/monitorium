@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { User, MapPin, MessageSquare, Plus, Settings } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 
-const ProfileSidebar = () => {
+const RepresantiveProfileSidebar = () => {
     const { user } = useAuth();
 
     return (
@@ -24,9 +24,7 @@ const ProfileSidebar = () => {
                     />
                     <span className="text-sm">Округ №1</span>
                 </div>
-                <Badge className="mt-2 bg-honor-blue">
-                    {user.representativeProfile.party}
-                </Badge>
+                <Badge className="mt-2 bg-honor-blue">{user.representativeProfile.party}</Badge>
             </div>
 
             <div className="border-t border-b py-4 mb-4">
@@ -40,9 +38,7 @@ const ProfileSidebar = () => {
                         <p className="text-xs text-honor-darkGray">Выполнено</p>
                     </div>
                     <div>
-                        <p className="text-2xl font-bold text-honor-blue">
-                            4.7
-                        </p>
+                        <p className="text-2xl font-bold text-honor-blue">4.7</p>
                         <p className="text-xs text-honor-darkGray">Рейтинг</p>
                     </div>
                 </div>
@@ -68,9 +64,7 @@ const ProfileSidebar = () => {
                             />
                             Центр сообщений
                             {/* Display badge if there are unread messages */}
-                            {2 > 0 && (
-                                <Badge className="ml-2 bg-honor-blue">2</Badge>
-                            )}
+                            {2 > 0 && <Badge className="ml-2 bg-honor-blue">2</Badge>}
                         </Button>
                     </Link>
                     <Link to="/settings">
@@ -88,4 +82,4 @@ const ProfileSidebar = () => {
     );
 };
 
-export default ProfileSidebar;
+export default RepresantiveProfileSidebar;

@@ -44,7 +44,6 @@ const TaskDetails = () => {
 
     const accessToken = useAuthStore((state) => state.accessToken);
     const { taskId } = useParams<{ taskId: string }>();
-
     const { data: task, loading, error } = useAuthorizedFetch<Task>(`/api/v1/tasks/${taskId}`, accessToken);
 
     if (loading) {

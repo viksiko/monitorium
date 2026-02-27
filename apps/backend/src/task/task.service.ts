@@ -1,7 +1,7 @@
 import { TaskListItem } from '@monorepo/types';
 import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { Task, TaskStage, User } from '@prisma/client';
-import { TASK_MESSAGES } from '@src/constants/api-messages.constants';
+import { TASK_MESSAGES, USER_NOT_FOUND } from '@src/constants/api-messages.constants';
 import { logger } from '@src/logger/winston.logger';
 import { PrismaService } from '@src/prisma/prisma.service';
 import { UpdateTaskData } from '@src/types/task';
@@ -26,11 +26,11 @@ export class TaskService {
                 });
 
                 if (!assignee) {
-                    throw new Error('Assignee not found');
+                    throw new Error(TASK_MESSAGES.ASSIGNEE_NOT_FOUND);
                 }
 
                 if (assignee.role !== 'REPRESENTATIVE') {
-                    throw new Error('Task can be assigned only to representative');
+                    throw new Error(TASK_MESSAGES.TASK_ASSIGNEE_MUST_BE_REPRESENTATIVE);
                 }
             }
 
@@ -69,7 +69,7 @@ export class TaskService {
             console.error('Error creating task:', error);
             logger.error('Failed create task', {
                 category: 'TaskService',
-                operation: 'create',
+                operation: 'createTask',
                 error: error instanceof Error ? error.message : error,
             });
 
@@ -77,19 +77,21 @@ export class TaskService {
         }
     }
 
-    async findAll(): Promise<Task[]> {
+    async getAllTasks(): Promise<TaskListItem[]> {
         try {
-            return await this.prisma.task.findMany({
+            const tasks = await this.prisma.task.findMany({
                 include: {
                     stages: true,
                     comments: true,
                     taskFiles: true,
                 },
             });
+
+            return tasks.map(mapTaskListItemToDto);
         } catch (error) {
             logger.error('Failed when getting the task list', {
                 category: 'TaskService',
-                operation: 'findAll',
+                operation: 'getAllTasks',
                 error: error instanceof Error ? error.message : error,
             });
 
@@ -135,9 +137,55 @@ export class TaskService {
         }
     }
 
-    async findOneTaskById(id: string): Promise<Task | null> {
+    async getTasksByUserId(userId: string): Promise<TaskListItem[]> {
         try {
-            return this.prisma.task.findUnique({
+            const user = await this.prisma.user.findUnique({
+                where: { id: userId },
+                select: { id: true },
+            });
+
+            if (!user) {
+                throw new NotFoundException(USER_NOT_FOUND);
+            }
+
+            const tasks = await this.prisma.task.findMany({
+                where: { assigneeId: userId },
+                select: {
+                    id: true,
+                    title: true,
+                    address: true,
+                    desiredResolutionDate: true,
+                    likesCount: true,
+                    viewsCount: true,
+                    status: true,
+                    createdAt: true,
+                    // Можно добавить данные об авторе, если представителю нужно их видеть
+                    // user: {
+                    //     select: {
+                    //         name: true,
+                    //     },
+                    // },
+                },
+                orderBy: { createdAt: 'desc' },
+            });
+
+            if (!tasks) throw new NotFoundException(TASK_MESSAGES.NOT_FOUND);
+
+            return tasks.map(mapTaskListItemToDto);
+        } catch (error) {
+            logger.error('Failed when getting tasks for representative or voter', {
+                category: 'TaskService',
+                operation: 'getTasksByUserId',
+                error: error instanceof Error ? error.message : error,
+            });
+
+            throw error;
+        }
+    }
+
+    async getTaskById(id: string): Promise<Task> {
+        try {
+            const task = await this.prisma.task.findUnique({
                 where: { id },
                 include: {
                     stages: {
@@ -149,10 +197,14 @@ export class TaskService {
                     taskFiles: true,
                 },
             });
+
+            if (!task) throw new NotFoundException(TASK_MESSAGES.NOT_FOUND);
+
+            return task;
         } catch (error) {
             logger.error('Failed when getting the task by id', {
                 category: 'TaskService',
-                operation: 'findAll',
+                operation: 'getTaskById',
                 error: error instanceof Error ? error.message : error,
             });
 
@@ -215,7 +267,7 @@ export class TaskService {
         }
     }
 
-    async getStages(taskId: string): Promise<TaskStage[] | null> {
+    async getStages(taskId: string): Promise<TaskStage[]> {
         try {
             // Проверяем, существует ли задача
             const task = await this.prisma.task.findUnique({
@@ -224,7 +276,7 @@ export class TaskService {
             });
 
             if (!task) {
-                throw new NotFoundException('Задача не найдена');
+                throw new NotFoundException(TASK_MESSAGES.NOT_FOUND);
             }
 
             // Получаем все этапы

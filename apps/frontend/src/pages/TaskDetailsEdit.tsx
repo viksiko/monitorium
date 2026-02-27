@@ -32,7 +32,7 @@ import { TaskStatus, TaskStage } from '@monorepo/types';
 import { Button } from '@/components/ui/button';
 import { STATUS_CONFIG } from '@/constants/task-status.config';
 
-const TaskEdit = () => {
+const TaskDetailsEdit = () => {
     const { taskId } = useParams<{ taskId: string }>();
     const { data: task, loading, error, request } = useApi<Task>();
     const textareaRef = useRef(null);
@@ -646,4 +646,4 @@ const TaskEdit = () => {
     );
 };
 
-export default TaskEdit;
+export default TaskDetailsEdit;

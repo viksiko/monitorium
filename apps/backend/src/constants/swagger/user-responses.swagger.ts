@@ -1,14 +1,9 @@
 import { ApiResponseOptions } from '@nestjs/swagger';
-import {
-    DEACTIVATE_OWN_ACCOUNT_ONLY,
-    USER_DEACTIVATED_SUCCESS,
-    USER_NOT_FOUND_MSG,
-} from '../api-messages.constants';
+import { DEACTIVATE_OWN_ACCOUNT_ONLY, USER_DEACTIVATED_SUCCESS, USER_NOT_FOUND } from '../api-messages.constants';
 
 export const USER_LIST_SUCCESS_RESPONSE: ApiResponseOptions = {
     status: 200,
-    description:
-        'Если параметр "email" не указан, возвращается список всех пользователей. Если пользователи не найдены возвращается null.',
+    description: 'Cписок всех пользователей',
     content: {
         'application/json': {
             examples: {
@@ -19,31 +14,40 @@ export const USER_LIST_SUCCESS_RESPONSE: ApiResponseOptions = {
                         statusCode: 200,
                         data: [
                             {
-                                id: 'cmik6d2sm0000mojf4oz1jraa',
-                                name: 'user1',
-                                email: '1@test.test',
-                                role: 'USER',
+                                id: 'cmlw502tu00007gjfo3yn4pdn',
+                                name: 'Иванов Сергей',
+                                email: 'nimaxa@mailinator.com',
+                                phone: '19755788615',
+                                district: null,
+                                role: 'REPRESENTATIVE',
+                                gosuslugiId: null,
+                                sberId: null,
+                                tinkoffId: null,
+                                isRepresentative: false,
+                                isVerified: false,
+                                isActive: true,
+                                deletedAt: null,
+                                createdAt: '2026-02-21T09:49:18.546Z',
+                                updatedAt: '2026-02-21T09:49:18.546Z',
                             },
                             {
-                                id: 'cmik6d2sm0000mojf4oz1jrbb',
-                                name: 'user2',
-                                email: '2@test.test',
-                                role: 'USER',
+                                id: 'cmly1ul430001i4jfvmfbtkog',
+                                name: 'Петров Алексей',
+                                email: 'xefibi@mailinator.com',
+                                phone: '13813851411',
+                                district: null,
+                                role: 'REPRESENTATIVE',
+                                gosuslugiId: null,
+                                sberId: null,
+                                tinkoffId: null,
+                                isRepresentative: true,
+                                isVerified: true,
+                                isActive: true,
+                                deletedAt: null,
+                                createdAt: '2026-02-22T17:56:35.811Z',
+                                updatedAt: '2026-02-22T17:56:52.838Z',
                             },
                         ],
-                    },
-                },
-                UserFoundByEmail: {
-                    summary: 'Ответ с одним найденным пользователем по email',
-                    value: {
-                        success: true,
-                        statusCode: 200,
-                        data: {
-                            id: 'cmik6d2sm0000mojf4oz1jraa',
-                            name: 'user1',
-                            email: '1@test.test',
-                            role: 'USER',
-                        },
                     },
                 },
                 UserNotFound: {
@@ -51,7 +55,7 @@ export const USER_LIST_SUCCESS_RESPONSE: ApiResponseOptions = {
                     value: {
                         success: true,
                         statusCode: 200,
-                        data: null,
+                        data: [],
                     },
                 },
             },
@@ -59,31 +63,102 @@ export const USER_LIST_SUCCESS_RESPONSE: ApiResponseOptions = {
     },
 };
 
-export const USER_NOT_FOUND_RESPONSE: ApiResponseOptions = {
+export const USER_FILTER_LIST_SUCCESS_RESPONSE: ApiResponseOptions = {
     status: 200,
-    description: 'Если указан несуществующий id вернется null',
+    description: 'Cписок пользователей по фильтру',
     content: {
         'application/json': {
             examples: {
-                UserFoundById: {
-                    summary: 'Ответ с одним найденным пользователем по id',
+                UsersFilterRoleRepresentative: {
+                    summary: 'Пользователи с ролью представителя власти',
                     value: {
                         success: true,
                         statusCode: 200,
-                        data: {
-                            id: 'cmik6d2sm0000mojf4oz1jraa',
-                            name: 'user1',
-                            email: '1@test.test',
-                            role: 'USER',
-                        },
+                        data: [
+                            {
+                                id: 'cmly1ul430001i4jfvmfbtkog',
+                                name: 'Петров Алексей',
+                                email: 'xefibi@mailinator.com',
+                                phone: '13813851411',
+                                district: null,
+                                isVerified: true,
+                                representativeProfile: {
+                                    id: 'cmly1uy950003i4jf0xczym6m',
+                                    position: 'Депутат Государственной Думы',
+                                    party: 'er',
+                                    bio: 'Aut cupiditate nisi ',
+                                    rating: 0,
+                                    tasksTotal: 0,
+                                    tasksCompleted: 0,
+                                    attendance: 0,
+                                    lastActivity: null,
+                                },
+                                voterProfile: null,
+                            },
+                            {
+                                id: 'cmlw5eb1z0000ywjfohd3nni2',
+                                name: 'Сидорова Мария',
+                                email: 'tojagax@mailinator.com',
+                                phone: '16979619121',
+                                district: null,
+                                isVerified: true,
+                                representativeProfile: {
+                                    id: 'cmlw5er040002ywjfhic1r0wa',
+                                    position: 'Член Совета Федерации',
+                                    party: 'other',
+                                    bio: 'Sunt rem labore ius',
+                                    rating: 0,
+                                    tasksTotal: 0,
+                                    tasksCompleted: 0,
+                                    attendance: 0,
+                                    lastActivity: null,
+                                },
+                                voterProfile: null,
+                            },
+                        ],
+                    },
+                },
+                UsersFilterRoleVoter: {
+                    summary: 'Пользователи с ролью избирателя',
+                    value: {
+                        success: true,
+                        statusCode: 200,
+                        data: [
+                            {
+                                id: 'cmlw502tu00007gjfo3yn4pdn',
+                                name: 'Иванов Сергей',
+                                email: 'nimaxa@mailinator.com',
+                                phone: '19755788615',
+                                district: null,
+                                isVerified: false,
+                                representativeProfile: null,
+                                voterProfile: {
+                                    id: 'cmlw502u600017gjf4ykzsbk1',
+                                    userId: 'cmlw502tu00007gjfo3yn4pdn',
+                                },
+                            },
+                            {
+                                id: 'cmlznbcj00003gwjf14yuwh3c',
+                                name: 'Петров Алексей',
+                                email: 'xuxozojodu@mailinator.com',
+                                phone: '14389185046',
+                                district: null,
+                                isVerified: true,
+                                representativeProfile: null,
+                                voterProfile: {
+                                    id: 'cmlznbcj20004gwjff4h6yyiy',
+                                    userId: 'cmlznbcj00003gwjf14yuwh3c',
+                                },
+                            },
+                        ],
                     },
                 },
                 UserNotFound: {
-                    summary: USER_NOT_FOUND_MSG,
+                    summary: 'Пользователи не найдены',
                     value: {
                         success: true,
                         statusCode: 200,
-                        data: null,
+                        data: [],
                     },
                 },
             },
@@ -107,7 +182,7 @@ export const USER_ACCOUNT_DEACTIVATED_RESPONSE: ApiResponseOptions = {
 
 export const GET_CURRENT_USER_RESPONSE: ApiResponseOptions = {
     status: 200,
-    description: 'Удачная попытка получения данных текущего пользователяl',
+    description: 'Данные пользователя',
     content: {
         'application/json': {
             examples: {
@@ -155,7 +230,6 @@ export const GET_CURRENT_USER_RESPONSE: ApiResponseOptions = {
                             representativeProfile: null,
                             voterProfile: {
                                 id: 'vot_7g8h9i0j1k2l3',
-                                balance: 1500,
                             },
                             subscriptions: [
                                 {
@@ -166,8 +240,7 @@ export const GET_CURRENT_USER_RESPONSE: ApiResponseOptions = {
                                         name: 'Петров Алексей Викторович',
                                         representativeProfile: {
                                             id: 'rpr_2w3e4r5t6y7u8',
-                                            position:
-                                                'Депутат Государственной Думы',
+                                            position: 'Депутат Государственной Думы',
                                             party: 'Единая Россия',
                                             rating: 4.5,
                                         },
@@ -196,6 +269,20 @@ export const GET_CURRENT_USER_RESPONSE: ApiResponseOptions = {
     },
 };
 
+export const USER_BAD_REQUEST_RESPONSE: ApiResponseOptions = {
+    status: 400,
+    description: 'Неверный параметр запроса',
+    schema: {
+        example: {
+            success: false,
+            statusCode: 400,
+            data: {
+                message: ['Указана недопустимая роль'],
+            },
+        },
+    },
+};
+
 export const DEACTIVATE_OWN_ACCOUNT_ERROR_RESPONSE: ApiResponseOptions = {
     status: 403,
     description: 'Попытка дективации чужой учетной записи',
@@ -205,6 +292,20 @@ export const DEACTIVATE_OWN_ACCOUNT_ERROR_RESPONSE: ApiResponseOptions = {
             statusCode: 403,
             data: {
                 message: DEACTIVATE_OWN_ACCOUNT_ONLY,
+            },
+        },
+    },
+};
+
+export const USER_NOT_FOUND_RESPONSE: ApiResponseOptions = {
+    status: 404,
+    description: 'Пользователь не найден',
+    schema: {
+        example: {
+            success: false,
+            statusCode: 404,
+            data: {
+                message: USER_NOT_FOUND,
             },
         },
     },

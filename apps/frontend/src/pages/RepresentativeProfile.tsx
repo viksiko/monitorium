@@ -6,58 +6,49 @@ import { Avatar } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import {
-    ThumbsUp,
-    MessageSquare,
-    MapPin,
-    Building,
-    Calendar,
-    Clock,
-    User,
-    Mail,
-    Phone,
-    Eye,
-} from 'lucide-react';
+import { ThumbsUp, MessageSquare, MapPin, Building, Calendar, Clock, User, Mail, Phone, Eye } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { api } from '@/lib/api';
 import Loader from '@/components/ui/loader';
 import { useAuth } from '@/context/AuthContext';
+import { Task, Post } from '@monorepo/types';
+import { User as IUser } from '@/types/auth';
+import { TasksTab } from '@/components/dashboard';
+import TasksTabProfile from '@/components/representative/TasksTabProfile';
+import BlogTabProfile from '@/components/representative/BlogTabProfile';
 
-interface RepresentativeProfileData {
-    id: string;
-    name: string;
-    email: string;
-    phone: string | null;
-    role: string;
-    isRepresentative: boolean;
-    isVerified: boolean;
-    tasks: [];
-    representativeProfile: {
-        id: string;
-        position: string;
-        party: string;
-        rating: number;
-        bio: string;
-        tasksTotal: number;
-        tasksCompleted: number;
-        attendance: number;
-        lastActivity: string | null;
-    } | null;
-}
+// interface RepresentativeProfileData {
+//     id: string;
+//     name: string;
+//     email: string;
+//     phone: string | null;
+//     role: string;
+//     isRepresentative: boolean;
+//     isVerified: boolean;
+//     tasks: [];
+//     representativeProfile: {
+//         id: string;
+//         position: string;
+//         party: string;
+//         rating: number;
+//         bio: string;
+//         tasksTotal: number;
+//         tasksCompleted: number;
+//         attendance: number;
+//         lastActivity: string | null;
+//     } | null;
+// }
 
 const RepresentativeProfile = () => {
     const { id } = useParams();
     const { toast } = useToast();
     const { user, refreshUser } = useAuth();
     const [liked, setLiked] = useState<Record<string, boolean>>({});
-    const [showModifications, setShowModifications] = useState<number | null>(
-        null,
-    );
+    const [showModifications, setShowModifications] = useState<number | null>(null);
 
-    const [representative, setRepresentative] =
-        useState<RepresentativeProfileData | null>(null);
-    const [tasks, setTasks] = useState<any[]>([]);
-    const [posts, setPosts] = useState<any[]>([]);
+    const [representative, setRepresentative] = useState<IUser | null>(null);
+    const [tasks, setTasks] = useState<Task[]>([]);
+    const [posts, setPosts] = useState<Post[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -97,16 +88,13 @@ const RepresentativeProfile = () => {
 
             toast({
                 title: 'Подписка оформлена',
-                description:
-                    'Вы подписались на обновления этого представителя власти',
+                description: 'Вы подписались на обновления этого представителя власти',
                 variant: 'default',
             });
         } catch (error: any) {
             console.error('Ошибка подписки:', error);
 
-            const message =
-                error?.response?.data?.message ||
-                'Не удалось оформить подписку';
+            const message = error?.response?.data?.message || 'Не удалось оформить подписку';
 
             toast({
                 title: 'Ошибка',
@@ -124,32 +112,6 @@ const RepresentativeProfile = () => {
         });
     };
 
-    const getStatusColor = (status: string) => {
-        switch (status) {
-            case 'completed':
-                return 'bg-green-100 text-green-800';
-            case 'in-progress':
-                return 'bg-blue-100 text-blue-800';
-            case 'planned':
-                return 'bg-orange-100 text-orange-800';
-            default:
-                return 'bg-gray-100 text-gray-800';
-        }
-    };
-
-    const getStatusText = (status: string) => {
-        switch (status) {
-            case 'completed':
-                return 'Выполнено';
-            case 'in-progress':
-                return 'В процессе';
-            case 'planned':
-                return 'Запланировано';
-            default:
-                return 'Неизвестно';
-        }
-    };
-
     if (loading) {
         return (
             <Layout>
@@ -163,14 +125,10 @@ const RepresentativeProfile = () => {
     if (!representative) {
         return (
             <Layout>
-                <div className="honor-container py-12 text-center">
-                    Представитель не найден
-                </div>
+                <div className="honor-container py-12 text-center">Представитель не найден</div>
             </Layout>
         );
     }
-
-    console.log('representative', representative);
 
     return (
         <Layout>
@@ -183,20 +141,14 @@ const RepresentativeProfile = () => {
                                 <Avatar className="h-24 w-24 mb-4">
                                     <User size={48} />
                                 </Avatar>
-                                <h1 className="text-2xl font-bold text-center">
-                                    {representative.name}
-                                </h1>
-                                <p className="text-honor-darkGray">
-                                    {representative.role}
-                                </p>
+                                <h1 className="text-2xl font-bold text-center">{representative.name}</h1>
+                                <p className="text-honor-darkGray">{representative.role}</p>
                                 <div className="flex items-center mt-2">
                                     <MapPin
                                         size={16}
                                         className="text-honor-blue mr-1"
                                     />
-                                    <span className="text-sm">
-                                        {representative.name}
-                                    </span>
+                                    <span className="text-sm">{representative.name}</span>
                                 </div>
                                 <Badge className="mt-2 bg-honor-blue">
                                     {representative.representativeProfile.party}
@@ -217,56 +169,34 @@ const RepresentativeProfile = () => {
                                 <div className="grid grid-cols-3 text-center">
                                     <div>
                                         <p className="text-2xl font-bold text-honor-blue">
-                                            {
-                                                representative
-                                                    .representativeProfile
-                                                    .tasksTotal
-                                            }
+                                            {representative.representativeProfile.tasksTotal}
                                         </p>
-                                        <p className="text-xs text-honor-darkGray">
-                                            Всего задач
-                                        </p>
+                                        <p className="text-xs text-honor-darkGray">Всего задач</p>
                                     </div>
                                     <div>
                                         <p className="text-2xl font-bold text-honor-blue">
-                                            {
-                                                representative
-                                                    .representativeProfile
-                                                    .tasksCompleted
-                                            }
+                                            {representative.representativeProfile.tasksCompleted}
                                         </p>
-                                        <p className="text-xs text-honor-darkGray">
-                                            Выполнено
-                                        </p>
+                                        <p className="text-xs text-honor-darkGray">Выполнено</p>
                                     </div>
                                     <div>
                                         <p className="text-2xl font-bold text-honor-blue">
-                                            {
-                                                representative
-                                                    .representativeProfile
-                                                    .rating
-                                            }
+                                            {representative.representativeProfile.rating}
                                         </p>
-                                        <p className="text-xs text-honor-darkGray">
-                                            Рейтинг
-                                        </p>
+                                        <p className="text-xs text-honor-darkGray">Рейтинг</p>
                                     </div>
                                 </div>
                             </div>
 
                             <div className="mb-6">
-                                <h3 className="text-lg font-semibold mb-2">
-                                    О представителе
-                                </h3>
+                                <h3 className="text-lg font-semibold mb-2">О представителе</h3>
                                 <p className="text-honor-darkGray text-sm">
                                     {representative.representativeProfile.bio}
                                 </p>
                             </div>
 
                             <div className="mb-6">
-                                <h3 className="text-lg font-semibold mb-2">
-                                    Контактная информация
-                                </h3>
+                                <h3 className="text-lg font-semibold mb-2">Контактная информация</h3>
                                 <div className="space-y-2 text-sm">
                                     <div className="flex items-start">
                                         <Mail
@@ -325,7 +255,15 @@ const RepresentativeProfile = () => {
                                 </TabsTrigger>
                             </TabsList>
 
-                            <TabsContent
+                            <TabsContent value="tasks">
+                                <TasksTabProfile userId={representative.id} />
+                            </TabsContent>
+
+                            <TabsContent value="blog">
+                                <BlogTabProfile userId={representative.id} />
+                            </TabsContent>
+
+                            {/* <TabsContent
                                 value="tasks"
                                 className="space-y-6">
                                 {tasks.map((task) => (
@@ -333,18 +271,13 @@ const RepresentativeProfile = () => {
                                         key={task.id}
                                         className="honor-card">
                                         <div className="flex justify-between items-start mb-4">
-                                            <h2 className="text-xl font-bold">
-                                                {task.title}
-                                            </h2>
+                                            <h2 className="text-xl font-bold">{task.title}</h2>
                                             <div className="flex items-center">
                                                 {task.modified && (
                                                     <button
                                                         onClick={() =>
                                                             setShowModifications(
-                                                                showModifications ===
-                                                                    task.id
-                                                                    ? null
-                                                                    : task.id,
+                                                                showModifications === task.id ? null : task.id,
                                                             )
                                                         }
                                                         className="mr-2 text-honor-darkGray hover:text-honor-blue"
@@ -366,61 +299,32 @@ const RepresentativeProfile = () => {
                                                         </svg>
                                                     </button>
                                                 )}
-                                                <Badge
-                                                    className={getStatusColor(
-                                                        task.status,
-                                                    )}>
+                                                <Badge className={getStatusColor(task.status)}>
                                                     {getStatusText(task.status)}
                                                 </Badge>
                                             </div>
                                         </div>
 
-                                        {showModifications === task.id &&
-                                            task.modificationHistory.length >
-                                                0 && (
-                                                <div className="mb-4 bg-gray-50 p-3 rounded-lg text-sm">
-                                                    <h3 className="font-semibold mb-2">
-                                                        История изменений:
-                                                    </h3>
-                                                    <ul className="space-y-2">
-                                                        {task.modificationHistory.map(
-                                                            (mod, idx) => (
-                                                                <li
-                                                                    key={idx}
-                                                                    className="text-honor-darkGray">
-                                                                    <span className="font-medium">
-                                                                        {new Date(
-                                                                            mod.date,
-                                                                        ).toLocaleDateString(
-                                                                            'ru-RU',
-                                                                        )}
-                                                                    </span>{' '}
-                                                                    - Поле "
-                                                                    <span className="italic">
-                                                                        {
-                                                                            mod.field
-                                                                        }
-                                                                    </span>
-                                                                    " изменено с
-                                                                    "
-                                                                    <span className="line-through">
-                                                                        {
-                                                                            mod.oldValue
-                                                                        }
-                                                                    </span>
-                                                                    " на "
-                                                                    <span className="font-medium">
-                                                                        {
-                                                                            mod.newValue
-                                                                        }
-                                                                    </span>
-                                                                    "
-                                                                </li>
-                                                            ),
-                                                        )}
-                                                    </ul>
-                                                </div>
-                                            )}
+                                        {showModifications === task.id && task.modificationHistory.length > 0 && (
+                                            <div className="mb-4 bg-gray-50 p-3 rounded-lg text-sm">
+                                                <h3 className="font-semibold mb-2">История изменений:</h3>
+                                                <ul className="space-y-2">
+                                                    {task.modificationHistory.map((mod, idx) => (
+                                                        <li
+                                                            key={idx}
+                                                            className="text-honor-darkGray">
+                                                            <span className="font-medium">
+                                                                {new Date(mod.date).toLocaleDateString('ru-RU')}
+                                                            </span>{' '}
+                                                            - Поле "<span className="italic">{mod.field}</span>"
+                                                            изменено с "
+                                                            <span className="line-through">{mod.oldValue}</span>" на "
+                                                            <span className="font-medium">{mod.newValue}</span>"
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            </div>
+                                        )}
 
                                         <div className="flex items-center text-honor-darkGray text-sm mb-4">
                                             <MapPin
@@ -433,27 +337,16 @@ const RepresentativeProfile = () => {
                                                 size={16}
                                                 className="mr-1"
                                             />
-                                            <span>
-                                                До{' '}
-                                                {new Date(
-                                                    task.date,
-                                                ).toLocaleDateString('ru-RU')}
-                                            </span>
+                                            <span>До {new Date(task.date).toLocaleDateString('ru-RU')}</span>
                                         </div>
 
                                         <div className="mb-4">
-                                            <p className="text-honor-darkGray mb-2">
-                                                {task.description}
-                                            </p>
-                                            <p className="text-sm font-medium">
-                                                Решение: {task.solution}
-                                            </p>
+                                            <p className="text-honor-darkGray mb-2">{task.description}</p>
+                                            <p className="text-sm font-medium">Решение: {task.solution}</p>
                                         </div>
 
                                         <div className="mb-4">
-                                            <h3 className="text-lg font-semibold mb-2">
-                                                Этапы выполнения
-                                            </h3>
+                                            <h3 className="text-lg font-semibold mb-2">Этапы выполнения</h3>
                                             <div className="space-y-2">
                                                 {task.stages.map((stage) => (
                                                     <div
@@ -465,16 +358,10 @@ const RepresentativeProfile = () => {
                                                             <div className="flex justify-between">
                                                                 <p
                                                                     className={`${stage.completed ? 'font-medium' : 'text-honor-darkGray'}`}>
-                                                                    {
-                                                                        stage.title
-                                                                    }
+                                                                    {stage.title}
                                                                 </p>
                                                                 <p className="text-xs text-honor-darkGray">
-                                                                    {new Date(
-                                                                        stage.date,
-                                                                    ).toLocaleDateString(
-                                                                        'ru-RU',
-                                                                    )}
+                                                                    {new Date(stage.date).toLocaleDateString('ru-RU')}
                                                                 </p>
                                                             </div>
                                                         </div>
@@ -487,22 +374,11 @@ const RepresentativeProfile = () => {
                                             <div className="flex space-x-4">
                                                 <button
                                                     className={`flex items-center space-x-1 ${liked[`task-${task.id}`] ? 'text-honor-blue' : 'text-honor-darkGray hover:text-honor-blue'}`}
-                                                    onClick={() =>
-                                                        handleLike(
-                                                            'task',
-                                                            task.id,
-                                                        )
-                                                    }
-                                                    disabled={
-                                                        liked[`task-${task.id}`]
-                                                    }>
+                                                    onClick={() => handleLike('task', task.id)}
+                                                    disabled={liked[`task-${task.id}`]}>
                                                     <ThumbsUp size={18} />
                                                     <span>
-                                                        {liked[
-                                                            `task-${task.id}`
-                                                        ]
-                                                            ? task.likes + 1
-                                                            : task.likes}
+                                                        {liked[`task-${task.id}`] ? task.likes + 1 : task.likes}
                                                     </span>
                                                 </button>
                                                 <div className="flex items-center space-x-1 text-honor-darkGray">
@@ -524,7 +400,7 @@ const RepresentativeProfile = () => {
                                         </div>
                                     </Card>
                                 ))}
-                            </TabsContent>
+                            </TabsContent> */}
 
                             {/* <TabsContent
                                 value="blog"

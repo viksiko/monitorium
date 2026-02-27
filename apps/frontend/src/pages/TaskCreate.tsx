@@ -72,10 +72,12 @@ const TaskCreate = () => {
             problemDescription: data.description,
             possibleSolutions: data.solution,
             desiredResolutionDate: new Date(data.endDate).toISOString(),
-            stages: stages.map((stage) => ({
-                title: stage.title,
-                date: new Date(stage.date).toISOString(),
-            })),
+            stages:
+                data.stages?.map((stage) => ({
+                    title: stage.title,
+                    date: new Date(stage.date).toISOString(),
+                })) || [],
+
             assigneeId: user.subscriptions?.[0].representative.id, // берем первого представителя из подписок
         };
 
@@ -121,9 +123,7 @@ const TaskCreate = () => {
         <Layout>
             <div className="honor-container py-12">
                 <div className="max-w-2xl mx-auto">
-                    <h1 className="text-3xl font-bold mb-8 text-center">
-                        Создание задания
-                    </h1>
+                    <h1 className="text-3xl font-bold mb-8 text-center">Создание задания</h1>
                     <form
                         onSubmit={handleSubmit(onSubmit)}
                         className="honor-card">
@@ -186,9 +186,7 @@ const TaskCreate = () => {
                                     id="description"
                                     name="description"
                                     {...register('description')}
-                                    className={formInputClass(
-                                        errors.description,
-                                    )}
+                                    className={formInputClass(errors.description)}
                                     // className="honor-input min-h-[100px]"
                                     placeholder="Подробно опишите суть проблемы..."
                                 />
@@ -234,9 +232,7 @@ const TaskCreate = () => {
                                     type="date"
                                     {...register('endDate')}
                                     // className="honor-input pl-10"
-                                    className={formInputClass(
-                                        errors.description,
-                                    )}
+                                    className={formInputClass(errors.description)}
                                 />
                                 <FormError error={errors.endDate} />
                             </div>
@@ -271,13 +267,7 @@ const TaskCreate = () => {
                                             />
                                             <Input
                                                 value={stage.title}
-                                                onChange={(e) =>
-                                                    handleStageChange(
-                                                        index,
-                                                        'title',
-                                                        e.target.value,
-                                                    )
-                                                }
+                                                onChange={(e) => handleStageChange(index, 'title', e.target.value)}
                                                 className="honor-input pl-10"
                                                 placeholder="Название этапа"
                                             />
@@ -287,13 +277,7 @@ const TaskCreate = () => {
                                         <Input
                                             type="date"
                                             value={stage.date}
-                                            onChange={(e) =>
-                                                handleStageChange(
-                                                    index,
-                                                    'date',
-                                                    e.target.value,
-                                                )
-                                            }
+                                            onChange={(e) => handleStageChange(index, 'date', e.target.value)}
                                             className="honor-input"
                                         />
                                     </div>
@@ -312,13 +296,9 @@ const TaskCreate = () => {
                         </div>
 
                         <div className="mb-6">
-                            <Label className="block mb-2">
-                                Приложенные файлы
-                            </Label>
+                            <Label className="block mb-2">Приложенные файлы</Label>
                             <div className="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center">
-                                <p className="text-honor-darkGray mb-2">
-                                    Перетащите файлы сюда или нажмите для выбора
-                                </p>
+                                <p className="text-honor-darkGray mb-2">Перетащите файлы сюда или нажмите для выбора</p>
                                 <Button
                                     type="button"
                                     variant="outline"

@@ -15,7 +15,7 @@ import {
     REGISTRATION_CONFIRMED_MESSAGE,
     REPRESENTATIVE_REQUEST_CREATED,
     USER_ALREADY_EXISTS,
-    USER_NOT_FOUND_MSG,
+    USER_NOT_FOUND,
     VERIFICATION_MESSAGES,
 } from '@src/constants/api-messages.constants';
 import { logger } from '@src/logger/winston.logger';
@@ -53,10 +53,7 @@ export class AuthService {
         // isRepresentative: boolean,
     ): Promise<User> {
         // 1. Проверка существования пользователя
-        const existingUser = await this.userService.findUserByEmailOrPhone(
-            registerDto.email,
-            registerDto.phone,
-        );
+        const existingUser = await this.userService.findUserByEmailOrPhone(registerDto.email, registerDto.phone);
 
         if (existingUser) {
             throw new ConflictException(USER_ALREADY_EXISTS);
@@ -80,10 +77,7 @@ export class AuthService {
         userProfile: UserProfile;
     }> {
         // 1. Делегируем всю логику поиска, проверки верификации и пароля в UserService
-        const user = await this.userService.validateUserLogin(
-            loginDto.email,
-            loginDto.password,
-        );
+        const user = await this.userService.validateUserLogin(loginDto.email, loginDto.password);
 
         // 2. Успешный вход: генерируем payload
         const payload = {
@@ -99,10 +93,7 @@ export class AuthService {
     }
 
     // Refresh токен
-    async refresh(
-        request: Request,
-        response: Response,
-    ): Promise<{ accessToken: string; userProfile: UserProfile }> {
+    async refresh(request: Request, response: Response): Promise<{ accessToken: string; userProfile: UserProfile }> {
         const refreshToken = request.cookies['refreshToken'];
 
         if (!refreshToken) {
@@ -140,10 +131,7 @@ export class AuthService {
     }
 
     // Выход из системы
-    async logout(
-        request: Request,
-        response: Response,
-    ): Promise<{ message: string }> {
+    async logout(request: Request, response: Response): Promise<{ message: string }> {
         const refreshToken = request.cookies['refreshToken'];
 
         if (refreshToken) {
@@ -168,7 +156,7 @@ export class AuthService {
 
     // запрос на восстановление пароля
     async forgotPassword(dto: ForgotPasswordDto): Promise<{ message: string }> {
-        const user = await this.userService.findUserByEmail(dto.email);
+        const user = await this.userService.getUserByEmail(dto.email);
 
         // Если юзера нет, мы не кидаем ошибку, а просто имитируем успех
         if (!user) {
@@ -177,10 +165,7 @@ export class AuthService {
 
         const rawResetToken = uuidv4();
         const salt = this.configService.get('JWT_RESET_PASSWORD_SALT');
-        const hashedResetToken = this.tokenService.hashToken(
-            rawResetToken,
-            salt,
-        );
+        const hashedResetToken = this.tokenService.hashToken(rawResetToken, salt);
 
         const expiryDate = new Date();
         expiryDate.setHours(expiryDate.getHours() + 1); // Токены сброса обычно живут недолго (1 час)
@@ -204,10 +189,7 @@ export class AuthService {
             });
 
             // Отправка письма (вне транзакции!)
-            await this.mailService.sendResetPasswordEmail(
-                user.email,
-                rawResetToken,
-            );
+            await this.mailService.sendResetPasswordEmail(user.email, rawResetToken);
         } catch (error) {
             logger.error('Failed to create reset password token', {
                 category: 'database',
@@ -289,29 +271,17 @@ export class AuthService {
                 where: { userId, type: 'VERIFY_EMAIL' },
             });
 
-            if (!token)
-                throw new BadRequestException(
-                    VERIFICATION_MESSAGES.CODE_NOT_FOUND,
-                );
+            if (!token) throw new BadRequestException(VERIFICATION_MESSAGES.CODE_NOT_FOUND);
 
-            if (token.exp < new Date())
-                throw new BadRequestException(
-                    VERIFICATION_MESSAGES.CODE_EXPIRED,
-                );
+            if (token.exp < new Date()) throw new BadRequestException(VERIFICATION_MESSAGES.CODE_EXPIRED);
 
-            const hashed = this.tokenService.hashToken(
-                code,
-                this.configService.get('JWT_VERIFY_SALT'),
-            );
-            if (hashed !== token.hashedToken)
-                throw new BadRequestException(
-                    VERIFICATION_MESSAGES.CODE_INVALID,
-                );
+            const hashed = this.tokenService.hashToken(code, this.configService.get('JWT_VERIFY_SALT'));
+            if (hashed !== token.hashedToken) throw new BadRequestException(VERIFICATION_MESSAGES.CODE_INVALID);
 
             const user = await this.prisma.user.findUnique({
                 where: { id: userId },
             });
-            if (!user) throw new NotFoundException(USER_NOT_FOUND_MSG);
+            if (!user) throw new NotFoundException(USER_NOT_FOUND);
 
             await this.prisma.$transaction(async (tx) => {
                 const updatedUser = await tx.user.update({
@@ -332,9 +302,7 @@ export class AuthService {
         }
     }
 
-    async representativeRequest(
-        dto: RepresentativeRequestDto,
-    ): Promise<{ message: string }> {
+    async representativeRequest(dto: RepresentativeRequestDto): Promise<{ message: string }> {
         const { userId, position } = dto;
 
         try {
@@ -344,7 +312,7 @@ export class AuthService {
             });
 
             if (!user) {
-                throw new NotFoundException(USER_NOT_FOUND_MSG);
+                throw new NotFoundException(USER_NOT_FOUND);
             }
 
             // Обновляем пользователя + создаём профиль представителя в транзакции

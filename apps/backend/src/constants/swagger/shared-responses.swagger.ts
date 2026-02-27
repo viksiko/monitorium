@@ -3,6 +3,7 @@ import {
     AUTHORIZATION_REQUIRED,
     DB_OPERATION_FAILED,
     EMAIL_VERIFICATION_FAILED,
+    FORBIDDEN_RESOURCE,
 } from '../api-messages.constants';
 
 export const TOKEN_INVALID_RES = {
@@ -46,10 +47,23 @@ export const AUTHENTICATION_ERROR_RESPONSES: ApiResponseOptions = {
                     value: INVALID_ACCESS_TOKEN_RESPONSE.schema.example,
                 },
                 UserFoundByEmail: {
-                    summary:
-                        'Неавторизованный доступ (отсутсвует в header Authorization)',
+                    summary: 'Неавторизованный доступ (отсутсвует в header Authorization)',
                     value: UNAUTHORIZED_ACCESS_RESPONSE.schema.example,
                 },
+            },
+        },
+    },
+};
+
+export const FORBIDDEN_RESOURCE_RESPONSE: ApiResponseOptions = {
+    status: 403,
+    description: 'Нет прав для выполнения операции',
+    schema: {
+        example: {
+            success: false,
+            statusCode: 403,
+            data: {
+                message: FORBIDDEN_RESOURCE,
             },
         },
     },
@@ -71,8 +85,7 @@ export const DATABASE_ERROR_RESPONSE: ApiResponseOptions = {
 
 export const EMAIL_VERIFICATION_FAILED_RESPONSE: ApiResponseOptions = {
     status: 500,
-    description:
-        'Ошибка отправки письма поьзователю для подтверждения регистрации',
+    description: 'Ошибка отправки письма поьзователю для подтверждения регистрации',
     schema: {
         example: {
             success: false,
@@ -91,8 +104,7 @@ export const SERVER_ERROR_RESPONSES_REGISTR: ApiResponseOptions = {
         'application/json': {
             examples: {
                 UsersFound: {
-                    summary:
-                        'Ошибка доступа к базе данных. Сервер БД недоступен',
+                    summary: 'Ошибка доступа к базе данных. Сервер БД недоступен',
                     value: DATABASE_ERROR_RESPONSE.schema.example,
                 },
                 UserFoundByEmail: {

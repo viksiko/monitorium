@@ -215,6 +215,7 @@ export interface UserResponse {
     role: Role;
     isRepresentative: boolean;
     isVerified: boolean;
+    isActive: boolean;
 
     representativeProfile?: {
         id: string;
@@ -230,7 +231,7 @@ export interface UserResponse {
 
     voterProfile?: {
         id: string;
-        balance: number;
+        // balance: number;
     } | null;
 
     subscriptions: Array<{

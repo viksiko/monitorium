@@ -7,27 +7,27 @@ export class CreateTaskDto {
     @IsString({ message: 'Заголовок должно быть строкой' })
     @MinLength(2, { message: 'Заголовок должно быть не менее 2 символов' })
     @IsNotEmpty({ message: 'Заголовок не может быть пустым' })
-    @ApiProperty({ example: 'Утечка воды в подъезде' })
+    @ApiProperty({ example: 'Ремонт крыши' })
     title: string;
 
     @IsString({ message: 'Адрес должно быть строкой' })
     @MinLength(2, { message: 'Адрес должно быть не менее 2 символов' })
     @IsNotEmpty({ message: 'Адрес не может быть пустым' })
-    @ApiProperty({ example: 'ул. Ленина, д. 10, кв. 5' })
+    @ApiProperty({ example: 'пр. Мира, д. 42' })
     address: string;
 
     @IsString({ message: 'Описание должно быть строкой' })
     @MinLength(2, { message: 'Описание должно быть не менее 2 символов' })
     @IsNotEmpty({ message: 'Описание не может быть пустым' })
     @ApiProperty({
-        example: 'Протекает труба на втором этаже, вода капает на лестничную площадку',
+        example: 'Протекает крыша после сильного дождя, повреждена гидроизоляция',
     })
     problemDescription: string;
 
     @IsOptional()
     @IsString({ message: 'Пути решения должны быть строкой' })
     @ApiProperty({
-        example: 'Необходимо заменить участок трубы или установить запорную арматуру',
+        example: 'Необходимо заменить участок кровли и восстановить гидроизоляционный слой',
     })
     possibleSolutions?: string;
 

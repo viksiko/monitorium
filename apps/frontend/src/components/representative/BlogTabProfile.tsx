@@ -1,25 +1,19 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { MapPin, Calendar, Clock, Plus, ThumbsUp, MessageSquare } from 'lucide-react';
-import { toast } from 'sonner';
+import { Clock, Plus, ThumbsUp, MessageSquare } from 'lucide-react';
 import { api } from '@/lib/api';
-import { useAuth } from '@/context/AuthContext';
 import Loader from '../ui/loader';
-import { TaskStatusBadge } from '../ui/task-status-badge';
-import { Post, Task } from '@monorepo/types';
+import { Post } from '@monorepo/types';
 
-const BlogTab = () => {
+const BlogTabProfile = ({ userId }: { userId: string }) => {
     const [loading, setLoading] = useState(true);
     const [posts, setPosts] = useState<Post[]>([]);
-    const { user } = useAuth();
 
     useEffect(() => {
         const fetchGetTasksRepresentative = async () => {
             try {
-                const response = await api.get(`/api/v1/posts/user/${user.id}`);
+                const response = await api.get(`/api/v1/posts/user/${userId}`);
 
                 setPosts(response.data.data);
             } catch (error) {
@@ -33,12 +27,6 @@ const BlogTab = () => {
         fetchGetTasksRepresentative();
     }, []);
 
-    const handleUpdateTaskStatus = (taskId: number) => {
-        toast.success('Статус обновлен', {
-            description: 'Статус задачи успешно обновлен',
-        });
-    };
-
     if (loading) {
         return (
             <div className="text-center">
@@ -47,31 +35,16 @@ const BlogTab = () => {
         );
     }
 
-    // if (posts.length === 0) {
-    //     return (
-    //         <div className="honor-card text-center py-8">
-    //             <p className="text-honor-darkGray">По вашему запросу ничего не найдено</p>
-    //         </div>
-    //     );
-    // }
+    if (posts.length === 0) {
+        return (
+            <div className="honor-card text-center py-8">
+                <p className="text-honor-darkGray">Публикации отсутсвуют</p>
+            </div>
+        );
+    }
 
     return (
         <>
-            <div className="flex justify-between items-center mb-4">
-                <h2 className="text-2xl font-bold">Мои статьи</h2>
-                {posts.length !== 0 && (
-                    <Link to="/posts/create">
-                        <Button className="honor-button-primary flex items-center">
-                            <Plus
-                                size={18}
-                                className="mr-2"
-                            />
-                            Создать статью
-                        </Button>
-                    </Link>
-                )}
-            </div>
-
             {posts.map((post) => (
                 <Link
                     key={post.id}
@@ -108,17 +81,8 @@ const BlogTab = () => {
                     </Card>
                 </Link>
             ))}
-
-            {posts.length === 0 && (
-                <div className="text-center py-10">
-                    <p className="text-honor-darkGray mb-4">У вас пока нет опубликованных статей</p>
-                    <Link to="/posts/create">
-                        <Button className="honor-button-primary">Создать первую статью</Button>
-                    </Link>
-                </div>
-            )}
         </>
     );
 };
 
-export default BlogTab;
+export default BlogTabProfile;

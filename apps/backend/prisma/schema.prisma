@@ -57,6 +57,12 @@ model User {
   // На меня подписались
   subscribers Subscription[] @relation("UserSubscribers")
 
+  // Связь с постами
+  posts Post[]
+
+  // Связь с комментариями постов
+  postComments PostComment[]
+
   @@map("users")
 }
 
@@ -87,7 +93,6 @@ model Task {
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
   taskFiles TaskFile[]
-
 
   @@map("tasks")
 }
@@ -199,6 +204,59 @@ model TaskComment {
   user User @relation(fields: [userId], references: [id])
 
   @@map("task_comments")
+}
+
+// таблица для постов
+model Post {
+  id          String   @id @default(cuid())
+  title       String
+  content     String // текст публикации
+  publishedAt DateTime @default(now()) // дата публикации
+
+  // Автор (представитель власти)
+  authorId String
+  author   User   @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  // Файлы блога
+  files PostFile[]
+
+  likesCount Int           @default(0) // Количество лайков
+  viewsCount Int           @default(0) // Количество просмотров
+  comments   PostComment[] //  комментарии
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("posts")
+}
+
+model PostComment {
+  id        String   @id @default(cuid())
+  taskId    String
+  userId    String // кто оставил комментарий
+  text      String
+  createdAt DateTime @default(now())
+
+  post Post @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("post_comments")
+}
+
+// для файлов в блоге
+model PostFile {
+  id     String  @id @default(cuid())
+  postId String
+  url    String // ссылка на файл (S3, CDN и т.п.)
+  name   String?
+  type   String? // MIME-тип
+  size   Int? // размер в байтах
+
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@map("post_files")
 }
 
 enum Role {

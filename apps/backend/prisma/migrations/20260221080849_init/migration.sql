@@ -138,6 +138,45 @@ CREATE TABLE "task_comments" (
     CONSTRAINT "task_comments_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateTable
+CREATE TABLE "posts" (
+    "id" TEXT NOT NULL,
+    "title" TEXT NOT NULL,
+    "content" TEXT NOT NULL,
+    "publishedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "authorId" TEXT NOT NULL,
+    "likesCount" INTEGER NOT NULL DEFAULT 0,
+    "viewsCount" INTEGER NOT NULL DEFAULT 0,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "posts_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "post_comments" (
+    "id" TEXT NOT NULL,
+    "taskId" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
+    "text" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "post_comments_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "post_files" (
+    "id" TEXT NOT NULL,
+    "postId" TEXT NOT NULL,
+    "url" TEXT NOT NULL,
+    "name" TEXT,
+    "type" TEXT,
+    "size" INTEGER,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "post_files_pkey" PRIMARY KEY ("id")
+);
+
 -- CreateIndex
 CREATE UNIQUE INDEX "users_email_key" ON "users"("email");
 
@@ -197,3 +236,15 @@ ALTER TABLE "task_comments" ADD CONSTRAINT "task_comments_taskId_fkey" FOREIGN K
 
 -- AddForeignKey
 ALTER TABLE "task_comments" ADD CONSTRAINT "task_comments_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "posts" ADD CONSTRAINT "posts_authorId_fkey" FOREIGN KEY ("authorId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "post_comments" ADD CONSTRAINT "post_comments_taskId_fkey" FOREIGN KEY ("taskId") REFERENCES "posts"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "post_comments" ADD CONSTRAINT "post_comments_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "post_files" ADD CONSTRAINT "post_files_postId_fkey" FOREIGN KEY ("postId") REFERENCES "posts"("id") ON DELETE CASCADE ON UPDATE CASCADE;
