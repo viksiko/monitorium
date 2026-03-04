@@ -63,6 +63,10 @@ model User {
   // Связь с комментариями постов
   postComments PostComment[]
 
+  voterDialogs          Dialog[]  @relation("VoterDialogs")
+  representativeDialogs Dialog[]  @relation("RepresentativeDialogs")
+  messages              Message[]
+
   @@map("users")
 }
 
@@ -276,4 +280,42 @@ enum TaskStatus {
   IN_PROGRESS // "В процессе"  
   COMPLETED // "Выполнено"
   REJECTED // "Отклонено"
+}
+
+model Dialog {
+  id String @id @default(cuid())
+
+  voterId String
+  voter   User   @relation("VoterDialogs", fields: [voterId], references: [id], onDelete: Cascade)
+
+  representativeId String
+  representative   User   @relation("RepresentativeDialogs", fields: [representativeId], references: [id], onDelete: Cascade)
+
+  messages Message[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+
+  voterLastReadAt          DateTime?
+  representativeLastReadAt DateTime?
+
+  @@unique([voterId, representativeId])
+  @@map("dialogs")
+}
+
+model Message {
+  id String @id @default(cuid())
+
+  dialogId String
+  dialog   Dialog @relation(fields: [dialogId], references: [id], onDelete: Cascade)
+
+  senderId String
+  sender   User   @relation(fields: [senderId], references: [id])
+
+  text String
+
+  createdAt DateTime @default(now())
+
+  @@index([dialogId, createdAt])
+  @@map("messages")
 }

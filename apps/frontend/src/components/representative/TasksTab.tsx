@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { MapPin, Calendar, Clock, Plus, ThumbsUp, MessageSquare } from 'lucide-react';
+import { MapPin, Calendar, Clock, Plus, ThumbsUp, MessageSquare, BookType } from 'lucide-react';
 import { toast } from 'sonner';
 import { api } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
@@ -48,8 +48,12 @@ const TasksTab = () => {
 
     if (tasks.length === 0) {
         return (
-            <div className="honor-card text-center py-8">
-                <p className="text-honor-darkGray">По вашему запросу ничего не найдено</p>
+            <div className="text-center py-10">
+                <BookType
+                    className="mx-auto mb-4 text-honor-darkGray/90"
+                    size={64}
+                />
+                <p className="text-honor-darkGray mb-4">У вас пока нет присланных заданий</p>
             </div>
         );
     }

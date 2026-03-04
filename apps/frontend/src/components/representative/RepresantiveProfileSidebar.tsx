@@ -46,7 +46,7 @@ const RepresantiveProfileSidebar = () => {
 
             <div className="p-6">
                 <h3 className="text-lg font-semibold mb-4">Быстрые действия</h3>
-                <div className="space-y-3">
+                <div className="flex flex-col space-y-3">
                     <Link to="/tasks/create">
                         {/* <Button className="w-full honor-button-primary flex items-center justify-center">
                             <Plus

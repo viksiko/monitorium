@@ -50,6 +50,31 @@ export class SubscriptionsService {
         return { message: 'Подписка успешно оформлена' };
     }
 
+    // async getUserSubscriptions(userId: string) {
+    //     return this.prisma.subscription.findMany({
+    //         where: {
+    //             subscriberId: userId,
+    //         },
+    //         orderBy: {
+    //             createdAt: 'desc',
+    //         },
+    //         include: {
+    //             representative: {
+    //                 select: {
+    //                     id: true,
+    //                     name: true,
+    //                     role: true,
+    //                     representativeProfile: {
+    //                         select: {
+    //                             position: true,
+    //                         },
+    //                     },
+    //                 },
+    //             },
+    //         },
+    //     });
+    // }
+
     // async unsubscribe(userId: string, representativeUserId: string) {
     //     const voterProfile = await this.prisma.voterProfile.findUnique({
     //         where: { userId },

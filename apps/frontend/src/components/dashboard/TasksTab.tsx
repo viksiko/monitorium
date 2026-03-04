@@ -5,15 +5,7 @@ import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
-import {
-    MapPin,
-    Calendar,
-    Clock,
-    Plus,
-    ThumbsUp,
-    MessageSquare,
-    AlertTriangle,
-} from 'lucide-react';
+import { MapPin, Calendar, Clock, Plus, ThumbsUp, MessageSquare, AlertTriangle, BookType } from 'lucide-react';
 import EscalateTask from './EscalateTask';
 import { useAuthStore } from '@/shared/stores/auth.store';
 import { Task } from '@monorepo/types';
@@ -58,8 +50,7 @@ const TasksTab = () => {
 
     const handleCreateTaskClick = (e: React.MouseEvent) => {
         // Проверяем наличие подписок
-        const hasSubscriptions =
-            user.subscriptions && user.subscriptions.length > 0;
+        const hasSubscriptions = user.subscriptions && user.subscriptions.length > 0;
 
         if (!user?.isRepresentative && !hasSubscriptions) {
             // e.preventDefault(); // Останавливаем переход, если это ссылка
@@ -89,7 +80,7 @@ const TasksTab = () => {
         <div className="space-y-6">
             <div className="flex justify-between items-center mb-4">
                 <h2 className="text-2xl font-bold">Мои задания</h2>
-                {tasks.length !== 0 && (
+                {tasks.length === 0 && (
                     <Link to="/tasks/create">
                         <Button className="honor-button-primary flex items-center">
                             <Plus
@@ -135,12 +126,7 @@ const TasksTab = () => {
                                 size={16}
                                 className="mr-1"
                             />
-                            <span>
-                                До{' '}
-                                {new Date(
-                                    task.desiredResolutionDate,
-                                ).toLocaleDateString('ru-RU')}
-                            </span>
+                            <span>До {new Date(task.desiredResolutionDate).toLocaleDateString('ru-RU')}</span>
                         </div>
 
                         <div className="flex justify-between items-center pt-3 border-t">
@@ -179,10 +165,7 @@ const TasksTab = () => {
                                             size={16}
                                             className="inline mr-1"
                                         />
-                                        Создано{' '}
-                                        {new Date(
-                                            task.createdAt,
-                                        ).toLocaleDateString('ru-RU')}
+                                        Создано {new Date(task.createdAt).toLocaleDateString('ru-RU')}
                                     </span>
                                 </div>
                             </div>
@@ -193,15 +176,11 @@ const TasksTab = () => {
 
             {tasks.length === 0 && (
                 <div className="text-center py-10">
-                    <p className="text-honor-darkGray mb-4">
-                        У вас пока нет заданий
-                    </p>
-
-                    <Button
-                        className="honor-button-primary"
-                        onClick={handleCreateTaskClick}>
-                        Создать первое задание
-                    </Button>
+                    <BookType
+                        className="mx-auto mb-4 text-honor-darkGray/90"
+                        size={64}
+                    />
+                    <p className="text-honor-darkGray mb-4">У вас пока нет отправленных заданий</p>
                 </div>
             )}
         </div>

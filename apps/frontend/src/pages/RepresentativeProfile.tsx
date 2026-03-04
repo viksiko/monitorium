@@ -91,9 +91,7 @@ const RepresentativeProfile = () => {
                 description: 'Вы подписались на обновления этого представителя власти',
                 variant: 'default',
             });
-        } catch (error: any) {
-            console.error('Ошибка подписки:', error);
-
+        } catch (error) {
             const message = error?.response?.data?.message || 'Не удалось оформить подписку';
 
             toast({
@@ -229,12 +227,14 @@ const RepresentativeProfile = () => {
                                     disabled={user.subscriptions.length > 0}>
                                     Подписаться
                                 </Button>
-
-                                <Button
-                                    className="honor-button-secondary"
-                                    onClick={handleSendMessage}>
-                                    Написать сообщение (10 билетов)
-                                </Button>
+                                {/* 
+                                {user.subscriptions.length > 0 && (
+                                    <Button
+                                        className="honor-button-secondary"
+                                        onClick={handleSendMessage}>
+                                        Написать сообщение (10 билетов)
+                                    </Button>
+                                )} */}
                             </div>
                         </div>
                     </div>

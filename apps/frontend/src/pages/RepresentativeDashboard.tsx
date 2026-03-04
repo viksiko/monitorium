@@ -1,12 +1,8 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import {
-    ProfileSidebar,
-    TasksTab,
-    MessagesTab,
-} from '@/components/representative';
+import { ProfileSidebar, TasksTab, MessagesTab } from '@/components/representative';
 import BlogTab from '@/components/representative/BlogTab';
 import { useAuth } from '@/context/AuthContext';
 
@@ -43,12 +39,9 @@ const RepresentativeDashboard = () => {
         <Layout>
             <div className="honor-container py-12">
                 <div className="mb-6">
-                    <h1 className="text-3xl font-bold text-honor-darkGray">
-                        Панель представителя власти
-                    </h1>
+                    <h1 className="text-3xl font-bold text-honor-darkGray">Панель представителя власти</h1>
                     <p className="text-honor-darkGray mt-2">
-                        Добро пожаловать, {user.name}! Управляйте задачами и
-                        взаимодействуйте с избирателями
+                        Добро пожаловать, {user.name}! Управляйте задачами и взаимодействуйте с избирателями
                     </p>
                 </div>
 

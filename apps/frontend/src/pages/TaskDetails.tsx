@@ -10,6 +10,7 @@ import Loader from '@/components/ui/loader';
 import { Badge } from '@/components/ui/badge';
 import { useAuthorizedFetch } from '@/hooks/useAuthorizedFetch';
 import { TaskStatusBadge } from '@/components/ui/task-status-badge';
+import DashboardBackButton from '@/components/ui/dashboardBackButton';
 
 const TaskDetails = () => {
     // const [showModifications, setShowModifications] = useState<number | null>(
@@ -82,25 +83,18 @@ const TaskDetails = () => {
     return (
         <Layout>
             <div className="honor-container py-12">
+                <h1 className="text-3xl font-bold  text-honor-darkGray mb-8">Задача «{task.title}»</h1>
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     <div className="lg:col-span-1">
                         <UserProfileSidebar />
                     </div>
-                    <div className="lg:col-span-2">
-                        <Link
-                            to="/dashboard"
-                            className="block w-4 hover:opacity-80">
-                            <CircleChevronLeft
-                                size={40}
-                                strokeWidth={1.75}
-                                className="text-honor-blue"
-                            />
-                        </Link>
+                    <div className="relative lg:col-span-2">
+                        <DashboardBackButton />
                         <div>
                             <Tabs defaultValue="tasks">
                                 <TabsContent
                                     value="tasks"
-                                    className="space-y-6">
+                                    className="space-y-6 mt-0">
                                     <Card
                                         key={task.id}
                                         className="honor-card">
