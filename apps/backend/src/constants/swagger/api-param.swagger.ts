@@ -37,3 +37,19 @@ export const PARAM_POST_USER_ID = {
     type: String,
     example: '/api/v1/posts/{userId}',
 };
+
+export const PARAM_MESSAGE_DIALOG = {
+    name: 'dialogId',
+    description: 'Обязательный параметр',
+    required: true,
+    type: String,
+    example: '/api/v1/dialogs/{dialogId}/messages',
+};
+
+export const PARAM_READ_DIALOG = {
+    name: 'dialogId',
+    description: 'Обязательный параметр',
+    required: true,
+    type: String,
+    example: '/api/v1/dialogs/{dialogId}/read',
+};

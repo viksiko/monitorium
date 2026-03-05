@@ -1,4 +1,3 @@
-import React from 'react';
 import Layout from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
@@ -18,12 +17,9 @@ const NotFound = () => {
                                 </span>
                             </div>
                         </div>
-                        <h2 className="text-2xl font-bold mt-6 mb-4">
-                            Страница не найдена
-                        </h2>
+                        <h2 className="text-2xl font-bold mt-6 mb-4">Страница не найдена</h2>
                         <p className="text-honor-darkGray mb-8">
-                            К сожалению, запрашиваемая страница не существует
-                            или была перемещена на другой адрес.
+                            К сожалению, запрашиваемая страница не существует или была перемещена на другой адрес.
                         </p>
                     </div>
 

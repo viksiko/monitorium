@@ -66,7 +66,6 @@ export class TaskService {
                 },
             });
         } catch (error) {
-            console.error('Error creating task:', error);
             logger.error('Failed create task', {
                 category: 'TaskService',
                 operation: 'createTask',

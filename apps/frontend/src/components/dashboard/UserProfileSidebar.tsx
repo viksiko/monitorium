@@ -60,9 +60,7 @@ const UserProfileSidebar = () => {
                 <Avatar className="h-24 w-24 mb-4 bg-honor-blue text-white text-xl font-bold">
                     {user.name ? getUserInitials() : <User size={48} />}
                 </Avatar>
-                <h1 className="text-2xl font-bold">
-                    {user.name || 'Пользователь'}
-                </h1>
+                <h1 className="text-2xl font-bold">{user.name || 'Пользователь'}</h1>
                 <div className="flex items-center gap-2">
                     <p className="text-honor-darkGray">{getUserRoleText()}</p>
                     {user.isRepresentative && (
@@ -81,34 +79,24 @@ const UserProfileSidebar = () => {
                         <span className="text-sm">{user.district}</span>
                     </div>
                 )}
-                {user.isVerified && (
-                    <Badge className="mt-2 bg-green-500">Верифицирован</Badge>
-                )}
-                <Badge className="mt-2 bg-honor-blue">
-                    {user.voterProfile.balance} токенов
-                </Badge>
+                {user.isVerified && <Badge className="mt-2 bg-green-500">Верифицирован</Badge>}
+                <Badge className="mt-2 bg-honor-blue">{user.voterProfile.balance} токенов</Badge>
             </div>
 
             <div className="border-t border-b py-4 mb-4">
                 <div className="grid grid-cols-3 text-center">
                     <div>
                         <p className="text-2xl font-bold text-honor-blue">
-                            {user.isRepresentative
-                                ? user.representativeProfile?.rating || 0
-                                : '0'}
+                            {user.isRepresentative ? user.representativeProfile?.rating || 0 : '0'}
                         </p>
-                        <p className="text-xs text-honor-darkGray">
-                            {user.isRepresentative ? 'Рейтинг' : 'Заданий'}
-                        </p>
+                        <p className="text-xs text-honor-darkGray">{user.isRepresentative ? 'Рейтинг' : 'Заданий'}</p>
                     </div>
                     <div>
                         <p className="text-2xl font-bold text-honor-blue">0</p>
                         <p className="text-xs text-honor-darkGray">Реакций</p>
                     </div>
                     <div>
-                        <p className="text-2xl font-bold text-honor-blue">
-                            {user.voterProfile.balance}
-                        </p>
+                        <p className="text-2xl font-bold text-honor-blue">{user.voterProfile.balance}</p>
                         <p className="text-xs text-honor-darkGray">Токенов</p>
                     </div>
                 </div>
@@ -117,9 +105,7 @@ const UserProfileSidebar = () => {
             <div className="p-6">
                 {!user.isRepresentative && (
                     <>
-                        <h3 className="text-lg font-semibold mb-4">
-                            Мой представитель
-                        </h3>
+                        <h3 className="text-lg font-semibold mb-4">Мой представитель</h3>
                         {user.subscriptions && user.subscriptions.length > 0 ? (
                             // Если подписки есть — выводим список
                             <div className="space-y-3">
@@ -135,13 +121,10 @@ const UserProfileSidebar = () => {
                                         </div>
                                         <div>
                                             <p className="font-medium">
-                                                {sub.representative?.name ||
-                                                    'Имя не указано'}
+                                                {sub.representative?.name || 'Имя не указано'}
                                             </p>
                                             <p className="text-sm text-honor-darkGray">
-                                                {sub.representative
-                                                    .representativeProfile
-                                                    ?.position ||
+                                                {sub.representative.representativeProfile?.position ||
                                                     'Должность не указана'}
                                             </p>
                                         </div>
@@ -158,12 +141,8 @@ const UserProfileSidebar = () => {
                                     />
                                 </div>
                                 <div>
-                                    <p className="font-medium text-gray-500">
-                                        Не назначен
-                                    </p>
-                                    <p className="text-sm text-honor-darkGray">
-                                        Выберите представителя в каталоге
-                                    </p>
+                                    <p className="font-medium text-gray-500">Не назначен</p>
+                                    <p className="text-sm text-honor-darkGray">Выберите представителя в каталоге</p>
                                 </div>
                             </div>
                         )}
@@ -172,44 +151,33 @@ const UserProfileSidebar = () => {
 
                 {user.isRepresentative && (
                     <>
-                        <h3 className="text-lg font-semibold mb-4">
-                            Статистика
-                        </h3>
+                        <h3 className="text-lg font-semibold mb-4">Статистика</h3>
                         <div className="space-y-2 mb-4">
                             {user.representativeProfile?.position && (
                                 <p className="text-sm">
-                                    <span className="font-medium">
-                                        Должность:
-                                    </span>{' '}
+                                    <span className="font-medium">Должность:</span>{' '}
                                     {user.representativeProfile.position}
                                 </p>
                             )}
                             {user.representativeProfile?.party && (
                                 <p className="text-sm">
-                                    <span className="font-medium">Партия:</span>{' '}
-                                    {user.representativeProfile.party}
+                                    <span className="font-medium">Партия:</span> {user.representativeProfile.party}
                                 </p>
                             )}
                             <p className="text-sm">
-                                <span className="font-medium">Email:</span>{' '}
-                                {user.email}
+                                <span className="font-medium">Email:</span> {user.email}
                             </p>
                             {user.phone && (
                                 <p className="text-sm">
-                                    <span className="font-medium">
-                                        Телефон:
-                                    </span>{' '}
-                                    {user.phone}
+                                    <span className="font-medium">Телефон:</span> {user.phone}
                                 </p>
                             )}
                         </div>
                     </>
                 )}
 
-                <h3 className="text-lg font-semibold mt-6 mb-4">
-                    Быстрые действия
-                </h3>
-                <div className="space-y-3">
+                <h3 className="text-lg font-semibold mt-6 mb-4">Быстрые действия</h3>
+                <div className="flex flex-col space-y-3">
                     {!user.isRepresentative && (
                         <Link to="/tasks/create">
                             <Button className="w-full honor-button-primary flex items-center justify-center">

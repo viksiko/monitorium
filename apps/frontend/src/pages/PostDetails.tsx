@@ -12,6 +12,7 @@ import { useAuthorizedFetch } from '@/hooks/useAuthorizedFetch';
 import { TaskStatusBadge } from '@/components/ui/task-status-badge';
 import RepresantiveProfileSidebar from '@/components/representative/RepresantiveProfileSidebar';
 import { Avatar } from '@/components/ui/avatar';
+import DashboardBackButton from '@/components/ui/dashboardBackButton';
 
 const PostDetails = () => {
     const accessToken = useAuthStore((state) => state.accessToken);
@@ -54,25 +55,18 @@ const PostDetails = () => {
     return (
         <Layout>
             <div className="honor-container py-12">
+                <h1 className="text-3xl font-bold  text-honor-darkGray mb-8">Статья «{post.title}»</h1>
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    <div className="lg:col-span-1">
+                    <div className="relative lg:col-span-1">
                         <RepresantiveProfileSidebar />
                     </div>
-                    <div className="lg:col-span-2">
-                        <Link
-                            to="/dashboard"
-                            className="block w-4 hover:opacity-80">
-                            <CircleChevronLeft
-                                size={40}
-                                strokeWidth={1.75}
-                                className="text-honor-blue"
-                            />
-                        </Link>
+                    <div className="relative lg:col-span-2 ">
+                        <DashboardBackButton />
                         <div>
                             <Tabs defaultValue="posts">
                                 <TabsContent
                                     value="posts"
-                                    className="space-y-6">
+                                    className="space-y-6 mt-0">
                                     <Card className="honor-card">
                                         <div className="p-6">
                                             <div className="flex items-center mb-4">

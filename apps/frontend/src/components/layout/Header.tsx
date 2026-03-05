@@ -34,21 +34,22 @@ const Header = () => {
                         <Link
                             to="/"
                             className="flex items-center">
-                            <span className="text-2xl font-bold text-honor-blue whitespace-nowrap">
-                                Мониториум
-                            </span>
+                            <span className="text-2xl font-bold text-honor-blue whitespace-nowrap">Мониториум</span>
                         </Link>
                     </div>
 
                     <nav className="hidden md:flex items-center space-x-6">
                         {user && (
                             <>
-                                <Link
-                                    to="/tasks/create"
-                                    className="flex items-center space-x-1 text-honor-text hover:text-honor-blue transition-colors">
-                                    <Plus size={20} />
-                                    <span>Создать задание</span>
-                                </Link>
+                                {!user.isRepresentative && (
+                                    <Link
+                                        to="/tasks/create"
+                                        className="flex items-center space-x-1 text-honor-text hover:text-honor-blue transition-colors">
+                                        <Plus size={20} />
+                                        <span>Создать задание</span>
+                                    </Link>
+                                )}
+
                                 <Link
                                     to="/map"
                                     className="flex items-center space-x-1 text-honor-text hover:text-honor-blue transition-colors">
@@ -78,9 +79,7 @@ const Header = () => {
                                             className="text-honor-blue mr-1"
                                         />
 
-                                        <span className="text-sm font-medium">
-                                            {user.voterProfile.balance}
-                                        </span>
+                                        <span className="text-sm font-medium">{user.voterProfile.balance}</span>
                                     </Link>
                                 )}
 
@@ -96,21 +95,16 @@ const Header = () => {
                                     </DialogTrigger>
                                     <DialogContent>
                                         <DialogHeader>
-                                            <DialogTitle>
-                                                Подписки и уведомления
-                                            </DialogTitle>
+                                            <DialogTitle>Подписки и уведомления</DialogTitle>
                                             <DialogDescription>
-                                                Управляйте подписками и
-                                                просматривайте последние
-                                                уведомления
+                                                Управляйте подписками и просматривайте последние уведомления
                                             </DialogDescription>
                                         </DialogHeader>
                                         <div className="py-4">
                                             <div className="space-y-4">
                                                 <div>
                                                     <h3 className="text-sm font-medium">
-                                                        Вы подписаны на
-                                                        следующие округа:
+                                                        Вы подписаны на следующие округа:
                                                     </h3>
                                                     <div className="mt-2 space-y-2">
                                                         <div className="flex justify-between items-center p-2 bg-honor-gray rounded">
@@ -119,9 +113,7 @@ const Header = () => {
                                                                     size={16}
                                                                     className="text-honor-blue mr-2"
                                                                 />
-                                                                <span>
-                                                                    Округ №3
-                                                                </span>
+                                                                <span>Округ №3</span>
                                                             </div>
                                                             <Button
                                                                 variant="ghost"
@@ -132,14 +124,11 @@ const Header = () => {
                                                     </div>
                                                 </div>
                                                 <div>
-                                                    <h3 className="text-sm font-medium">
-                                                        Последние уведомления:
-                                                    </h3>
+                                                    <h3 className="text-sm font-medium">Последние уведомления:</h3>
                                                     <div className="mt-2 space-y-2">
                                                         <div className="p-2 bg-honor-gray rounded">
                                                             <p className="text-sm font-medium">
-                                                                Новое задание в
-                                                                Округе №3
+                                                                Новое задание в Округе №3
                                                             </p>
                                                             <p className="text-xs text-honor-darkGray">
                                                                 15 минут назад
@@ -147,13 +136,9 @@ const Header = () => {
                                                         </div>
                                                         <div className="p-2 bg-honor-gray rounded">
                                                             <p className="text-sm font-medium">
-                                                                Встреча с
-                                                                жителями
-                                                                перенесена
+                                                                Встреча с жителями перенесена
                                                             </p>
-                                                            <p className="text-xs text-honor-darkGray">
-                                                                2 часа назад
-                                                            </p>
+                                                            <p className="text-xs text-honor-darkGray">2 часа назад</p>
                                                         </div>
                                                     </div>
                                                 </div>

@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { MapPin, Calendar, Clock, Plus, ThumbsUp, MessageSquare } from 'lucide-react';
+import { MapPin, Calendar, Clock, Plus, ThumbsUp, MessageSquare, FilePen } from 'lucide-react';
 import { toast } from 'sonner';
 import { api } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
@@ -47,19 +47,11 @@ const BlogTab = () => {
         );
     }
 
-    // if (posts.length === 0) {
-    //     return (
-    //         <div className="honor-card text-center py-8">
-    //             <p className="text-honor-darkGray">По вашему запросу ничего не найдено</p>
-    //         </div>
-    //     );
-    // }
-
     return (
         <>
             <div className="flex justify-between items-center mb-4">
                 <h2 className="text-2xl font-bold">Мои статьи</h2>
-                {posts.length !== 0 && (
+                {posts.length === 0 && (
                     <Link to="/posts/create">
                         <Button className="honor-button-primary flex items-center">
                             <Plus
@@ -111,10 +103,11 @@ const BlogTab = () => {
 
             {posts.length === 0 && (
                 <div className="text-center py-10">
+                    <FilePen
+                        className="mx-auto mb-4 text-honor-darkGray/90"
+                        size={64}
+                    />
                     <p className="text-honor-darkGray mb-4">У вас пока нет опубликованных статей</p>
-                    <Link to="/posts/create">
-                        <Button className="honor-button-primary">Создать первую статью</Button>
-                    </Link>
                 </div>
             )}
         </>

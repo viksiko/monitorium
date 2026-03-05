@@ -2,13 +2,9 @@ import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import {
-    UserProfileSidebar,
-    TasksTab,
-    NotificationsTab,
-    SubscriptionsTab,
-} from '@/components/dashboard';
+import { UserProfileSidebar, TasksTab, NotificationsTab, SubscriptionsTab } from '@/components/dashboard';
 import { useAuth } from '@/context/AuthContext';
+import { MessagesTab } from '@/components/representative';
 
 const Dashboard = () => {
     const { user } = useAuth();
@@ -50,12 +46,9 @@ const Dashboard = () => {
         <Layout>
             <div className="honor-container py-12">
                 <div className="mb-6">
-                    <h1 className="text-3xl font-bold text-honor-darkGray">
-                        Добро пожаловать, {user.name}!
-                    </h1>
+                    <h1 className="text-3xl font-bold text-honor-darkGray">Добро пожаловать, {user.name}!</h1>
                     <p className="text-honor-darkGray mt-2">
-                        Управляйте своими заданиями и следите за активностью в
-                        вашем округе
+                        Управляйте своими заданиями и следите за активностью в вашем округе
                     </p>
                 </div>
 
@@ -75,6 +68,11 @@ const Dashboard = () => {
                                     Мои задания
                                 </TabsTrigger>
                                 <TabsTrigger
+                                    value="messages"
+                                    className="flex-1">
+                                    Сообщения
+                                </TabsTrigger>
+                                <TabsTrigger
                                     value="notifications"
                                     className="flex-1">
                                     Уведомления
@@ -88,6 +86,10 @@ const Dashboard = () => {
 
                             <TabsContent value="tasks">
                                 <TasksTab />
+                            </TabsContent>
+
+                            <TabsContent value="messages">
+                                <MessagesTab />
                             </TabsContent>
 
                             <TabsContent value="notifications">

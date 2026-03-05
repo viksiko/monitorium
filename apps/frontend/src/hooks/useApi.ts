@@ -16,9 +16,11 @@ export function useApi<T = unknown>() {
             setData(response.data.data);
 
             return response.data.data;
-        } catch (err: any) {
-            setError(err.response?.data?.message || 'Something went wrong');
-            return null;
+        } catch (err) {
+            const message = err.response?.data?.message || 'Something went wrong';
+
+            setError(message);
+            throw new Error(message);
         } finally {
             setLoading(false);
         }

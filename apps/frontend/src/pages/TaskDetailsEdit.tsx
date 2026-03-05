@@ -17,6 +17,9 @@ import {
     Trash2,
     Plus,
     X,
+    ChevronLeft,
+    LayoutDashboard,
+    House,
 } from 'lucide-react';
 import { Link, useParams } from 'react-router-dom';
 import Loader from '@/components/ui/loader';
@@ -31,6 +34,7 @@ import { useApi } from '@/hooks/useApi';
 import { TaskStatus, TaskStage } from '@monorepo/types';
 import { Button } from '@/components/ui/button';
 import { STATUS_CONFIG } from '@/constants/task-status.config';
+import DashboardBackButton from '@/components/ui/dashboardBackButton';
 
 const TaskDetailsEdit = () => {
     const { taskId } = useParams<{ taskId: string }>();
@@ -283,6 +287,7 @@ const TaskDetailsEdit = () => {
     return (
         <Layout>
             <div className="honor-container py-12">
+                <h1 className="text-3xl font-bold text-honor-darkGray mb-8">Задача «{task.title}»</h1>
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     <div className="lg:col-span-1">
                         <ProfileSidebar />
@@ -293,30 +298,25 @@ const TaskDetailsEdit = () => {
                                 <Loader />
                             </div>
                         )}
-                        <div className="flex justify-between">
-                            <Link
-                                to="/dashboard"
-                                className="block w-4 hover:opacity-80">
-                                <CircleChevronLeft
-                                    size={40}
-                                    strokeWidth={1.75}
-                                    className="text-honor-blue"
-                                />
-                            </Link>
+                        <div className="flex relative justify-between">
+                            <DashboardBackButton />
+
                             {isChanged && (
-                                <Save
-                                    size={40}
-                                    strokeWidth={1.75}
-                                    className="text-honor-blue cursor-pointer hover:opacity-80"
-                                    onClick={handleSave}
-                                />
+                                <div className="absolute top-[-26px] right-0">
+                                    <Save
+                                        size={22}
+                                        strokeWidth={1.75}
+                                        className="text-honor-blue cursor-pointer hover:opacity-80"
+                                        onClick={handleSave}
+                                    />
+                                </div>
                             )}
                         </div>
                         <div>
                             <Tabs defaultValue="tasks">
                                 <TabsContent
                                     value="tasks"
-                                    className="space-y-6">
+                                    className="space-y-6  mt-0">
                                     <Card
                                         key={task.id}
                                         className="honor-card">

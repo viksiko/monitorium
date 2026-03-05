@@ -177,6 +177,30 @@ CREATE TABLE "post_files" (
     CONSTRAINT "post_files_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateTable
+CREATE TABLE "dialogs" (
+    "id" TEXT NOT NULL,
+    "voterId" TEXT NOT NULL,
+    "representativeId" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "voterLastReadAt" TIMESTAMP(3),
+    "representativeLastReadAt" TIMESTAMP(3),
+
+    CONSTRAINT "dialogs_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "messages" (
+    "id" TEXT NOT NULL,
+    "dialogId" TEXT NOT NULL,
+    "senderId" TEXT NOT NULL,
+    "text" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "messages_pkey" PRIMARY KEY ("id")
+);
+
 -- CreateIndex
 CREATE UNIQUE INDEX "users_email_key" ON "users"("email");
 
@@ -203,6 +227,12 @@ CREATE UNIQUE INDEX "subscriptions_subscriberId_representativeId_key" ON "subscr
 
 -- CreateIndex
 CREATE UNIQUE INDEX "tokens_hashedToken_key" ON "tokens"("hashedToken");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "dialogs_voterId_representativeId_key" ON "dialogs"("voterId", "representativeId");
+
+-- CreateIndex
+CREATE INDEX "messages_dialogId_createdAt_idx" ON "messages"("dialogId", "createdAt");
 
 -- AddForeignKey
 ALTER TABLE "tasks" ADD CONSTRAINT "tasks_authorId_fkey" FOREIGN KEY ("authorId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -248,3 +278,15 @@ ALTER TABLE "post_comments" ADD CONSTRAINT "post_comments_userId_fkey" FOREIGN K
 
 -- AddForeignKey
 ALTER TABLE "post_files" ADD CONSTRAINT "post_files_postId_fkey" FOREIGN KEY ("postId") REFERENCES "posts"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "dialogs" ADD CONSTRAINT "dialogs_voterId_fkey" FOREIGN KEY ("voterId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "dialogs" ADD CONSTRAINT "dialogs_representativeId_fkey" FOREIGN KEY ("representativeId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "messages" ADD CONSTRAINT "messages_dialogId_fkey" FOREIGN KEY ("dialogId") REFERENCES "dialogs"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "messages" ADD CONSTRAINT "messages_senderId_fkey" FOREIGN KEY ("senderId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
