@@ -1,4 +1,4 @@
-import { createContext, useContext, ReactNode, useEffect, useCallback } from 'react';
+import { createContext, useContext, ReactNode, useEffect, useCallback, useMemo } from 'react';
 import { useUser, useLogin, useRegister, useLogout, useOAuthLogin, useRefreshToken } from '@/hooks/useAuth';
 import { User, RegisterData, LoginData, OAuthData } from '@/types/auth';
 import { useToast } from '@/components/ui/use-toast';
@@ -9,8 +9,7 @@ import { useAuthStore } from '@/shared/stores/auth.store';
 interface AuthContextType {
     user: User | null | undefined;
     loading: boolean;
-    isAuthenticated: boolean;
-    refreshToken: () => Promise<void>;
+    // refreshToken: () => Promise<void>;
     login: (email: string, password: string) => Promise<void>;
     register: (data: RegisterData) => Promise<any>;
     logout: () => void;
@@ -24,8 +23,8 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-    const { accessToken, status, setAccessToken } = useAuthStore((authState) => authState);
     const refreshTokenMutation = useRefreshToken();
+    const { status } = useAuthStore();
     const { data: user, isLoading: loading, isError, error } = useUser();
     const queryClient = useQueryClient();
     const loginMutation = useLogin();
@@ -35,37 +34,15 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const { toast } = useToast();
 
     // Используем для первоначального запроса токена при загрузке страницы.
-    // Потому что accessToken может быть undefined и токен просрочен.
     useEffect(() => {
-        refreshToken();
+        refreshTokenMutation.mutate();
     }, []);
 
-    const refreshToken = useCallback(async () => {
-        if (status === 'unauthorized' || (status === 'fresh' && accessToken)) return;
-
-        if (status && user) return;
-
-        // Если есть ошибка получения профиля пользователя, то токен ВОЗМОЖНО просрочен.
-
-        // TODO: Сделать проверку актуальности токена по специальному методу проверки токена, а
-        // не по ошибкам получения юзера (потому что они могут быть иного рода)
-
-        try {
-            await refreshTokenMutation.mutateAsync();
-            toast({
-                title: 'Токен обновлен',
-                description: 'Токен успешно обновлен.',
-                variant: 'success',
-            });
-        } catch (error) {
-            console.error('Refresh token failed', error);
-            toast({
-                title: 'Ошибка обновления токена',
-                description: 'Произошла ошибка при обновлении токена.',
-                variant: 'destructive',
-            });
+    useEffect(() => {
+        if (status !== 'fresh') {
+            queryClient.removeQueries({ queryKey: ['user'] });
         }
-    }, [status, accessToken, user, refreshTokenMutation, toast]);
+    }, [status, queryClient]);
 
     const login = async (email: string, password: string) => {
         try {
@@ -156,10 +133,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     return (
         <AuthContext.Provider
             value={{
-                user,
+                user: status === 'fresh' ? user : undefined,
                 loading,
-                isAuthenticated: !!user,
-                refreshToken,
+                // refreshToken,
                 login,
                 register,
                 logout,
