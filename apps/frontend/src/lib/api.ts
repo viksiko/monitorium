@@ -36,7 +36,7 @@ export async function refreshTokenPair(): Promise<string> {
     const authState = useAuthStore.getState();
 
     if (authState.status === 'unauthorized') {
-        return Promise.reject(new Error('Cannot refresh: already unauthorized'));
+        throw new Error('Cannot refresh: already unauthorized');
     }
 
     if (sharedRefreshPromise) {
@@ -55,9 +55,7 @@ export async function refreshTokenPair(): Promise<string> {
 
             const { accessToken } = response.data.data;
 
-            if (!accessToken) {
-                return Promise.reject(response);
-            }
+            if (!accessToken) throw response;
 
             authState.setAccessToken(accessToken, 'fresh');
 
@@ -65,6 +63,7 @@ export async function refreshTokenPair(): Promise<string> {
         } catch (refreshError) {
             console.warn('Refresh token failed');
             authState.logout();
+
             throw refreshError;
         } finally {
             sharedRefreshPromise = null;
@@ -84,11 +83,10 @@ api.interceptors.response.use(
         const { response, config } = error;
         const authState = useAuthStore.getState();
 
-        if (!response || response.status !== 401 || !config || authState.status === 'unauthorized')
-            return Promise.reject(error);
+        if (!response || response.status !== 401 || !config || authState.status === 'unauthorized') throw error;
 
         // Это важная проверка, чтобы не зациклиться на обновлении токена при вызове refreshTokenPair
-        if (config.url?.includes('/auth/refresh')) return Promise.reject(error);
+        if (config.url?.includes('/auth/refresh')) throw error;
 
         try {
             const accessToken = await refreshTokenPair();
