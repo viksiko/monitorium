@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api, refreshTokenPair } from '@/lib/api';
 import { RegisterData, LoginData, AuthResponse, User, OAuthData } from '@/types/auth';
-import { AuthState, useAuthStore } from '@/shared/stores/auth.store';
+import { useAuthStore } from '@/shared/stores/auth.store';
 import { RegisterRoleEnum } from '@monorepo/types';
 
 export const useRefreshToken = () => {

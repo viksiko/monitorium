@@ -1,4 +1,4 @@
-import { createContext, useContext, ReactNode, useEffect, useCallback, useMemo } from 'react';
+import { createContext, useContext, ReactNode, useEffect } from 'react';
 import { useUser, useLogin, useRegister, useLogout, useOAuthLogin, useRefreshToken } from '@/hooks/useAuth';
 import { User, RegisterData, LoginData, OAuthData } from '@/types/auth';
 import { useToast } from '@/components/ui/use-toast';
@@ -9,7 +9,6 @@ import { useAuthStore } from '@/shared/stores/auth.store';
 interface AuthContextType {
     user: User | null | undefined;
     loading: boolean;
-    // refreshToken: () => Promise<void>;
     login: (email: string, password: string) => Promise<void>;
     register: (data: RegisterData) => Promise<any>;
     logout: () => void;
@@ -25,7 +24,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const refreshTokenMutation = useRefreshToken();
     const { status } = useAuthStore();
-    const { data: user, isLoading: loading, isError, error } = useUser();
+    const { data: user, isLoading: loading } = useUser();
     const queryClient = useQueryClient();
     const loginMutation = useLogin();
     const registerMutation = useRegister();
@@ -38,6 +37,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         refreshTokenMutation.mutate();
     }, []);
 
+    // Этот useEffect используется для очистки данных пользователя из кэша, если статус не fresh.
     useEffect(() => {
         if (status !== 'fresh') {
             queryClient.removeQueries({ queryKey: ['user'] });
@@ -136,7 +136,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 // Это условие необходимо для обновления данных пользователя в компонентах.
                 user: status === 'fresh' ? user : undefined,
                 loading,
-                // refreshToken,
                 login,
                 register,
                 logout,

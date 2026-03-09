@@ -1,6 +1,6 @@
 import { useAuthStore } from '@/shared/stores/auth.store';
 import { AuthResponse } from '@/types/auth';
-import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
+import axios, { AxiosError, AxiosResponse } from 'axios';
 
 export const api = axios.create({
     baseURL: import.meta.env.VITE_API_URL,
