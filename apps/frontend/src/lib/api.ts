@@ -23,36 +23,8 @@ api.interceptors.request.use((config) => {
 
 /// REFRESH TOKEN INTERCEPTOR
 
-/**
- * Обновляет пару токенов (access и refresh)
- * @returns Новый accessToken
- * @throws Error, если обновление токена неуспешно
- */
-async function refreshTokenPair(): Promise<string> {
-    const response: AxiosResponse<{
-        data: AuthResponse;
-    }> = await api.post('/api/v1/auth/refresh');
-
-    const { accessToken } = response.data.data;
-
-    return accessToken || Promise.reject(response);
-}
-
+// Этот promise используется для запуска refreshTokenPair в единственном экземпляре.
 let sharedRefreshPromise: Promise<string> | null = null;
-/**
- * Возвращает sharedRefreshPromise, если он уже существует, иначе создает новый
- * @returns Новый accessToken
- */
-async function getOrRunRefreshPromise(): Promise<{ accessToken: string; isFirstCaller: boolean }> {
-    if (sharedRefreshPromise) {
-        return { accessToken: await sharedRefreshPromise, isFirstCaller: false };
-    }
-    sharedRefreshPromise = refreshTokenPair().finally(() => {
-        sharedRefreshPromise = null;
-    });
-
-    return { accessToken: await sharedRefreshPromise, isFirstCaller: true };
-}
 
 /**
  * Проверяет необходимость обновления, запускает refresh и обновляет authState.
@@ -60,26 +32,46 @@ async function getOrRunRefreshPromise(): Promise<{ accessToken: string; isFirstC
  * @returns Новый accessToken
  * @throws При ошибке обновления — вызывает logout и пробрасывает ошибку
  */
-export async function ensureRefreshedToken(): Promise<string> {
+export async function refreshTokenPair(): Promise<string> {
     const authState = useAuthStore.getState();
 
     if (authState.status === 'unauthorized') {
         return Promise.reject(new Error('Cannot refresh: already unauthorized'));
     }
 
-    try {
-        const { accessToken, isFirstCaller } = await getOrRunRefreshPromise();
-
-        if (isFirstCaller) {
-            authState.setAccessToken(accessToken, 'fresh');
-        }
-
-        return accessToken;
-    } catch (refreshError) {
-        console.warn('Refresh token failed');
-        authState.logout();
-        throw refreshError;
+    if (sharedRefreshPromise) {
+        return sharedRefreshPromise;
     }
+
+    sharedRefreshPromise = (async () => {
+        try {
+            // Этот вызов post перейдет внутри себя в интерсептор,
+            // если ответ будет с ошибкой (например 401).
+            // Поэтому в интерсепторе мы учитываем конкретный api-путь /api/v1/auth/refresh.
+            // чтобы не зациклиться на обновлении токена при вызове refreshTokenPair.
+            const response: AxiosResponse<{
+                data: AuthResponse;
+            }> = await api.post('/api/v1/auth/refresh');
+
+            const { accessToken } = response.data.data;
+
+            if (!accessToken) {
+                return Promise.reject(response);
+            }
+
+            authState.setAccessToken(accessToken, 'fresh');
+
+            return accessToken;
+        } catch (refreshError) {
+            console.warn('Refresh token failed');
+            authState.logout();
+            throw refreshError;
+        } finally {
+            sharedRefreshPromise = null;
+        }
+    })();
+
+    return sharedRefreshPromise;
 }
 
 // Обрабатываем 401 ошибку:
@@ -99,7 +91,7 @@ api.interceptors.response.use(
         if (config.url?.includes('/auth/refresh')) return Promise.reject(error);
 
         try {
-            const accessToken = await ensureRefreshedToken();
+            const accessToken = await refreshTokenPair();
 
             config.headers.Authorization = `Bearer ${accessToken}`;
             return api(config);

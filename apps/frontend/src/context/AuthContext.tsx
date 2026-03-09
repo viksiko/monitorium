@@ -133,6 +133,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     return (
         <AuthContext.Provider
             value={{
+                // Это условие необходимо для обновления данных пользователя в компонентах.
                 user: status === 'fresh' ? user : undefined,
                 loading,
                 // refreshToken,
