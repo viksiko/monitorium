@@ -5,16 +5,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import {
-    MapPin,
-    Calendar,
-    Clock,
-    Plus,
-    ThumbsUp,
-    MessageSquare,
-    Search,
-    Filter,
-} from 'lucide-react';
+import { MapPin, Calendar, Clock, Plus, ThumbsUp, MessageSquare, Search, Filter } from 'lucide-react';
 
 // Моковые данные задач
 const tasks = [
@@ -71,12 +62,9 @@ const Tasks = () => {
                 <div className="max-w-5xl mx-auto">
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
                         <div>
-                            <h1 className="text-3xl font-bold mb-2">
-                                Задачи и обращения
-                            </h1>
+                            <h1 className="text-3xl font-bold mb-2">Задачи и обращения</h1>
                             <p className="text-honor-darkGray">
-                                Список всех публичных задач и обращений от
-                                избирателей
+                                Список всех публичных задач и обращений от избирателей
                             </p>
                         </div>
                         <Link
@@ -122,9 +110,7 @@ const Tasks = () => {
                             className="honor-card mb-6">
                             <div className="flex justify-between items-start mb-4">
                                 <Link to={`/tasks/${task.id}`}>
-                                    <h3 className="text-xl font-bold hover:text-honor-blue">
-                                        {task.title}
-                                    </h3>
+                                    <h3 className="text-xl font-bold hover:text-honor-blue">{task.title}</h3>
                                 </Link>
                                 <Badge
                                     className={
@@ -155,12 +141,7 @@ const Tasks = () => {
                                     size={16}
                                     className="mr-1"
                                 />
-                                <span>
-                                    До{' '}
-                                    {new Date(task.date).toLocaleDateString(
-                                        'ru-RU',
-                                    )}
-                                </span>
+                                <span>До {new Date(task.date).toLocaleDateString('ru-RU')}</span>
                             </div>
 
                             <div className="flex justify-between items-center mb-2">
@@ -179,10 +160,7 @@ const Tasks = () => {
                                         size={16}
                                         className="inline mr-1"
                                     />
-                                    Создано{' '}
-                                    {new Date(
-                                        task.createdAt,
-                                    ).toLocaleDateString('ru-RU')}
+                                    Создано {new Date(task.createdAt).toLocaleDateString('ru-RU')}
                                 </span>
                             </div>
                         </Card>

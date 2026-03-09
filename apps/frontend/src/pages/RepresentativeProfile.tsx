@@ -16,28 +16,8 @@ import { User as IUser } from '@/types/auth';
 import { TasksTab } from '@/components/dashboard';
 import TasksTabProfile from '@/components/representative/TasksTabProfile';
 import BlogTabProfile from '@/components/representative/BlogTabProfile';
-
-// interface RepresentativeProfileData {
-//     id: string;
-//     name: string;
-//     email: string;
-//     phone: string | null;
-//     role: string;
-//     isRepresentative: boolean;
-//     isVerified: boolean;
-//     tasks: [];
-//     representativeProfile: {
-//         id: string;
-//         position: string;
-//         party: string;
-//         rating: number;
-//         bio: string;
-//         tasksTotal: number;
-//         tasksCompleted: number;
-//         attendance: number;
-//         lastActivity: string | null;
-//     } | null;
-// }
+import { formatPartyName } from '@/utils/formatPartyName';
+import { Representative } from '@monorepo/types';
 
 const RepresentativeProfile = () => {
     const { id } = useParams();
@@ -46,7 +26,7 @@ const RepresentativeProfile = () => {
     const [liked, setLiked] = useState<Record<string, boolean>>({});
     const [showModifications, setShowModifications] = useState<number | null>(null);
 
-    const [representative, setRepresentative] = useState<IUser | null>(null);
+    const [representative, setRepresentative] = useState<Representative | null>(null);
     const [tasks, setTasks] = useState<Task[]>([]);
     const [posts, setPosts] = useState<Post[]>([]);
     const [loading, setLoading] = useState(true);
@@ -79,6 +59,8 @@ const RepresentativeProfile = () => {
     };
 
     const handleSubscribe = async () => {
+        if (isSubscribed) return;
+
         try {
             await api.post('/api/v1/subscriptions', {
                 representativeId: representative.id,
@@ -110,6 +92,9 @@ const RepresentativeProfile = () => {
         });
     };
 
+    const isSubscribed =
+        representative && user?.subscriptions?.some((sub) => sub.representative.id === representative.id);
+
     if (loading) {
         return (
             <Layout>
@@ -131,6 +116,7 @@ const RepresentativeProfile = () => {
     return (
         <Layout>
             <div className="honor-container py-12">
+                <h1 className="text-3xl font-bold text-honor-darkGray mb-8">Представитель {representative.name}</h1>
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     {/* Profile sidebar */}
                     <div className="lg:col-span-1">
@@ -140,16 +126,16 @@ const RepresentativeProfile = () => {
                                     <User size={48} />
                                 </Avatar>
                                 <h1 className="text-2xl font-bold text-center">{representative.name}</h1>
-                                <p className="text-honor-darkGray">{representative.role}</p>
+                                <p className="text-honor-darkGray">{representative.representativeProfile.position}</p>
                                 <div className="flex items-center mt-2">
                                     <MapPin
                                         size={16}
                                         className="text-honor-blue mr-1"
                                     />
-                                    <span className="text-sm">{representative.name}</span>
+                                    <span className="text-sm">{representative.district}</span>
                                 </div>
                                 <Badge className="mt-2 bg-honor-blue">
-                                    {representative.representativeProfile.party}
+                                    {formatPartyName(representative.representativeProfile.party)}
                                 </Badge>
 
                                 {/* {mockRepresentative.achievementBadges.map(
@@ -224,8 +210,8 @@ const RepresentativeProfile = () => {
                                 <Button
                                     className="honor-button-primary"
                                     onClick={handleSubscribe}
-                                    disabled={user.subscriptions.length > 0}>
-                                    Подписаться
+                                    disabled={isSubscribed}>
+                                    {isSubscribed ? 'Вы подписаны' : 'Подписаться'}
                                 </Button>
                                 {/* 
                                 {user.subscriptions.length > 0 && (

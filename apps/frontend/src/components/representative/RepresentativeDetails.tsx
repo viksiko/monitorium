@@ -2,14 +2,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Building, Loader2, MapPin, Upload } from 'lucide-react';
+import { PARTIES } from '@/constants/parties';
 
 interface RepresentativeDetailsProps {
     formData: {
@@ -19,9 +14,7 @@ interface RepresentativeDetailsProps {
         bio: string;
         idCard: File | null;
     };
-    handleChange: (
-        e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-    ) => void;
+    handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
     handleSelectChange: (name: string, value: string) => void;
     handleFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
     handleSubmit: (e: React.FormEvent) => void;
@@ -58,9 +51,7 @@ const RepresentativeDetails = ({
         <form
             onSubmit={handleSubmit}
             className="honor-card">
-            <h2 className="text-xl font-bold mb-6">
-                Информация о представителе
-            </h2>
+            <h2 className="text-xl font-bold mb-6">Информация о представителе</h2>
 
             <div className="mb-6">
                 <Label
@@ -93,20 +84,18 @@ const RepresentativeDetails = ({
                 </Label>
                 <Select
                     defaultValue={formData.party}
-                    onValueChange={(value) =>
-                        handleSelectChange('party', value)
-                    }>
+                    onValueChange={(value) => handleSelectChange('party', value)}>
                     <SelectTrigger>
                         <SelectValue placeholder="Выберите партию" />
                     </SelectTrigger>
                     <SelectContent>
-                        <SelectItem value="er">Единая Россия</SelectItem>
-                        <SelectItem value="sr">Справедливая Россия</SelectItem>
-                        <SelectItem value="kprf">КПРФ</SelectItem>
-                        <SelectItem value="ldpr">ЛДПР</SelectItem>
-                        <SelectItem value="nl">Новые люди</SelectItem>
-                        <SelectItem value="other">Другая</SelectItem>
-                        <SelectItem value="none">Беспартийный</SelectItem>
+                        {PARTIES.map((party) => (
+                            <SelectItem
+                                key={party.value}
+                                value={party.value}>
+                                {party.label}
+                            </SelectItem>
+                        ))}
                     </SelectContent>
                 </Select>
             </div>
@@ -160,14 +149,9 @@ const RepresentativeDetails = ({
                 <div className="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center">
                     {formData.idCard ? (
                         <div>
-                            <p className="font-medium text-honor-blue mb-2">
-                                {formData.idCard.name}
-                            </p>
+                            <p className="font-medium text-honor-blue mb-2">{formData.idCard.name}</p>
                             <p className="text-sm text-honor-darkGray">
-                                {(formData.idCard.size / 1024 / 1024).toFixed(
-                                    2,
-                                )}{' '}
-                                MB
+                                {(formData.idCard.size / 1024 / 1024).toFixed(2)} MB
                             </p>
                             <Button
                                 type="button"
@@ -183,9 +167,7 @@ const RepresentativeDetails = ({
                                 className="mx-auto mb-2 text-honor-darkGray"
                                 size={32}
                             />
-                            <p className="text-honor-darkGray mb-2">
-                                Перетащите файл сюда или нажмите для выбора
-                            </p>
+                            <p className="text-honor-darkGray mb-2">Перетащите файл сюда или нажмите для выбора</p>
                             <Input
                                 id="idCard"
                                 type="file"
@@ -198,18 +180,15 @@ const RepresentativeDetails = ({
                                 type="button"
                                 variant="outline"
                                 className="text-honor-blue"
-                                onClick={() =>
-                                    document.getElementById('idCard')?.click()
-                                }>
+                                onClick={() => document.getElementById('idCard')?.click()}>
                                 Выбрать файл
                             </Button>
                         </>
                     )}
                 </div>
                 <p className="text-xs text-honor-darkGray mt-2">
-                    Загрузите скан или фото удостоверения для верификации вашего
-                    аккаунта. Допустимые форматы: JPG, PNG, PDF. Максимальный
-                    размер: 5MB.
+                    Загрузите скан или фото удостоверения для верификации вашего аккаунта. Допустимые форматы: JPG, PNG,
+                    PDF. Максимальный размер: 5MB.
                 </p>
             </div>
 
@@ -217,11 +196,7 @@ const RepresentativeDetails = ({
                 type="submit"
                 disabled={isLoading}
                 className="w-full honor-button-primary mb-4">
-                {isLoading ? (
-                    <Loader2 className="h-8 w-8 animate-spin" />
-                ) : (
-                    'Отправить заявку'
-                )}
+                {isLoading ? <Loader2 className="h-8 w-8 animate-spin" /> : 'Отправить заявку'}
             </Button>
 
             <div className="text-center">

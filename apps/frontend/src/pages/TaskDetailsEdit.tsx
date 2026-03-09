@@ -2,7 +2,7 @@ import { UserProfileSidebar } from '@/components/dashboard';
 import Layout from '@/components/layout/Layout';
 import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Task } from '@monorepo/types';
+import { Task, TASK_STATUSES } from '@monorepo/types';
 import {
     Calendar,
     Check,
@@ -20,6 +20,7 @@ import {
     ChevronLeft,
     LayoutDashboard,
     House,
+    User,
 } from 'lucide-react';
 import { Link, useParams } from 'react-router-dom';
 import Loader from '@/components/ui/loader';
@@ -40,7 +41,7 @@ const TaskDetailsEdit = () => {
     const { taskId } = useParams<{ taskId: string }>();
     const { data: task, loading, error, request } = useApi<Task>();
     const textareaRef = useRef(null);
-    const statusOptions = Object.values(TaskStatus);
+    const statusOptions = TASK_STATUSES;
 
     const [isEditingPossibleSolutions, setIsEditingPossibleSolutions] = useState(false);
     const [isEditingDate, setIsEditingDate] = useState(false);
@@ -402,6 +403,14 @@ const TaskDetailsEdit = () => {
                                             )} */}
 
                                         <div className="flex items-center text-honor-darkGray text-sm mb-4">
+                                            <div className="flex items-center">
+                                                <User
+                                                    size={16}
+                                                    className="mr-1"
+                                                />
+                                                <span>{task.author.name}</span>
+                                            </div>
+                                            <span className="mx-2">•</span>
                                             <MapPin
                                                 size={16}
                                                 className="mr-1"
@@ -611,7 +620,7 @@ const TaskDetailsEdit = () => {
                                                 </div>
                                                 <div className="flex items-center space-x-1 text-honor-darkGray">
                                                     <MessageSquare size={18} />
-                                                    <span>{task.comments}</span>
+                                                    <span>{task.comments.length}</span>
                                                 </div>
                                                 <div className="flex items-center space-x-1 text-honor-darkGray">
                                                     <Eye size={18} />

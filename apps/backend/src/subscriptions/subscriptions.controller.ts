@@ -4,7 +4,6 @@ import { DATABASE_ERROR_RESPONSE } from '@src/constants/swagger/shared-responses
 import {
     SUBSCRIBE_CREATED_RESPONSE,
     SUBSCRIBE_ERROR_RESPONSE,
-    SUBSCRIBE_SUCCESS_RESPONSE,
     SUBSCRIBE_USER_NOT_FOUND_ERROR_RESPONSE,
 } from '@src/constants/swagger/subscriptions-responses.swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -21,19 +20,12 @@ export class SubscriptionsController {
 
     @Post()
     @ApiOperation({ summary: 'Подписка на представителя власти' })
-    @ApiResponse(SUBSCRIBE_SUCCESS_RESPONSE)
     @ApiResponse(SUBSCRIBE_CREATED_RESPONSE)
     @ApiResponse(SUBSCRIBE_ERROR_RESPONSE)
     @ApiResponse(SUBSCRIBE_USER_NOT_FOUND_ERROR_RESPONSE)
     @ApiResponse(DATABASE_ERROR_RESPONSE)
-    subscribe(
-        @Req() req,
-        @Body() dto: SubscribeDto,
-    ): Promise<{ message: string }> {
-        return this.subscriptionsService.subscribe(
-            req.user.id,
-            dto.representativeId,
-        );
+    subscribe(@Req() req, @Body() dto: SubscribeDto): Promise<{ message: string }> {
+        return this.subscriptionsService.subscribe(req.user.id, dto.representativeId);
     }
 
     // @Delete()

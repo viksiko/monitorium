@@ -15,6 +15,7 @@ import { Dialog } from '@monorepo/types';
 import Loader from '@/components/ui/loader';
 import { formatDate, formatTime } from '@/utils/date';
 import DashboardBackButton from '@/components/ui/dashboardBackButton';
+import { RegisterRoleEnum } from '@monorepo/types';
 
 const MessageCenter = () => {
     const { user } = useAuth();
@@ -51,13 +52,6 @@ const MessageCenter = () => {
 
         fetchDialogs();
     }, []); // Зависимости пустые, выполнится только один раз
-
-    // Прокрутка к последнему сообщению при загрузке сообщений
-    useEffect(() => {
-        if (messages.length > 0) {
-            scrollToBottom();
-        }
-    }, [messages]);
 
     // автоматическое обновление сообщений каждые 5 секунд
     useEffect(() => {
@@ -113,7 +107,28 @@ const MessageCenter = () => {
         if (!messageText.trim()) return;
 
         try {
-            if (!selectedDialog.id) {
+            if (selectedDialog.id) {
+                // обычная отправка когда диалог уже есть
+                const newMessage = await sendMessageRequest({
+                    method: 'POST',
+                    url: `/api/v1/dialogs/${selectedDialog.id}/messages`,
+                    data: { text: messageText },
+                });
+
+                setMessages((prev) => [...prev, newMessage]);
+
+                // ВАЖНО: обновляем список диалогов
+                setDialogs((prev) => {
+                    const updatedDialogs = prev.map((d) =>
+                        d.id === selectedDialog.id ? { ...d, updatedAt: new Date().toISOString() } : d,
+                    );
+
+                    // сортируем по updatedAt
+                    return updatedDialogs.sort(
+                        (a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
+                    );
+                });
+            } else {
                 // создание нового диалога
                 const result = await sendMessageRequest({
                     method: 'POST',
@@ -134,27 +149,6 @@ const MessageCenter = () => {
 
                 setSelectedDialog(result.dialog);
                 setMessages([result.message]);
-            } else {
-                // обычная отправка
-                const newMessage = await sendMessageRequest({
-                    method: 'POST',
-                    url: `/api/v1/dialogs/${selectedDialog.id}/messages`,
-                    data: { text: messageText },
-                });
-
-                setMessages((prev) => [...prev, newMessage]);
-
-                // 🔥 ВАЖНО: обновляем список диалогов
-                setDialogs((prev) => {
-                    const updatedDialogs = prev.map((d) =>
-                        d.id === selectedDialog.id ? { ...d, updatedAt: new Date().toISOString() } : d,
-                    );
-
-                    // сортируем по updatedAt
-                    return updatedDialogs.sort(
-                        (a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
-                    );
-                });
             }
 
             setMessageText('');
@@ -169,18 +163,21 @@ const MessageCenter = () => {
     };
 
     const handleSelectDialog = async (dialog: Dialog) => {
-        // 🔒 Если диалог уже активен — ничего не делаем
-        if (selectedDialog?.id === dialog.id) {
-            return;
-        }
+        // Если диалог уже активен — ничего не делаем
+        const isSameDialog = dialog.id
+            ? selectedDialog?.id === dialog.id
+            : selectedDialog?.representative.id === dialog.representative.id;
+
+        if (isSameDialog) return;
 
         setSelectedDialog(dialog);
         setMessages([]);
+        setMessageText('');
 
         if (!dialog.id) return;
 
         try {
-            // 1️⃣ Загружаем сообщения
+            // Загружаем сообщения
             const result = await loadMessagesClickDialog({
                 method: 'GET',
                 url: `/api/v1/dialogs/${dialog.id}/messages`,
@@ -190,13 +187,13 @@ const MessageCenter = () => {
                 setMessages(result);
             }
 
-            // 2️⃣ Помечаем как прочитанный и получаем обновлённый диалог
+            // Помечаем как прочитанный и получаем обновлённый диалог
             const updatedDialog = await markAsRead({
                 method: 'PATCH',
                 url: `/api/v1/dialogs/${dialog.id}/read`,
             });
 
-            // 3️⃣ Обновляем локальный state
+            // Обновляем локальный state
             setSelectedDialog(updatedDialog);
 
             // обновляем массив диалогов в state, чтобы иконка пропала в списке
@@ -223,34 +220,48 @@ const MessageCenter = () => {
         // }
     };
 
+    // Возвращает собеседника (не текущего пользователя) в диалоге
     const getCompanion = (dialog: Dialog) => {
         return dialog.voter.id === user.id ? dialog.representative : dialog.voter;
     };
 
+    // Проверяет, есть ли непрочитанные сообщения в диалоге для текущего пользователя
     const hasUnreadMessages = (dialog: Dialog) => {
-        if (!dialog.updatedAt) return false;
+        if (!dialog.messages?.length) return false;
 
-        if (user.role === 'VOTER') {
-            return (
-                !dialog.voterLastReadAt ||
-                new Date(dialog.updatedAt).getTime() > new Date(dialog.voterLastReadAt).getTime()
-            );
+        const lastMessage = dialog.messages[dialog.messages.length - 1];
+
+        // если сообщение отправил текущий пользователь — оно не может быть unread
+        if (lastMessage.senderId === user.id) return false;
+
+        const lastMessageTime = new Date(lastMessage.createdAt).getTime();
+
+        if (user.role === RegisterRoleEnum.VOTER) {
+            if (!dialog.voterLastReadAt) return true;
+
+            return lastMessageTime > new Date(dialog.voterLastReadAt).getTime();
         }
 
-        if (user.role === 'REPRESENTATIVE') {
-            return (
-                !dialog.representativeLastReadAt ||
-                new Date(dialog.messages[0].createdAt).getTime() > new Date(dialog.representativeLastReadAt).getTime()
-            );
+        if (user.role === RegisterRoleEnum.REPRESENTATIVE) {
+            if (!dialog.representativeLastReadAt) return true;
+
+            return lastMessageTime > new Date(dialog.representativeLastReadAt).getTime();
         }
+
         return false;
     };
 
+    // Отправляет сообщение при нажатии Enter без Shift
     const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
             handleSendMessage();
         }
+    };
+
+    // Возвращает уникальный ключ диалога (id или временный ключ)
+    const getDialogKey = (dialog: Dialog) => {
+        return dialog.id ?? `${dialog.voter.id}-${dialog.representative.id}`;
     };
 
     return (
@@ -307,14 +318,14 @@ const MessageCenter = () => {
                                     dialogs.map((dialog) => {
                                         const companion = getCompanion(dialog);
                                         const unread = hasUnreadMessages(dialog);
+                                        const isSelected =
+                                            selectedDialog && getDialogKey(selectedDialog) === getDialogKey(dialog);
 
                                         return (
                                             <button
-                                                key={dialog.id}
+                                                key={getDialogKey(dialog)}
                                                 className={`w-full flex items-start p-4 transition-colors border-b ${
-                                                    selectedDialog?.id === dialog.id
-                                                        ? 'bg-honor-blue/10'
-                                                        : 'hover:bg-honor-gray'
+                                                    isSelected ? 'bg-honor-blue/10' : 'hover:bg-honor-gray'
                                                 }`}
                                                 onClick={() => handleSelectDialog(dialog)}>
                                                 <Avatar className="h-12 w-12 mr-4">

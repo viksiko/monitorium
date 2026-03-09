@@ -4,25 +4,10 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { User, MapPin, ThumbsUp, CheckCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
-
-interface Representative {
-    id: string;
-    name: string;
-    email: string;
-    role: 'REPRESENTATIVE';
-    isRepresentative: boolean;
-    isVerified: boolean;
-    representativeProfile: {
-        id: string;
-        position: string;
-        party: string;
-        rating: number;
-        tasksTotal: number;
-        tasksCompleted: number;
-        attendance: number;
-        lastActivity: string | null;
-    };
-}
+import { Representative } from '@monorepo/types';
+import { PARTIES } from '@/constants/parties';
+import { PartyLabel } from '../ui/partyLabel';
+import { formatPartyName } from '@/utils/formatPartyName';
 
 interface RepresentativeCardProps {
     representative: Representative;
@@ -43,22 +28,25 @@ const RepresentativeCard = ({ representative }: RepresentativeCardProps) => {
                                 <h3 className="text-lg font-bold">{representative.name}</h3>
                                 <p className="text-honor-darkGray">{representative.role}</p>
 
-                                <div className="flex items-center space-x-4 mt-1">
-                                    <div className="flex items-center text-sm text-honor-darkGray">
+                                <div className="flex items-center text-honor-darkGray text-sm">
+                                    <div className="flex items-center">
                                         <MapPin
                                             size={14}
                                             className="mr-1"
                                         />
-                                        {/* <span>
-                                            {
-                                                representative
-                                                    .representativeProfile
-                                                    .position
-                                            }
-                                        </span> */}
+                                        <span>{representative.district}</span>
                                     </div>
+                                    <span className="mx-2">•</span>
+                                    <div className="flex items-center">
+                                        <MapPin
+                                            size={14}
+                                            className="mr-1"
+                                        />
+                                        <span>{representative.representativeProfile.position}</span>
+                                    </div>
+                                    <span className="mx-2">•</span>
                                     <Badge className="bg-honor-blue">
-                                        {representative.representativeProfile.party}
+                                        {formatPartyName(representative.representativeProfile.party)}
                                     </Badge>
                                 </div>
                             </div>

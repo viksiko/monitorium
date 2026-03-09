@@ -39,6 +39,7 @@ const TaskCreate = () => {
     } = useForm({
         resolver: zodResolver(createTaskSchema),
         defaultValues: {
+            assigneeId: '',
             title: '',
             address: '',
             description: '',
@@ -67,6 +68,7 @@ const TaskCreate = () => {
 
     const onSubmit = async (data) => {
         const payload = {
+            assigneeId: data.assigneeId,
             title: data.title,
             address: data.address,
             problemDescription: data.description,
@@ -77,8 +79,6 @@ const TaskCreate = () => {
                     title: stage.title,
                     date: new Date(stage.date).toISOString(),
                 })) || [],
-
-            assigneeId: user.subscriptions?.[0].representative.id, // берем первого представителя из подписок
         };
 
         try {
@@ -127,6 +127,34 @@ const TaskCreate = () => {
                     <form
                         onSubmit={handleSubmit(onSubmit)}
                         className="honor-card">
+                        <div className="mb-6">
+                            <Label
+                                htmlFor="assignee"
+                                className="block mb-2">
+                                Представитель власти
+                            </Label>
+                            <div className="relative">
+                                <User
+                                    className="absolute left-3 top-1/2 transform -translate-y-1/2 text-honor-darkGray"
+                                    size={18}
+                                />
+                                <select
+                                    id="assignee"
+                                    {...register('assigneeId')}
+                                    className={formInputClass(errors.assigneeId)}>
+                                    <option value="">Выберите представителя</option>
+                                    {user?.subscriptions?.map((sub) => (
+                                        <option
+                                            key={sub.id}
+                                            value={sub.representative.id}>
+                                            {sub.representative.name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                            <FormError error={errors.assigneeId} />
+                        </div>
+
                         <div className="mb-6">
                             <Label
                                 htmlFor="title"

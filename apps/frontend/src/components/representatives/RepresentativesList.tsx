@@ -2,59 +2,9 @@ import { useEffect, useState } from 'react';
 import RepresentativeCard from './RepresentativeCard';
 import { api } from '@/lib/api';
 import Loader from '../ui/loader';
+import { Representative } from '@monorepo/types';
 
-interface Representative {
-    id: string;
-    name: string;
-    email: string;
-    role: 'REPRESENTATIVE';
-    isRepresentative: boolean;
-    isVerified: boolean;
-    representativeProfile: {
-        id: string;
-        position: string;
-        party: string;
-        rating: number;
-        tasksTotal: number;
-        tasksCompleted: number;
-        attendance: number;
-        lastActivity: string | null;
-    };
-}
-
-const RepresentativesList = () => {
-    const [representatives, setRepresentatives] = useState<Representative[]>([]);
-    const [loading, setLoading] = useState(true);
-
-    useEffect(() => {
-        const fetchRepresentatives = async () => {
-            try {
-                const response = await api.get('/api/v1/users/filter', {
-                    params: {
-                        role: 'representative',
-                    },
-                });
-
-                setRepresentatives(response.data.data);
-            } catch (error) {
-                console.error('Ошибка загрузки представителей:', error);
-                setRepresentatives([]);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchRepresentatives();
-    }, []);
-
-    if (loading) {
-        return (
-            <div className="text-center">
-                <Loader />
-            </div>
-        );
-    }
-
+const RepresentativesList = ({ representatives }) => {
     if (representatives.length === 0) {
         return (
             <div className="honor-card text-center py-8">
@@ -65,7 +15,7 @@ const RepresentativesList = () => {
 
     return (
         <div className="space-y-4">
-            {representatives.map((rep) => (
+            {representatives.map((rep: Representative) => (
                 <div key={rep.id}>
                     <RepresentativeCard representative={rep} />
                 </div>

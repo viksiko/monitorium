@@ -1,6 +1,6 @@
 // subscriptions/subscriptions.service.ts
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { USER_NOT_FOUND } from '@src/constants/api-messages.constants';
+import { SUBSCRIPTION_MESSAGES, USER_NOT_FOUND } from '@src/constants/api-messages.constants';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
@@ -9,7 +9,7 @@ export class SubscriptionsService {
 
     async subscribe(subscriberId: string, representativeId: string): Promise<{ message: string }> {
         if (subscriberId === representativeId) {
-            throw new BadRequestException('Нельзя подписаться на самого себя');
+            throw new BadRequestException(SUBSCRIPTION_MESSAGES.SELF_SUBSCRIPTION);
         }
 
         // Проверяем, что пользователь существует и он представитель
@@ -23,7 +23,7 @@ export class SubscriptionsService {
         }
 
         if (targetUser.role !== 'REPRESENTATIVE') {
-            throw new BadRequestException('Подписка возможна только на представителя власти');
+            throw new BadRequestException(SUBSCRIPTION_MESSAGES.INVALID_TARGET);
         }
 
         // Проверка на существующую подписку
@@ -37,7 +37,7 @@ export class SubscriptionsService {
         });
 
         if (existingSubscription) {
-            throw new BadRequestException('Вы уже подписаны на этого представителя');
+            throw new BadRequestException(SUBSCRIPTION_MESSAGES.ALREADY_SUBSCRIBED);
         }
 
         await this.prisma.subscription.create({
@@ -47,7 +47,7 @@ export class SubscriptionsService {
             },
         });
 
-        return { message: 'Подписка успешно оформлена' };
+        return { message: SUBSCRIPTION_MESSAGES.CREATE_SUCCESS };
     }
 
     // async getUserSubscriptions(userId: string) {

@@ -68,55 +68,53 @@ const PostDetails = () => {
                                     value="posts"
                                     className="space-y-6 mt-0">
                                     <Card className="honor-card">
-                                        <div className="p-6">
-                                            <div className="flex items-center mb-4">
-                                                <Avatar className="h-10 w-10 mr-3">
-                                                    <User size={20} />
-                                                </Avatar>
-                                                <div>
-                                                    <p className="font-medium">{post.author.name}</p>
-                                                    <p className="text-xs text-honor-darkGray">
-                                                        {post.author.representativeProfile.position}
-                                                    </p>
-                                                </div>
-                                                <div className="ml-auto text-sm text-honor-darkGray">
-                                                    <Calendar
-                                                        size={14}
-                                                        className="inline mr-1"
-                                                    />
-                                                    {new Date(post.publishedAt).toLocaleDateString('ru-RU')}
+                                        <div className="flex items-center mb-4">
+                                            <Avatar className="h-10 w-10 mr-3">
+                                                <User size={20} />
+                                            </Avatar>
+                                            <div>
+                                                <p className="font-medium">{post.author.name}</p>
+                                                <p className="text-xs text-honor-darkGray">
+                                                    {post.author.representativeProfile.position}
+                                                </p>
+                                            </div>
+                                            <div className="ml-auto text-sm text-honor-darkGray">
+                                                <Calendar
+                                                    size={14}
+                                                    className="inline mr-1"
+                                                />
+                                                {new Date(post.publishedAt).toLocaleDateString('ru-RU')}
+                                            </div>
+                                        </div>
+
+                                        <h1 className="text-2xl font-bold mb-4">{post.title}</h1>
+
+                                        {/* // !!! не безопасно */}
+                                        <div
+                                            className="prose max-w-none mb-6"
+                                            dangerouslySetInnerHTML={{
+                                                __html: post.content,
+                                            }}
+                                        />
+
+                                        <div className="flex justify-between items-center pt-4 border-t">
+                                            <div className="flex space-x-4">
+                                                <button
+                                                    className="flex items-center space-x-1 text-honor-darkGray hover:text-honor-blue"
+                                                    onClick={handleLike}>
+                                                    <ThumbsUp size={18} />
+                                                    <span>{post.likesCount}</span>
+                                                </button>
+                                                <div className="flex items-center space-x-1 text-honor-darkGray">
+                                                    <MessageSquare size={18} />
+                                                    {/* <span>{post.comments}</span> */}
                                                 </div>
                                             </div>
-
-                                            <h1 className="text-2xl font-bold mb-4">{post.title}</h1>
-
-                                            {/* // !!! не безопасно */}
-                                            <div
-                                                className="prose max-w-none mb-6"
-                                                dangerouslySetInnerHTML={{
-                                                    __html: post.content,
-                                                }}
-                                            />
-
-                                            <div className="flex justify-between items-center pt-4 border-t">
-                                                <div className="flex space-x-4">
-                                                    <button
-                                                        className="flex items-center space-x-1 text-honor-darkGray hover:text-honor-blue"
-                                                        onClick={handleLike}>
-                                                        <ThumbsUp size={18} />
-                                                        <span>{post.likesCount}</span>
-                                                    </button>
-                                                    <div className="flex items-center space-x-1 text-honor-darkGray">
-                                                        <MessageSquare size={18} />
-                                                        {/* <span>{post.comments}</span> */}
-                                                    </div>
-                                                </div>
-                                                {/* <button
+                                            {/* <button
                                                     className="text-honor-darkGray hover:text-honor-blue"
                                                     onClick={handleShare}>
                                                     <Share2 size={18} />
                                                 </button> */}
-                                            </div>
                                         </div>
                                     </Card>
                                 </TabsContent>

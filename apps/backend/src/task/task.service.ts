@@ -1,6 +1,6 @@
-import { TaskListItem } from '@monorepo/types';
+import { Task, TaskListItem, TaskStage } from '@monorepo/types';
 import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
-import { Task, TaskStage, User } from '@prisma/client';
+import { User } from '@prisma/client';
 import { TASK_MESSAGES, USER_NOT_FOUND } from '@src/constants/api-messages.constants';
 import { logger } from '@src/logger/winston.logger';
 import { PrismaService } from '@src/prisma/prisma.service';
@@ -62,6 +62,8 @@ export class TaskService {
                     }),
                 },
                 include: {
+                    author: { select: { id: true, name: true } },
+                    assignee: assigneeId ? { select: { id: true, name: true } } : false,
                     stages: true,
                 },
             });
@@ -80,6 +82,8 @@ export class TaskService {
         try {
             const tasks = await this.prisma.task.findMany({
                 include: {
+                    author: { select: { id: true, name: true } },
+                    assignee: { select: { id: true, name: true } },
                     stages: true,
                     comments: true,
                     taskFiles: true,
@@ -103,22 +107,10 @@ export class TaskService {
 
         try {
             const tasks = await this.prisma.task.findMany({
-                where: where,
-                select: {
-                    id: true,
-                    title: true,
-                    address: true,
-                    desiredResolutionDate: true,
-                    likesCount: true,
-                    viewsCount: true,
-                    status: true,
-                    createdAt: true,
-                    // Можно добавить данные об авторе, если представителю нужно их видеть
-                    // user: {
-                    //     select: {
-                    //         name: true,
-                    //     },
-                    // },
+                where,
+                include: {
+                    author: { select: { id: true, name: true } },
+                    assignee: { select: { id: true, name: true } },
                 },
                 orderBy: { createdAt: 'desc' },
             });
@@ -149,21 +141,9 @@ export class TaskService {
 
             const tasks = await this.prisma.task.findMany({
                 where: { assigneeId: userId },
-                select: {
-                    id: true,
-                    title: true,
-                    address: true,
-                    desiredResolutionDate: true,
-                    likesCount: true,
-                    viewsCount: true,
-                    status: true,
-                    createdAt: true,
-                    // Можно добавить данные об авторе, если представителю нужно их видеть
-                    // user: {
-                    //     select: {
-                    //         name: true,
-                    //     },
-                    // },
+                include: {
+                    author: { select: { id: true, name: true } },
+                    assignee: { select: { id: true, name: true } },
                 },
                 orderBy: { createdAt: 'desc' },
             });
@@ -187,6 +167,8 @@ export class TaskService {
             const task = await this.prisma.task.findUnique({
                 where: { id },
                 include: {
+                    author: { select: { id: true, name: true } },
+                    assignee: { select: { id: true, name: true } },
                     stages: {
                         orderBy: {
                             date: 'asc', // сортировка по возрастанию
@@ -362,6 +344,8 @@ export class TaskService {
             where: { id },
             data,
             include: {
+                author: { select: { id: true, name: true } },
+                assignee: { select: { id: true, name: true } },
                 stages: {
                     orderBy: {
                         date: 'asc',

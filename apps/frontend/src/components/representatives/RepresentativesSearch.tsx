@@ -10,10 +10,7 @@ interface RepresentativesSearchProps {
     handleSearch: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
-const RepresentativesSearch = ({
-    searchTerm,
-    handleSearch,
-}: RepresentativesSearchProps) => {
+const RepresentativesSearch = ({ searchTerm, handleSearch }: RepresentativesSearchProps) => {
     const [showEscalation, setShowEscalation] = useState(false);
 
     return (
@@ -31,7 +28,7 @@ const RepresentativesSearch = ({
                         onChange={handleSearch}
                     />
                 </div>
-                <Dialog
+                {/* <Dialog
                     open={showEscalation}
                     onOpenChange={setShowEscalation}>
                     <DialogTrigger asChild>
@@ -47,7 +44,7 @@ const RepresentativesSearch = ({
                             onCancel={() => setShowEscalation(false)}
                         />
                     </DialogContent>
-                </Dialog>
+                </Dialog> */}
             </div>
         </div>
     );

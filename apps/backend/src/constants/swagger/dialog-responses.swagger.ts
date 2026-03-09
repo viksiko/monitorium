@@ -1,4 +1,5 @@
 import { ApiResponseOptions } from '@nestjs/swagger';
+import { DIALOG_MESSAGES } from '../api-messages.constants';
 
 export const DIALOGS_AND_SUBSCRIPTIONS_RESPONSE: ApiResponseOptions = {
     status: 200,
@@ -206,13 +207,13 @@ export const CREATE_MESSAGE_DIALOG_VALIDATION_ERROR_RESPONSE: ApiResponseOptions
 
 export const NO_SUBSCRIPTION_RESPONSE: ApiResponseOptions = {
     status: 403,
-    description: 'Нет подписки на представителя власти',
+    description: DIALOG_MESSAGES.NO_SUBSCRIPTION,
     schema: {
         example: {
             success: false,
             statusCode: 403,
             data: {
-                message: 'Нет подписки на представителя власти',
+                message: DIALOG_MESSAGES.NO_SUBSCRIPTION,
             },
         },
     },
@@ -220,13 +221,13 @@ export const NO_SUBSCRIPTION_RESPONSE: ApiResponseOptions = {
 
 export const NO_DIALOG_ACCESS_RESPONSE: ApiResponseOptions = {
     status: 403,
-    description: 'Нет доступа к диалогу',
+    description: DIALOG_MESSAGES.ACCESS_DENIED,
     schema: {
         example: {
             success: false,
             statusCode: 403,
             data: {
-                message: 'Нет доступа к диалогу',
+                message: DIALOG_MESSAGES.ACCESS_DENIED,
             },
         },
     },
@@ -234,13 +235,13 @@ export const NO_DIALOG_ACCESS_RESPONSE: ApiResponseOptions = {
 
 export const DIALOG_NOT_FOUND_RESPONSE: ApiResponseOptions = {
     status: 404,
-    description: 'Диалог не найден',
+    description: DIALOG_MESSAGES.NOT_FOUND,
     schema: {
         example: {
             success: false,
             statusCode: 404,
             data: {
-                message: 'Диалог не найден',
+                message: DIALOG_MESSAGES.NOT_FOUND,
             },
         },
     },
