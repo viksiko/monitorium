@@ -24,6 +24,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { FormError, formInputClass } from '@/components/ui/formInputClass';
 import { add } from 'date-fns';
 import { useAuth } from '@/context/AuthContext';
+import { api } from '@/lib/api';
 
 const TaskCreate = () => {
     const accessToken = useAuthStore((state) => state.accessToken);
@@ -82,18 +83,7 @@ const TaskCreate = () => {
         };
 
         try {
-            const response = await fetch('/api/v1/tasks', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${accessToken}`,
-                },
-                body: JSON.stringify(payload),
-            });
-
-            if (!response.ok) {
-                throw new Error('Ошибка при создании задания');
-            }
+            await api.post('/api/v1/tasks', payload);
 
             toast({
                 title: 'Задание создано',
