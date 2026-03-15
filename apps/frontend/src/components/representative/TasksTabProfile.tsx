@@ -5,8 +5,8 @@ import { MapPin, Calendar, Clock, ThumbsUp } from 'lucide-react';
 import { Task } from '@monorepo/types';
 import Loader from '@/components/ui/loader';
 import { TaskStatusBadge } from '../ui/task-status-badge';
-
 import { api } from '@/lib/api';
+import { Button } from '@/components/ui/button';
 
 const TasksTabProfile = ({ userId }: { userId: string }) => {
     const [loading, setLoading] = useState(true);
@@ -64,18 +64,26 @@ const TasksTabProfile = ({ userId }: { userId: string }) => {
                             <TaskStatusBadge status={task.status} />
                         </div>
 
-                        <div className="flex items-center text-honor-darkGray text-sm mb-4">
-                            <MapPin
-                                size={16}
-                                className="mr-1"
-                            />
-                            <span>{task.address}</span>
-                            <span className="mx-2">•</span>
-                            <Calendar
-                                size={16}
-                                className="mr-1"
-                            />
-                            <span>До {new Date(task.desiredResolutionDate).toLocaleDateString('ru-RU')}</span>
+                        <div className="flex justify-between items-start">
+                            <div className="flex items-center text-honor-darkGray text-sm mb-4">
+                                <MapPin
+                                    size={16}
+                                    className="mr-1"
+                                />
+                                <span>{task.address}</span>
+                                <span className="mx-2">•</span>
+                                <Calendar
+                                    size={16}
+                                    className="mr-1"
+                                />
+
+                                <span>До {new Date(task.desiredResolutionDate).toLocaleDateString('ru-RU')}</span>
+                            </div>
+                            <Button
+                                variant="link"
+                                className="p-0 h-auto text-honor-blue">
+                                Подробнее
+                            </Button>
                         </div>
 
                         <div className="flex justify-between items-center pt-3 border-t">

@@ -1,6 +1,6 @@
-import React from 'react';
 import { Button } from '@/components/ui/button';
-import { MapPin, Building } from 'lucide-react';
+import { MapPin, Award } from 'lucide-react';
+import { formatPartyName } from '@/utils/formatPartyName';
 
 interface RepresentativesFiltersProps {
     districts: string[];
@@ -26,9 +26,7 @@ const RepresentativesFilters = ({
             <h3 className="text-lg font-semibold mb-4">Фильтры</h3>
 
             <div className="mb-6">
-                <label className="block text-sm font-medium mb-2">
-                    Округ/Район
-                </label>
+                <label className="block text-sm font-medium mb-2">Округ/Район</label>
                 <div className="space-y-2">
                     {districts.map((district) => (
                         <button
@@ -61,11 +59,11 @@ const RepresentativesFilters = ({
                                     ? 'bg-honor-blue text-white'
                                     : 'hover:bg-honor-gray text-honor-darkGray'
                             }`}>
-                            <Building
+                            <Award
                                 size={16}
                                 className="mr-2"
                             />
-                            {party}
+                            {formatPartyName(party)}
                         </button>
                     ))}
                 </div>

@@ -72,11 +72,11 @@ const Dashboard = () => {
                                     className="flex-1">
                                     Сообщения
                                 </TabsTrigger>
-                                <TabsTrigger
+                                {/* <TabsTrigger
                                     value="notifications"
                                     className="flex-1">
                                     Уведомления
-                                </TabsTrigger>
+                                </TabsTrigger> */}
                                 <TabsTrigger
                                     value="subscriptions"
                                     className="flex-1">

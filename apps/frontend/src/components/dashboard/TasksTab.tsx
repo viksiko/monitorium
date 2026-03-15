@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
-import { MapPin, Calendar, Clock, Plus, ThumbsUp, MessageSquare, AlertTriangle, BookType } from 'lucide-react';
+import { MapPin, Calendar, Clock, Plus, ThumbsUp, MessageSquare, AlertTriangle, BookType, User } from 'lucide-react';
 import EscalateTask from './EscalateTask';
 import { useAuthStore } from '@/shared/stores/auth.store';
 import { Task } from '@monorepo/types';
@@ -80,17 +80,16 @@ const TasksTab = () => {
         <div className="space-y-6">
             <div className="flex justify-between items-center mb-4">
                 <h2 className="text-2xl font-bold">Мои задания</h2>
-                {tasks.length === 0 && (
-                    <Link to="/tasks/create">
-                        <Button className="honor-button-primary flex items-center">
-                            <Plus
-                                size={18}
-                                className="mr-2"
-                            />
-                            Создать задание
-                        </Button>
-                    </Link>
-                )}
+
+                <Button
+                    className="honor-button-primary flex items-center"
+                    onClick={handleCreateTaskClick}>
+                    <Plus
+                        size={18}
+                        className="mr-2"
+                    />
+                    Создать задание
+                </Button>
             </div>
 
             <Dialog
@@ -115,18 +114,34 @@ const TasksTab = () => {
                             <TaskStatusBadge status={task.status} />
                         </div>
 
-                        <div className="flex items-center text-honor-darkGray text-sm mb-4">
-                            <MapPin
-                                size={16}
-                                className="mr-1"
-                            />
-                            <span>{task.address}</span>
-                            <span className="mx-2">•</span>
-                            <Calendar
-                                size={16}
-                                className="mr-1"
-                            />
-                            <span>До {new Date(task.desiredResolutionDate).toLocaleDateString('ru-RU')}</span>
+                        <div className="flex justify-between items-start">
+                            <div className="flex items-center text-honor-darkGray text-sm mb-4">
+                                <div className="flex items-center">
+                                    <User
+                                        size={16}
+                                        className="mr-1"
+                                    />
+                                    <span>{task.assignee.name}</span>
+                                </div>
+                                <span className="mx-2">•</span>
+                                <MapPin
+                                    size={16}
+                                    className="mr-1"
+                                />
+                                <span>{task.address}</span>
+                                <span className="mx-2">•</span>
+                                <Calendar
+                                    size={16}
+                                    className="mr-1"
+                                />
+                                <span>До {new Date(task.desiredResolutionDate).toLocaleDateString('ru-RU')}</span>
+                            </div>
+
+                            <Button
+                                variant="link"
+                                className="p-0 h-auto text-honor-blue">
+                                Подробнее
+                            </Button>
                         </div>
 
                         <div className="flex justify-between items-center pt-3 border-t">
@@ -135,11 +150,12 @@ const TasksTab = () => {
                                     <ThumbsUp size={18} />
                                     <span>{task.likesCount}</span>
                                 </div>
-                                {/* <div className="flex items-center space-x-1 text-honor-darkGray">
-                                <MessageSquare size={18} />
-                                <span>{task.comments}</span>
-                            </div> */}
+                                <div className="flex items-center space-x-1 text-honor-darkGray">
+                                    <MessageSquare size={18} />
+                                    <span>{task.comments?.length}</span>
+                                </div>
                             </div>
+
                             <div className="flex items-center">
                                 {/* {task.status !== 'NEW' &&
                                     needsEscalation(task.lastResponseDays) && (

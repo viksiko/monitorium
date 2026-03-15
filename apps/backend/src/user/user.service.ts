@@ -139,6 +139,7 @@ export class UserService {
                     isRepresentative: true,
                     isVerified: true,
                     isActive: true,
+                    district: true,
                     representativeProfile: {
                         select: {
                             id: true,
@@ -209,7 +210,7 @@ export class UserService {
                     isRepresentative: true,
                     isVerified: true,
                     isActive: true,
-
+                    district: true,
                     representativeProfile: {
                         select: {
                             id: true,

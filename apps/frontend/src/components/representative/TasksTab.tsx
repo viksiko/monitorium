@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { MapPin, Calendar, Clock, Plus, ThumbsUp, MessageSquare, BookType } from 'lucide-react';
+import { MapPin, Calendar, Clock, Plus, ThumbsUp, MessageSquare, BookType, User } from 'lucide-react';
 import { toast } from 'sonner';
 import { api } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
@@ -86,18 +86,34 @@ const TasksTab = () => {
                             <TaskStatusBadge status={task.status} />
                         </div>
 
-                        <div className="flex items-center text-honor-darkGray text-sm mb-4">
-                            <MapPin
-                                size={16}
-                                className="mr-1"
-                            />
-                            <span>{task.address}</span>
-                            <span className="mx-2">•</span>
-                            <Calendar
-                                size={16}
-                                className="mr-1"
-                            />
-                            <span>До {new Date(task.desiredResolutionDate).toLocaleDateString('ru-RU')}</span>
+                        <div className="flex justify-between items-start">
+                            <div className="flex items-center text-honor-darkGray text-sm mb-4">
+                                <div className="flex items-center">
+                                    <User
+                                        size={16}
+                                        className="mr-1"
+                                    />
+                                    <span>{task.assignee.name}</span>
+                                </div>
+                                <span className="mx-2">•</span>
+                                <MapPin
+                                    size={16}
+                                    className="mr-1"
+                                />
+                                <span>{task.address}</span>
+                                <span className="mx-2">•</span>
+                                <Calendar
+                                    size={16}
+                                    className="mr-1"
+                                />
+                                <span>До {new Date(task.desiredResolutionDate).toLocaleDateString('ru-RU')}</span>
+                            </div>
+
+                            <Button
+                                variant="link"
+                                className="p-0 h-auto text-honor-blue">
+                                Подробнее
+                            </Button>
                         </div>
 
                         <div className="flex justify-between items-center pt-3 border-t">

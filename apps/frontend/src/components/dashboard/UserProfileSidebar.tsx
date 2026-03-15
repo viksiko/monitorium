@@ -110,25 +110,27 @@ const UserProfileSidebar = () => {
                             // Если подписки есть — выводим список
                             <div className="space-y-3">
                                 {user.subscriptions.map((sub) => (
-                                    <div
-                                        key={sub.id}
-                                        className="flex items-center p-3 border rounded-xl bg-white shadow-sm">
-                                        <div className="bg-honor-gray rounded-full p-2 mr-3">
-                                            <User
-                                                size={24}
-                                                className="text-honor-blue"
-                                            />
+                                    <Link
+                                        to={`/representative/profile/${sub.representative.id}`}
+                                        key={sub.id}>
+                                        <div className="flex items-center mb-4 hover:shadow-lg p-3 border rounded-xl bg-white shadow-sm">
+                                            <div className="bg-honor-gray rounded-full p-2 mr-3">
+                                                <User
+                                                    size={24}
+                                                    className="text-honor-blue"
+                                                />
+                                            </div>
+                                            <div>
+                                                <p className="font-medium">
+                                                    {sub.representative?.name || 'Имя не указано'}
+                                                </p>
+                                                <p className="text-sm text-honor-darkGray">
+                                                    {sub.representative.representativeProfile?.position ||
+                                                        'Должность не указана'}
+                                                </p>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <p className="font-medium">
-                                                {sub.representative?.name || 'Имя не указано'}
-                                            </p>
-                                            <p className="text-sm text-honor-darkGray">
-                                                {sub.representative.representativeProfile?.position ||
-                                                    'Должность не указана'}
-                                            </p>
-                                        </div>
-                                    </div>
+                                    </Link>
                                 ))}
                             </div>
                         ) : (

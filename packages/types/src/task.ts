@@ -3,33 +3,50 @@ export interface Task {
     title: string;
     address: string;
     problemDescription: string;
-    possibleSolutions?: string;
-    desiredResolutionDate?: string; // или Date, если будет преобразование
-    userId: string;
+    possibleSolutions?: string | null;
+    desiredResolutionDate?: Date | string | null; // или Date, если будет преобразование
+    authorId: string;
+    author: Author;
+    assignee?: Assignee | null;
     status: TaskStatus; // enum для статусов
-    createdAt: string; // или Date
-    updatedAt: string; // или Date
+    createdAt: Date | string; // или Date
+    updatedAt: Date | string; // или Date
     stages?: TaskStage[];
     likesCount: number;
     viewsCount: number;
-    comments?: number;
+    comments?: TaskComment[];
 }
 
-export enum TaskStatus {
-    PLANNED = 'PLANNED',
-    IN_PROGRESS = 'IN_PROGRESS',
-    COMPLETED = 'COMPLETED',
-    REJECTED = 'REJECTED',
+interface Author {
+    id: string;
+    name: string;
 }
+
+interface Assignee {
+    id: string;
+    name: string;
+}
+
+export interface TaskComment {
+    id: string;
+    taskId: string;
+    userId: string;
+    text: string;
+    createdAt: Date | string;
+}
+
+export const TASK_STATUSES = ['PLANNED', 'IN_PROGRESS', 'COMPLETED', 'REJECTED'] as const;
+
+export type TaskStatus = (typeof TASK_STATUSES)[number];
 
 export interface TaskStage {
     id: string;
     taskId: string;
     title: string;
-    date: string; // или Date, если будет преобразование
-    createdAt: string; // или Date
+    date: Date | string; // или Date, если будет преобразование
+    createdAt: Date | string; // или Date
     isCompleted: boolean;
-    updatedAt: string; // или Date
+    updatedAt?: Date | string; // или Date
 }
 
 export type TaskListItem = Pick<
@@ -43,4 +60,6 @@ export type TaskListItem = Pick<
     | 'likesCount'
     | 'viewsCount'
     | 'comments'
+    | 'author'
+    | 'assignee'
 >;

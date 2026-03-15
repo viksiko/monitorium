@@ -3,6 +3,7 @@ import { Message } from '@monorepo/types';
 import { DialogAndSubscriptions } from '@monorepo/types';
 import { CreateDialog } from '@monorepo/types';
 import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { DIALOG_MESSAGES } from '@src/constants/api-messages.constants';
 import { logger } from '@src/logger/winston.logger';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateDialogDto } from './dto/create-dialog.dto';
@@ -27,7 +28,7 @@ export class DialogService {
                 });
 
                 if (!subscription) {
-                    throw new ForbiddenException('Нет подписки на представителя власти');
+                    throw new ForbiddenException(DIALOG_MESSAGES.NO_SUBSCRIPTION);
                 }
 
                 // 2️⃣ ищем диалог
@@ -181,13 +182,15 @@ export class DialogService {
                 });
 
                 if (!dialog) {
-                    throw new NotFoundException('Диалог не найден');
+                    throw new NotFoundException(DIALOG_MESSAGES.NOT_FOUND);
                 }
 
                 const isParticipant = dialog.voterId === userId || dialog.representativeId === userId;
                 if (!isParticipant) {
-                    throw new ForbiddenException('Нет доступа к диалогу');
+                    throw new ForbiddenException(DIALOG_MESSAGES.ACCESS_DENIED);
                 }
+
+                const now = new Date();
 
                 // Создаём сообщение
                 const message = await tx.message.create({
@@ -198,10 +201,20 @@ export class DialogService {
                     },
                 });
 
-                // Обновляем updatedAt у диалога
+                const updateData: { updatedAt: Date; voterLastReadAt?: Date; representativeLastReadAt?: Date } = {
+                    updatedAt: now,
+                };
+
+                // Обновляем lastReadAt у отправителя
+                if (dialog.voterId === userId) {
+                    updateData.voterLastReadAt = now;
+                } else if (dialog.representativeId === userId) {
+                    updateData.representativeLastReadAt = now;
+                }
+
                 await tx.dialog.update({
                     where: { id: dialogId },
-                    data: { updatedAt: new Date() },
+                    data: updateData,
                 });
 
                 return message;
@@ -224,10 +237,10 @@ export class DialogService {
                 where: { id: dialogId },
             });
 
-            if (!dialog) throw new NotFoundException('Диалог не найден');
+            if (!dialog) throw new NotFoundException(DIALOG_MESSAGES.NOT_FOUND);
 
             if (dialog.voterId !== userId && dialog.representativeId !== userId) {
-                throw new ForbiddenException('Нет доступа к диалогу');
+                throw new ForbiddenException(DIALOG_MESSAGES.ACCESS_DENIED);
             }
 
             if (afterId) {
@@ -271,7 +284,7 @@ export class DialogService {
             });
 
             if (!dialog) {
-                throw new NotFoundException('Диалог не найден');
+                throw new NotFoundException(DIALOG_MESSAGES.NOT_FOUND);
             }
 
             let updatedDialog;
@@ -309,7 +322,7 @@ export class DialogService {
                     },
                 });
             } else {
-                throw new ForbiddenException('Нет доступа к диалогу');
+                throw new ForbiddenException(DIALOG_MESSAGES.ACCESS_DENIED);
             }
 
             return updatedDialog;

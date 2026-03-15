@@ -4,7 +4,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Avatar } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { User, MailCheck } from 'lucide-react';
+import { User, MailCheck, MailSearch, Mails } from 'lucide-react';
 import { Dialog } from '@monorepo/types';
 import { useApi } from '@/hooks/useApi';
 import { useAuth } from '@/context/AuthContext';
@@ -90,7 +90,13 @@ const MessagesTab = () => {
                 <h2 className="text-2xl font-bold">Новые сообщения</h2>
                 <div className="text-center">
                     <Link to="/messages">
-                        <Button className="honor-button-secondary">Перейти в центр сообщений</Button>
+                        <Button className="honor-button-primary flex items-center">
+                            <Mails
+                                size={18}
+                                className="mr-2"
+                            />
+                            Перейти в центр сообщений
+                        </Button>
                     </Link>
                 </div>
             </div>
