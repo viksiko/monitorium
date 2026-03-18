@@ -1,25 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { api } from '@/lib/api';
+import { api, refreshTokenPair } from '@/lib/api';
 import { RegisterData, LoginData, AuthResponse, User, OAuthData } from '@/types/auth';
-import { AuthState, useAuthStore } from '@/shared/stores/auth.store';
+import { useAuthStore } from '@/shared/stores/auth.store';
 import { RegisterRoleEnum } from '@monorepo/types';
 
 export const useRefreshToken = () => {
-    const authState = useAuthStore((state) => state);
     return useMutation({
-        mutationFn: (): Promise<{ data: { data: AuthResponse } }> => api.post('/api/v1/auth/refresh'),
-        onSuccess: (response) => {
-            const { accessToken } = response.data.data;
-
-            if (!accessToken) {
-                throw new Error('Refresh token failed: invalid response');
-            }
-            authState.setAccessToken(accessToken, 'fresh');
-        },
-        onError: (error) => {
-            console.error('Refresh token failed', error);
-            authState.setAccessToken(null, 'unauthorized');
-        },
+        mutationFn: (): Promise<string> => refreshTokenPair(),
     });
 };
 
@@ -76,7 +63,7 @@ export const useUser = () => {
             const { data } = await api.get('/api/v1/users/profile');
             return data.data;
         },
-        enabled: status === 'fresh',
+        enabled: status === 'fresh' && !!accessToken,
         retry: false,
         // TODO: привязать к значению получаемому из конфига или из запроса на сервер. Как лучше хз.
         staleTime: 5 * 60 * 1000,
