@@ -1,52 +1,59 @@
-import React from 'react';
 import { MapPin } from 'lucide-react';
 
 interface DistrictsListProps {
     districts: any[];
-    selectedDistrict: number | null;
-    onSelectDistrict: (id: number) => void;
+    selectedDistrict: string | null;
+    onSelectDistrict: (name: string) => void;
 }
 
-const DistrictsList = ({
-    districts,
-    selectedDistrict,
-    onSelectDistrict,
-}: DistrictsListProps) => {
+const DistrictsList = ({ districts, selectedDistrict, onSelectDistrict }: DistrictsListProps) => {
     return (
-        <div className="honor-card">
+        <div className="honor-card h-full">
             <h2 className="text-xl font-bold mb-4">Избирательные округа</h2>
-            <p className="text-honor-darkGray mb-6">
-                Выберите округ на карте или из списка для получения подробной
-                информации
-            </p>
+            <p className="text-honor-darkGray mb-6">Выберите округ из списка для получения подробной информации</p>
 
-            <div className="space-y-2">
-                {districts.map((district) => (
-                    <button
-                        key={district.id}
-                        className={`w-full flex items-center justify-between p-3 border rounded-xl transition-colors ${
-                            selectedDistrict === district.id
-                                ? 'bg-honor-blue text-white'
-                                : 'hover:bg-honor-gray'
-                        }`}
-                        onClick={() => onSelectDistrict(district.id)}>
-                        <div className="flex items-center">
-                            <MapPin
-                                className={
-                                    selectedDistrict === district.id
-                                        ? 'text-white'
-                                        : 'text-honor-blue'
-                                }
-                                size={20}
-                            />
-                            <span className="ml-2">{district.name}</span>
-                        </div>
-                        <span
-                            className={`text-sm ${selectedDistrict === district.id ? 'text-white' : 'text-honor-darkGray'}`}>
-                            {district.description}
-                        </span>
-                    </button>
-                ))}
+            <div className="relative">
+                {/* Иконка внутри селекта для сохранения стиля */}
+                <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+                    <MapPin
+                        className="text-honor-blue"
+                        size={20}
+                    />
+                </div>
+
+                <select
+                    className="w-full pl-10 pr-4 py-3 border rounded-xl bg-white focus:ring-2 focus:ring-honor-blue focus:border-honor-blue outline-none appearance-none transition-all cursor-pointer text-honor-darkGray"
+                    value={selectedDistrict || ''}
+                    onChange={(e) => onSelectDistrict(e.target.value)}>
+                    <option
+                        value=""
+                        disabled>
+                        Выберите округ...
+                    </option>
+                    {districts.map((district) => (
+                        <option
+                            key={district.id}
+                            value={district.name}>
+                            {district.name}
+                        </option>
+                    ))}
+                </select>
+
+                {/* Кастомная стрелочка (опционально) */}
+                <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none">
+                    <svg
+                        className="h-5 w-5 text-gray-400"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M19 9l-7 7-7-7"
+                        />
+                    </svg>
+                </div>
             </div>
         </div>
     );
