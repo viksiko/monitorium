@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import Layout from '@/components/layout/Layout';
 import { useToast } from '@/hooks/use-toast';
 import { mockDistricts } from '@/data/mockDistricts';
@@ -10,21 +10,16 @@ import DistrictsList from '@/components/map/DistrictsList';
 import DistrictCard from '@/components/map/DistrictCard';
 import RepresentativeCard from '@/components/map/RepresentativeCard';
 import ComparisonTable from '@/components/map/ComparisonTable';
+import { DISTRICS } from '@/constants/districts';
 
 const Map = () => {
     const [searchTerm, setSearchTerm] = useState('');
-    const [selectedDistrict, setSelectedDistrict] = useState<number | null>(
-        null,
-    );
-    const [representativeType, setRepresentativeType] = useState<string | null>(
-        null,
-    );
+    const [selectedDistrict, setSelectedDistrict] = useState<string | null>(null);
+    const [representativeType, setRepresentativeType] = useState<string | null>(null);
     const [sortBy, setSortBy] = useState<string | null>(null);
     const [showProblems, setShowProblems] = useState(false);
     const [showStats, setShowStats] = useState(false);
-    const [selectedRepresentative, setSelectedRepresentative] = useState<
-        any | null
-    >(null);
+    const [selectedRepresentative, setSelectedRepresentative] = useState<any | null>(null);
     const { toast } = useToast();
 
     const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -34,38 +29,30 @@ const Map = () => {
     const filteredDistricts = mockDistricts.filter(
         (district) =>
             district.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            district.description
-                .toLowerCase()
-                .includes(searchTerm.toLowerCase()) ||
+            district.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
             district.representatives.some(
                 (rep) =>
                     rep.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                    rep.position
-                        .toLowerCase()
-                        .includes(searchTerm.toLowerCase()),
+                    rep.position.toLowerCase().includes(searchTerm.toLowerCase()),
             ),
     );
 
-    const handleSelectDistrict = (id: number) => {
-        setSelectedDistrict(id === selectedDistrict ? null : id);
+    const handleSelectDistrict = (name: string) => {
+        setSelectedDistrict(name === selectedDistrict ? null : name);
         setSelectedRepresentative(null);
     };
 
-    const selectedDistrictData = mockDistricts.find(
-        (d) => d.id === selectedDistrict,
-    );
+    const selectedDistrictData = DISTRICS.find((d) => d.name === selectedDistrict);
 
-    const filteredRepresentatives = selectedDistrictData?.representatives
-        .filter((rep) =>
-            representativeType ? rep.type === representativeType : true,
-        )
-        .sort((a, b) => {
-            if (!sortBy) return 0;
-            if (sortBy === 'rating') return b.rating - a.rating;
-            if (sortBy === 'tasks') return b.tasksCompleted - a.tasksCompleted;
-            if (sortBy === 'attendance') return b.attendance - a.attendance;
-            return 0;
-        });
+    // const filteredRepresentatives = selectedDistrictData?.representatives
+    //     .filter((rep) => (representativeType ? rep.type === representativeType : true))
+    //     .sort((a, b) => {
+    //         if (!sortBy) return 0;
+    //         if (sortBy === 'rating') return b.rating - a.rating;
+    //         if (sortBy === 'tasks') return b.tasksCompleted - a.tasksCompleted;
+    //         if (sortBy === 'attendance') return b.attendance - a.attendance;
+    //         return 0;
+    //     });
 
     const handleRequestMeeting = (representativeId: number) => {
         toast({
@@ -94,8 +81,7 @@ const Map = () => {
             <div className="honor-container py-12">
                 <h1 className="text-3xl font-bold mb-2">Карта округов</h1>
                 <p className="text-honor-darkGray mb-8">
-                    Интерактивная карта избирательных округов с информацией о
-                    представителях власти
+                    Интерактивная карта избирательных округов с информацией о представителях власти
                 </p>
 
                 <MapFilters
@@ -112,9 +98,7 @@ const Map = () => {
                             selectedDistrict={selectedDistrict}
                             showProblems={showProblems}
                             showStats={showStats}
-                            onToggleProblems={() =>
-                                setShowProblems(!showProblems)
-                            }
+                            onToggleProblems={() => setShowProblems(!showProblems)}
                             onToggleStats={() => setShowStats(!showStats)}
                             onSelectDistrict={handleSelectDistrict}
                         />
@@ -132,13 +116,11 @@ const Map = () => {
                                 district={selectedDistrictData}
                                 onDistrictSelect={setSelectedDistrict}
                                 onSubscribe={handleSubscribe}
-                                onSelectRepresentative={
-                                    setSelectedRepresentative
-                                }
+                                onSelectRepresentative={setSelectedRepresentative}
                             />
                         ) : (
                             <DistrictsList
-                                districts={filteredDistricts}
+                                districts={DISTRICS}
                                 selectedDistrict={selectedDistrict}
                                 onSelectDistrict={handleSelectDistrict}
                             />
@@ -147,15 +129,12 @@ const Map = () => {
                 </div>
 
                 {/* Таблица сравнения представителей */}
-                {selectedDistrict &&
-                    selectedDistrictData?.representatives.length > 1 && (
-                        <ComparisonTable
-                            representatives={
-                                selectedDistrictData.representatives
-                            }
-                            onSelectRepresentative={setSelectedRepresentative}
-                        />
-                    )}
+                {/* {selectedDistrict && selectedDistrictData?.representatives.length > 1 && (
+                    <ComparisonTable
+                        representatives={selectedDistrictData.representatives}
+                        onSelectRepresentative={setSelectedRepresentative}
+                    />
+                )} */}
             </div>
         </Layout>
     );

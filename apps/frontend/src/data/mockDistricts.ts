@@ -1,6 +1,6 @@
 export const mockDistricts = [
     {
-        id: 1,
+        id: 82,
         name: 'Округ №1',
         description: 'Центральный район',
         representatives: [
