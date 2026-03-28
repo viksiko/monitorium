@@ -66,9 +66,7 @@ export class AuthController {
     @ApiResponse(REGISTRATION_CONFIRMED_RESPONSE)
     @ApiResponse(INVALID_VERIFICATION_CODE_RESPONSE)
     @ApiResponse(DATABASE_ERROR_RESPONSE)
-    async confirmRegistration(
-        @Body() dto: СonfirmRegistration,
-    ): Promise<{ message: string }> {
+    async confirmRegistration(@Body() dto: СonfirmRegistration): Promise<{ message: string }> {
         return await this.authService.confirmRegistration(dto);
     }
 
@@ -79,9 +77,7 @@ export class AuthController {
     @ApiResponse(REPRESENTATIVE_REQUEST_CREATED_RESPONSE)
     @ApiResponse(REPRESENTATIVE_VALIDATION_ERROR_RESPONSE)
     @ApiResponse(DATABASE_ERROR_RESPONSE)
-    async representativeRequest(
-        @Body() dto: RepresentativeRequestDto,
-    ): Promise<{ message: string }> {
+    async representativeRequest(@Body() dto: RepresentativeRequestDto): Promise<{ message: string }> {
         return await this.authService.representativeRequest(dto);
     }
 
@@ -137,9 +133,7 @@ export class AuthController {
     @ApiResponse(FORGOT_PASSWORD_SUCCESS_RESPONSE)
     @ApiResponse(TOO_MANY_REQUESTS_RESPONSE)
     @ApiResponse(DATABASE_ERROR_RESPONSE)
-    async forgotPassword(
-        @Body() forgotPasswordDto: ForgotPasswordDto,
-    ): Promise<{ message: string }> {
+    async forgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto): Promise<{ message: string }> {
         return await this.authService.forgotPassword(forgotPasswordDto);
     }
 
@@ -151,9 +145,7 @@ export class AuthController {
     @ApiResponse(VALIDATION_RESET_PASSWORD_ERROR_RESPONSE)
     @ApiResponse(TOO_MANY_REQUESTS_RESPONSE)
     @ApiResponse(INVALID_RESET_PASSWORD_TOKEN_RESPONSE)
-    async resetPassword(
-        @Body() resetPasswordDto: ResetPasswordDto,
-    ): Promise<{ message: string }> {
+    async resetPassword(@Body() resetPasswordDto: ResetPasswordDto): Promise<{ message: string }> {
         return await this.authService.resetPassword(resetPasswordDto);
     }
 

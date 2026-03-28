@@ -30,7 +30,7 @@ model User {
   // Верифицирован и активная учтеная запись
   isRepresentative Boolean   @default(false)
   isVerified       Boolean   @default(false)
-  isActive         Boolean   @default(true)
+  isActive         Boolean   @default(false)
   deletedAt        DateTime?
 
   tokens Token[]
@@ -74,6 +74,7 @@ model User {
 model Task {
   id                    String    @id @default(cuid())
   title                 String
+  district              String // ← фиксируем округ на момент создания (берется от представителя при создании)
   address               String
   problemDescription    String
   possibleSolutions     String?

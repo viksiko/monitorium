@@ -18,11 +18,13 @@ export class TaskService {
         try {
             const { stages, assigneeId, ...taskData } = dto;
 
+            let assigneeDistrict: string | null = null;
+
             // Если указан исполнитель — проверяем, что это представитель
             if (assigneeId) {
                 const assignee = await this.prisma.user.findUnique({
                     where: { id: assigneeId },
-                    select: { role: true },
+                    select: { role: true, district: true },
                 });
 
                 if (!assignee) {
@@ -32,12 +34,20 @@ export class TaskService {
                 if (assignee.role !== 'REPRESENTATIVE') {
                     throw new Error(TASK_MESSAGES.TASK_ASSIGNEE_MUST_BE_REPRESENTATIVE);
                 }
+
+                if (!assignee.district) {
+                    throw new Error('У представителя не указан округ');
+                }
+
+                assigneeDistrict = assignee.district;
             }
 
             // Создание задачи с возможными этапами
             return await this.prisma.task.create({
                 data: {
                     ...taskData,
+
+                    district: assigneeDistrict!,
 
                     // автор
                     author: {
@@ -186,6 +196,42 @@ export class TaskService {
             logger.error('Failed when getting the task by id', {
                 category: 'TaskService',
                 operation: 'getTaskById',
+                error: error instanceof Error ? error.message : error,
+            });
+
+            throw error;
+        }
+    }
+
+    async getTasksByFilter(query: { district?: string }): Promise<Task[]> {
+        try {
+            const { district } = query;
+
+            const tasks = await this.prisma.task.findMany({
+                where: {
+                    ...(district && { district }), // ← фильтр только если передан
+                },
+                include: {
+                    author: { select: { id: true, name: true } },
+                    assignee: { select: { id: true, name: true } },
+                    stages: {
+                        orderBy: {
+                            date: 'asc',
+                        },
+                    },
+                    comments: true,
+                    taskFiles: true,
+                },
+                orderBy: {
+                    createdAt: 'desc',
+                },
+            });
+
+            return tasks;
+        } catch (error) {
+            logger.error('Failed to find tasks', {
+                category: 'database',
+                operation: 'getTasksByFilter',
                 error: error instanceof Error ? error.message : error,
             });
 

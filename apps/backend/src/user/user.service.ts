@@ -12,6 +12,7 @@ import { RegisterDto } from '@src/auth/dto/register.dto';
 import { MailService } from '@src/auth/services/mail.service';
 import { TokenSevice } from '@src/auth/services/token.service';
 import {
+    ACCOUNT_INACTIVE,
     AUTHORIZATION_REQUIRED,
     DEACTIVATE_OWN_ACCOUNT_ONLY,
     EMAIL_NOT_VERIFIED,
@@ -58,13 +59,16 @@ export class UserService {
 
     async getUsersByFilter(query: {
         role?: string;
+        district?: string;
     }): Promise<UserWithRepresentativeProfileDto[] | UserWithVoterProfileDto[]> {
         try {
-            const { role } = query;
+            const { role, district } = query;
 
             return await this.prisma.user.findMany({
                 where: {
                     role: role === 'representative' ? Role.REPRESENTATIVE : Role.VOTER,
+                    isActive: true,
+                    ...(district && { district }),
                 },
                 select: {
                     id: true,
@@ -324,8 +328,14 @@ export class UserService {
             throw new ConflictException(INVALID_CREDENTIALS_MSG);
         }
 
+        // Проверка: подтвержден ли email пользователя
         if (!user.isVerified) {
             throw new ConflictException(EMAIL_NOT_VERIFIED);
+        }
+
+        // Проверка: активен ли аккаунт пользователя
+        if (!user.isActive) {
+            throw new ConflictException(ACCOUNT_INACTIVE);
         }
 
         // Проверка пароля
@@ -351,7 +361,6 @@ export class UserService {
                     data: {
                         ...userData,
                         password: hashedPassword,
-                        isVerified: false,
                         role: dto.role,
                         isRepresentative: dto.isRepresentative,
                     },

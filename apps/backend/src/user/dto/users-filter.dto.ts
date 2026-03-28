@@ -5,4 +5,7 @@ export class UsersFilterDto {
     @IsOptional()
     @IsEnum(['voter', 'representative'], { message: 'Указана недопустимая роль' })
     role?: Role;
+
+    @IsOptional()
+    district?: string;
 }

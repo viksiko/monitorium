@@ -21,7 +21,7 @@ CREATE TABLE "users" (
     "tinkoffId" TEXT,
     "isRepresentative" BOOLEAN NOT NULL DEFAULT false,
     "isVerified" BOOLEAN NOT NULL DEFAULT false,
-    "isActive" BOOLEAN NOT NULL DEFAULT true,
+    "isActive" BOOLEAN NOT NULL DEFAULT false,
     "deletedAt" TIMESTAMP(3),
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
@@ -33,6 +33,7 @@ CREATE TABLE "users" (
 CREATE TABLE "tasks" (
     "id" TEXT NOT NULL,
     "title" TEXT NOT NULL,
+    "district" TEXT NOT NULL,
     "address" TEXT NOT NULL,
     "problemDescription" TEXT NOT NULL,
     "possibleSolutions" TEXT,
