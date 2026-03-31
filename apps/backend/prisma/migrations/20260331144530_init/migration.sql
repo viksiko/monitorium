@@ -14,7 +14,7 @@ CREATE TABLE "users" (
     "email" TEXT NOT NULL,
     "password" TEXT,
     "phone" TEXT,
-    "district" TEXT,
+    "districtId" TEXT,
     "role" "Role" NOT NULL,
     "gosuslugiId" TEXT,
     "sberId" TEXT,
@@ -33,11 +33,11 @@ CREATE TABLE "users" (
 CREATE TABLE "tasks" (
     "id" TEXT NOT NULL,
     "title" TEXT NOT NULL,
-    "district" TEXT NOT NULL,
     "address" TEXT NOT NULL,
     "problemDescription" TEXT NOT NULL,
     "possibleSolutions" TEXT,
     "desiredResolutionDate" TIMESTAMP(3),
+    "districtId" TEXT NOT NULL,
     "authorId" TEXT NOT NULL,
     "assigneeId" TEXT,
     "status" "TaskStatus" NOT NULL DEFAULT 'PLANNED',
@@ -202,6 +202,27 @@ CREATE TABLE "messages" (
     CONSTRAINT "messages_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateTable
+CREATE TABLE "districts" (
+    "id" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "mapId" INTEGER NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "districts_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "areas" (
+    "id" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "districtId" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "areas_pkey" PRIMARY KEY ("id")
+);
+
 -- CreateIndex
 CREATE UNIQUE INDEX "users_email_key" ON "users"("email");
 
@@ -234,6 +255,21 @@ CREATE UNIQUE INDEX "dialogs_voterId_representativeId_key" ON "dialogs"("voterId
 
 -- CreateIndex
 CREATE INDEX "messages_dialogId_createdAt_idx" ON "messages"("dialogId", "createdAt");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "districts_name_key" ON "districts"("name");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "districts_mapId_key" ON "districts"("mapId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "areas_name_districtId_key" ON "areas"("name", "districtId");
+
+-- AddForeignKey
+ALTER TABLE "users" ADD CONSTRAINT "users_districtId_fkey" FOREIGN KEY ("districtId") REFERENCES "districts"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "tasks" ADD CONSTRAINT "tasks_districtId_fkey" FOREIGN KEY ("districtId") REFERENCES "districts"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "tasks" ADD CONSTRAINT "tasks_authorId_fkey" FOREIGN KEY ("authorId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -291,3 +327,6 @@ ALTER TABLE "messages" ADD CONSTRAINT "messages_dialogId_fkey" FOREIGN KEY ("dia
 
 -- AddForeignKey
 ALTER TABLE "messages" ADD CONSTRAINT "messages_senderId_fkey" FOREIGN KEY ("senderId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "areas" ADD CONSTRAINT "areas_districtId_fkey" FOREIGN KEY ("districtId") REFERENCES "districts"("id") ON DELETE CASCADE ON UPDATE CASCADE;

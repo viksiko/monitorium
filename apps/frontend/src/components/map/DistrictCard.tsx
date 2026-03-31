@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
-import { MapPin, Bell, Calendar, TrendingUp, User, Building2 } from 'lucide-react';
-import { Representative, Task } from '@monorepo/types';
+import { MapPin, Bell, Calendar, TrendingUp, User, Building2, ChevronLeft } from 'lucide-react';
+import { Area, Representative, Task } from '@monorepo/types';
 import { useState, useEffect } from 'react';
 import { api } from '@/lib/api';
 import { constants } from 'buffer';
@@ -18,7 +18,6 @@ const DistrictCard = ({ district, onDistrictSelect, onSubscribe, onSelectReprese
     const [representatives, setRepresentatives] = useState<Representative[]>([]);
     const [loading, setLoading] = useState(false);
     const [tasks, setTasks] = useState<Task[]>([]);
-    const [tasksLoading, setTasksLoading] = useState(false);
     const stats = getTasksStats(tasks);
 
     useEffect(() => {
@@ -27,7 +26,6 @@ const DistrictCard = ({ district, onDistrictSelect, onSubscribe, onSelectReprese
         const fetchData = async () => {
             try {
                 setLoading(true);
-                setTasksLoading(true);
 
                 const [usersRes, tasksRes] = await Promise.all([
                     api.get('/api/v1/users/filter', {
@@ -49,7 +47,6 @@ const DistrictCard = ({ district, onDistrictSelect, onSubscribe, onSelectReprese
                 console.error('Ошибка загрузки данных:', error);
             } finally {
                 setLoading(false);
-                setTasksLoading(false);
             }
         };
 
@@ -90,24 +87,31 @@ const DistrictCard = ({ district, onDistrictSelect, onSubscribe, onSelectReprese
 
     return (
         <div className="honor-card">
-            <div className="flex items-center mb-4">
-                <MapPin
-                    className="text-honor-blue mr-2"
-                    size={24}
-                />
-                <h2 className="text-2xl font-bold">{district.name}</h2>
+            <div className="flex items-center mb-4 gap-3 justify-between">
+                <div className="flex items-center gap-1">
+                    <MapPin
+                        className="text-honor-blue"
+                        size={24}
+                    />
+                    <h2 className="text-2xl font-bold">{district.name}</h2>
+                </div>
+                <Button
+                    onClick={() => onDistrictSelect(null)}
+                    className="p-2 h-auto text-sm">
+                    <ChevronLeft size={24} />
+                </Button>
             </div>
             {/* <p className="text-honor-darkGray mb-4">{district.description}</p> */}
 
             {district.areas && (
                 <div className="mb-4">
                     <ul className="list-disc list-inside text-honor-darkGray space-y-1">
-                        {district.areas.map((area: string, index: number) => (
+                        {district.areas.map((area: Area) => (
                             <li
                                 className="flex items-center gap-1"
-                                key={index}>
+                                key={area.id}>
                                 <Building2 size={14} />
-                                {area}
+                                {area.name}
                             </li>
                         ))}
                     </ul>
@@ -214,7 +218,18 @@ const DistrictCard = ({ district, onDistrictSelect, onSubscribe, onSelectReprese
                                         </div>
                                         <div className="flex-grow">
                                             <p className="font-medium">{rep.name}</p>
+                                            <p className="text-sm">{rep.representativeProfile.position}</p>
                                         </div>
+                                        {/* <div className="text-right">
+                                            <div className="flex items-center text-sm">
+                                                <TrendingUp
+                                                    size={14}
+                                                    className="text-honor-blue"
+                                                />
+                                                <span className="ml-1">{rep.representativeProfile.rating}</span>
+                                            </div>
+                                            <p className="text-xs text-honor-darkGray">{rep.type}</p>
+                                        </div> */}
                                     </button>
                                 ))}
                             </div>
@@ -224,14 +239,14 @@ const DistrictCard = ({ district, onDistrictSelect, onSubscribe, onSelectReprese
             )}
 
             <div className="flex justify-between">
-                <Button
+                {/* <Button
                     className="honor-button-secondary"
                     onClick={() => onDistrictSelect(null)}>
                     Назад к выбору округа
-                </Button>
-                {/* <Link to={`/districts/${district.id}`}>
+                </Button> */}
+                <Link to={`/districts/${district.id}`}>
                     <Button className="honor-button-primary">Подробнее об округе</Button>
-                </Link> */}
+                </Link>
             </div>
         </div>
     );

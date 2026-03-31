@@ -13,12 +13,13 @@ datasource db {
 }
 
 model User {
-  id       String  @id @default(cuid())
-  name     String
-  email    String  @unique
-  password String? // Nullable для пользователей через OAuth
-  phone    String? @unique
-  district String? // Округ пользователя
+  id         String    @id @default(cuid())
+  name       String
+  email      String    @unique
+  password   String? // Nullable для пользователей через OAuth
+  phone      String?   @unique
+  district   District? @relation(fields: [districtId], references: [id])
+  districtId String?
 
   role Role
 
@@ -72,13 +73,16 @@ model User {
 
 // Задание
 model Task {
-  id                    String    @id @default(cuid())
-  title                 String
-  district              String // ← фиксируем округ на момент создания (берется от представителя при создании)
+  id    String @id @default(cuid())
+  title String
+
   address               String
   problemDescription    String
   possibleSolutions     String?
   desiredResolutionDate DateTime?
+
+  districtId String
+  district   District @relation(fields: [districtId], references: [id]) // ← фиксируем округ на момент создания (берется от представителя при создании)
 
   // Автор задачи
   authorId String
@@ -264,25 +268,6 @@ model PostFile {
   @@map("post_files")
 }
 
-enum Role {
-  VOTER
-  REPRESENTATIVE
-  ADMIN
-}
-
-enum TokenType {
-  REFRESH
-  VERIFY_EMAIL
-  RESET_PASSWORD
-}
-
-enum TaskStatus {
-  PLANNED // "Запланировано"
-  IN_PROGRESS // "В процессе"  
-  COMPLETED // "Выполнено"
-  REJECTED // "Отклонено"
-}
-
 model Dialog {
   id String @id @default(cuid())
 
@@ -319,4 +304,55 @@ model Message {
 
   @@index([dialogId, createdAt])
   @@map("messages")
+}
+
+model District {
+  id   String @id @default(cuid())
+  name String @unique
+
+  mapId Int @unique // ID из Яндекс.Карты
+
+  areas Area[] // Один округ → много городов
+
+  users User[] // Связь с пользователями (если используешь district у User)
+
+  tasks Task[] // Связь задачами (если используешь district у User)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("districts")
+}
+
+model Area {
+  id         String @id @default(cuid())
+  name       String
+  districtId String
+
+  // Связь с округом
+  district District @relation(fields: [districtId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([name, districtId]) // чтобы не было одинаковых городов в одном округе
+  @@map("areas")
+}
+
+enum Role {
+  VOTER
+  REPRESENTATIVE
+  ADMIN
+}
+
+enum TokenType {
+  REFRESH
+  VERIFY_EMAIL
+  RESET_PASSWORD
+}
+
+enum TaskStatus {
+  PLANNED // "Запланировано"
+  IN_PROGRESS // "В процессе"  
+  COMPLETED // "Выполнено"
+  REJECTED // "Отклонено"
 }

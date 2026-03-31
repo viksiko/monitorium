@@ -1,21 +1,8 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
-} from '@/components/ui/card';
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from '@/components/ui/table';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -31,6 +18,8 @@ import {
     MessageSquare,
     ArrowLeft,
 } from 'lucide-react';
+import { Representative, Task } from '@monorepo/types';
+import { api } from '@/lib/api';
 
 // Используем моковые данные из Map.tsx
 const mockDistricts = [
@@ -443,8 +432,46 @@ const mockDistricts = [
 const DistrictDetails = () => {
     const { id } = useParams();
     const districtId = parseInt(id || '0');
+    const [loading, setLoading] = useState(false);
+    const [tasks, setTasks] = useState<Task[]>([]);
+    const [representatives, setRepresentatives] = useState<Representative[]>([]);
 
     const district = mockDistricts.find((d) => d.id === districtId);
+
+    useEffect(() => {
+        if (!district?.name) return;
+
+        const fetchData = async () => {
+            try {
+                setLoading(true);
+
+                const [usersRes, tasksRes] = await Promise.all([
+                    api.get('/api/v1/users/filter', {
+                        params: {
+                            role: 'representative',
+                            district: district.name,
+                        },
+                    }),
+                    api.get('/api/v1/tasks/filter', {
+                        params: {
+                            district: district.name,
+                        },
+                    }),
+                ]);
+
+                setRepresentatives(usersRes.data.data);
+                setTasks(tasksRes.data.data);
+            } catch (error) {
+                console.error('Ошибка загрузки данных:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchData();
+    }, [district?.name]);
+
+    console.log('t', tasks, representatives);
 
     if (!district) {
         return (
@@ -453,9 +480,7 @@ const DistrictDetails = () => {
                     <Card className="honor-card">
                         <CardHeader>
                             <CardTitle>Округ не найден</CardTitle>
-                            <CardDescription>
-                                Информация по запрошенному округу отсутствует
-                            </CardDescription>
+                            <CardDescription>Информация по запрошенному округу отсутствует</CardDescription>
                         </CardHeader>
                         <CardContent>
                             <Link to="/map">
@@ -495,25 +520,21 @@ const DistrictDetails = () => {
                         />
                         <h1 className="text-3xl font-bold">{district.name}</h1>
                     </div>
-                    <p className="text-honor-darkGray">
-                        {district.description}
-                    </p>
+                    <p className="text-honor-darkGray">{district.description}</p>
                 </div>
 
                 <Tabs
                     defaultValue="overview"
                     className="mb-8">
-                    <TabsList className="grid w-full grid-cols-4 mb-8">
+                    <TabsList className="grid w-full grid-cols-3 mb-8">
                         <TabsTrigger value="overview">Обзор</TabsTrigger>
-                        <TabsTrigger value="representatives">
-                            Представители
-                        </TabsTrigger>
+                        <TabsTrigger value="representatives">Представители</TabsTrigger>
                         <TabsTrigger value="problems">Проблемы</TabsTrigger>
-                        <TabsTrigger value="events">События</TabsTrigger>
+                        {/* <TabsTrigger value="events">События</TabsTrigger> */}
                     </TabsList>
 
                     <TabsContent value="overview">
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-1 gap-6">
                             <Card className="col-span-2">
                                 <CardHeader>
                                     <CardTitle>Общая информация</CardTitle>
@@ -522,60 +543,37 @@ const DistrictDetails = () => {
                                     <div className="space-y-4">
                                         <div className="grid grid-cols-2 gap-4">
                                             <div className="bg-honor-gray rounded-lg p-4">
-                                                <p className="text-sm text-honor-darkGray">
-                                                    Всего задач
-                                                </p>
+                                                <p className="text-sm text-honor-darkGray">Всего задач</p>
                                                 <p className="text-2xl font-bold text-honor-blue">
                                                     {district.stats.tasksTotal}
                                                 </p>
                                             </div>
                                             <div className="bg-honor-gray rounded-lg p-4">
-                                                <p className="text-sm text-honor-darkGray">
-                                                    Выполнено
-                                                </p>
+                                                <p className="text-sm text-honor-darkGray">Выполнено</p>
                                                 <p className="text-2xl font-bold text-green-600">
-                                                    {
-                                                        district.stats
-                                                            .tasksCompleted
-                                                    }
+                                                    {district.stats.tasksCompleted}
                                                 </p>
                                             </div>
                                             <div className="bg-honor-gray rounded-lg p-4">
-                                                <p className="text-sm text-honor-darkGray">
-                                                    В процессе
-                                                </p>
+                                                <p className="text-sm text-honor-darkGray">В процессе</p>
                                                 <p className="text-2xl font-bold text-amber-600">
-                                                    {
-                                                        district.stats
-                                                            .tasksInProgress
-                                                    }
+                                                    {district.stats.tasksInProgress}
                                                 </p>
                                             </div>
                                             <div className="bg-honor-gray rounded-lg p-4">
-                                                <p className="text-sm text-honor-darkGray">
-                                                    Удовлетворенность
-                                                </p>
+                                                <p className="text-sm text-honor-darkGray">Удовлетворенность</p>
                                                 <p className="text-2xl font-bold text-honor-blue">
-                                                    {
-                                                        district.stats
-                                                            .satisfactionRate
-                                                    }
-                                                    %
+                                                    {district.stats.satisfactionRate}%
                                                 </p>
                                             </div>
                                         </div>
 
                                         <div className="bg-honor-gray rounded-lg p-4">
                                             <div className="flex justify-between mb-2">
-                                                <p className="text-sm font-medium">
-                                                    Прогресс выполнения задач
-                                                </p>
+                                                <p className="text-sm font-medium">Прогресс выполнения задач</p>
                                                 <p className="text-sm text-honor-darkGray">
                                                     {Math.round(
-                                                        (district.stats
-                                                            .tasksCompleted /
-                                                            district.stats
-                                                                .tasksTotal) *
+                                                        (district.stats.tasksCompleted / district.stats.tasksTotal) *
                                                             100,
                                                     )}
                                                     %
@@ -597,17 +595,9 @@ const DistrictDetails = () => {
                                                         size={18}
                                                         className="text-honor-blue mr-2"
                                                     />
-                                                    <p className="font-medium">
-                                                        Среднее время отклика
-                                                    </p>
+                                                    <p className="font-medium">Среднее время отклика</p>
                                                 </div>
-                                                <p className="text-2xl font-bold">
-                                                    {
-                                                        district.stats
-                                                            .responseTime
-                                                    }{' '}
-                                                    дней
-                                                </p>
+                                                <p className="text-2xl font-bold">{district.stats.responseTime} дней</p>
                                             </div>
                                             <div className="border rounded-lg p-4">
                                                 <div className="flex items-center mb-2">
@@ -615,23 +605,16 @@ const DistrictDetails = () => {
                                                         size={18}
                                                         className="text-honor-blue mr-2"
                                                     />
-                                                    <p className="font-medium">
-                                                        Представителей
-                                                    </p>
+                                                    <p className="font-medium">Представителей</p>
                                                 </div>
-                                                <p className="text-2xl font-bold">
-                                                    {
-                                                        district.representatives
-                                                            .length
-                                                    }
-                                                </p>
+                                                <p className="text-2xl font-bold">{district.representatives.length}</p>
                                             </div>
                                         </div>
                                     </div>
                                 </CardContent>
                             </Card>
 
-                            <Card>
+                            {/* <Card>
                                 <CardHeader>
                                     <CardTitle>Ближайшие события</CardTitle>
                                 </CardHeader>
@@ -646,21 +629,15 @@ const DistrictDetails = () => {
                                                     className="text-honor-blue mt-1"
                                                 />
                                                 <div>
-                                                    <p className="font-medium">
-                                                        {event.title}
-                                                    </p>
-                                                    <p className="text-sm text-honor-darkGray">
-                                                        {event.date}
-                                                    </p>
-                                                    <p className="text-sm text-honor-darkGray">
-                                                        {event.location}
-                                                    </p>
+                                                    <p className="font-medium">{event.title}</p>
+                                                    <p className="text-sm text-honor-darkGray">{event.date}</p>
+                                                    <p className="text-sm text-honor-darkGray">{event.location}</p>
                                                 </div>
                                             </div>
                                         </div>
                                     ))}
                                 </CardContent>
-                            </Card>
+                            </Card> */}
                         </div>
                     </TabsContent>
 
@@ -668,9 +645,7 @@ const DistrictDetails = () => {
                         <Card>
                             <CardHeader>
                                 <CardTitle>Представители округа</CardTitle>
-                                <CardDescription>
-                                    Список представителей власти данного округа
-                                </CardDescription>
+                                <CardDescription>Список представителей власти данного округа</CardDescription>
                             </CardHeader>
                             <CardContent>
                                 <Table>
@@ -678,18 +653,10 @@ const DistrictDetails = () => {
                                         <TableRow>
                                             <TableHead>Представитель</TableHead>
                                             <TableHead>Должность</TableHead>
-                                            <TableHead className="text-center">
-                                                Тип
-                                            </TableHead>
-                                            <TableHead className="text-center">
-                                                Рейтинг
-                                            </TableHead>
-                                            <TableHead className="text-center">
-                                                Выполнено задач
-                                            </TableHead>
-                                            <TableHead className="text-center">
-                                                Посещаемость
-                                            </TableHead>
+                                            <TableHead className="text-center">Тип</TableHead>
+                                            <TableHead className="text-center">Рейтинг</TableHead>
+                                            <TableHead className="text-center">Выполнено задач</TableHead>
+                                            <TableHead className="text-center">Посещаемость</TableHead>
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
@@ -702,21 +669,11 @@ const DistrictDetails = () => {
                                                         {rep.name}
                                                     </Link>
                                                 </TableCell>
-                                                <TableCell>
-                                                    {rep.position}
-                                                </TableCell>
-                                                <TableCell className="text-center">
-                                                    {rep.type}
-                                                </TableCell>
-                                                <TableCell className="text-center">
-                                                    {rep.rating}
-                                                </TableCell>
-                                                <TableCell className="text-center">
-                                                    {rep.tasksCompleted}
-                                                </TableCell>
-                                                <TableCell className="text-center">
-                                                    {rep.attendance}%
-                                                </TableCell>
+                                                <TableCell>{rep.position}</TableCell>
+                                                <TableCell className="text-center">{rep.type}</TableCell>
+                                                <TableCell className="text-center">{rep.rating}</TableCell>
+                                                <TableCell className="text-center">{rep.tasksCompleted}</TableCell>
+                                                <TableCell className="text-center">{rep.attendance}%</TableCell>
                                             </TableRow>
                                         ))}
                                     </TableBody>
@@ -729,9 +686,7 @@ const DistrictDetails = () => {
                         <Card>
                             <CardHeader>
                                 <CardTitle>Проблемы округа</CardTitle>
-                                <CardDescription>
-                                    Актуальные проблемы и задачи данного округа
-                                </CardDescription>
+                                <CardDescription>Актуальные проблемы и задачи данного округа</CardDescription>
                             </CardHeader>
                             <CardContent>
                                 <div className="space-y-4">
@@ -744,29 +699,23 @@ const DistrictDetails = () => {
                                                     <AlertTriangle
                                                         size={18}
                                                         className={
-                                                            problem.priority ===
-                                                            'высокий'
+                                                            problem.priority === 'высокий'
                                                                 ? 'text-red-600 mt-1'
                                                                 : 'text-amber-600 mt-1'
                                                         }
                                                     />
                                                     <div>
-                                                        <h3 className="font-bold">
-                                                            {problem.title}
-                                                        </h3>
+                                                        <h3 className="font-bold">{problem.title}</h3>
                                                         <p className="text-sm text-honor-darkGray">
-                                                            Создано:{' '}
-                                                            {problem.createdAt}
+                                                            Создано: {problem.createdAt}
                                                         </p>
                                                     </div>
                                                 </div>
                                                 <Badge
                                                     className={
-                                                        problem.status ===
-                                                        'выполнено'
+                                                        problem.status === 'выполнено'
                                                             ? 'bg-green-100 text-green-800'
-                                                            : problem.status ===
-                                                                'в работе'
+                                                            : problem.status === 'в работе'
                                                               ? 'bg-blue-100 text-blue-800'
                                                               : 'bg-orange-100 text-orange-800'
                                                     }>
@@ -774,8 +723,7 @@ const DistrictDetails = () => {
                                                 </Badge>
                                             </div>
                                             <div className="flex items-center justify-end mt-4">
-                                                <Link
-                                                    to={`/tasks/${problem.id}`}>
+                                                <Link to={`/tasks/${problem.id}`}>
                                                     <Button
                                                         variant="outline"
                                                         size="sm">
@@ -794,9 +742,7 @@ const DistrictDetails = () => {
                         <Card>
                             <CardHeader>
                                 <CardTitle>События округа</CardTitle>
-                                <CardDescription>
-                                    Календарь мероприятий в округе
-                                </CardDescription>
+                                <CardDescription>Календарь мероприятий в округе</CardDescription>
                             </CardHeader>
                             <CardContent>
                                 <div className="space-y-4">
@@ -807,31 +753,22 @@ const DistrictDetails = () => {
                                             <div className="flex items-start gap-3">
                                                 <div className="bg-honor-gray rounded-lg p-3 text-center min-w-[60px]">
                                                     <p className="text-xs text-honor-darkGray">
-                                                        {new Date(
-                                                            event.date,
-                                                        ).toLocaleDateString(
-                                                            'ru-RU',
-                                                            { month: 'short' },
-                                                        )}
+                                                        {new Date(event.date).toLocaleDateString('ru-RU', {
+                                                            month: 'short',
+                                                        })}
                                                     </p>
                                                     <p className="text-xl font-bold text-honor-blue">
-                                                        {new Date(
-                                                            event.date,
-                                                        ).getDate()}
+                                                        {new Date(event.date).getDate()}
                                                     </p>
                                                 </div>
                                                 <div>
-                                                    <h3 className="font-bold">
-                                                        {event.title}
-                                                    </h3>
+                                                    <h3 className="font-bold">{event.title}</h3>
                                                     <div className="flex items-center text-honor-darkGray text-sm mt-1">
                                                         <MapPin
                                                             size={14}
                                                             className="mr-1"
                                                         />
-                                                        <span>
-                                                            {event.location}
-                                                        </span>
+                                                        <span>{event.location}</span>
                                                     </div>
                                                 </div>
                                             </div>
@@ -855,14 +792,10 @@ const DistrictDetails = () => {
                 </Tabs>
 
                 <div className="mt-8 text-center">
-                    <h3 className="text-lg font-semibold mb-4">
-                        Хотите помочь своему округу?
-                    </h3>
+                    <h3 className="text-lg font-semibold mb-4">Хотите помочь своему округу?</h3>
                     <div className="flex justify-center space-x-4">
                         <Link to="/tasks/create">
-                            <Button className="honor-button-primary">
-                                Создать задачу
-                            </Button>
+                            <Button className="honor-button-primary">Создать задачу</Button>
                         </Link>
                         <Link to={`/representatives?district=${district.name}`}>
                             <Button variant="outline">
