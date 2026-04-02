@@ -185,3 +185,36 @@ npm run db:recreate  # СБРОС: удалить миграции, пересо
 docker compose up -d          # поднять всё в Docker
 npm run db:deploy              # применить миграции на продакшне
 ```
+
+---
+
+## Разное окружение (Docker и без него)
+
+Бекенд может работать в двух режимах, и от этого зависит как он находит базу данных. В файле `.env` нужно менять **две переменные**:
+
+| Режим | Когда используется | `POSTGRES_HOST` | Порт в `DATABASE_URL` |
+|---|---|---|---|
+| **Локальная разработка** | `npm run dev` / `npm run dev:back` | `localhost` | `${POSTGRES_HOST_PORT}` |
+| **Всё в Docker** | `docker compose up` | `postgres` | `${POSTGRES_DOCKER_PORT}` |
+
+Почему так: Docker-контейнеры общаются между собой по имени сервиса из `docker-compose.yml` — для них БД доступна как хост `postgres` на внутреннем порту. А с вашей машины (localhost) БД доступна только через проброшенный порт `POSTGRES_HOST_PORT`.
+
+Пример `.env` для **локальной разработки** (бекенд запускается через `npm run dev`, БД — в Docker):
+
+```env
+POSTGRES_HOST="localhost"
+POSTGRES_HOST_PORT=5433
+POSTGRES_DOCKER_PORT=5432
+DATABASE_URL="postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@localhost:5433/${POSTGRES_DB}"
+```
+
+Пример `.env` для **полного Docker** (`docker compose up` поднимает всё):
+
+```env
+POSTGRES_HOST="postgres"
+POSTGRES_HOST_PORT=5433
+POSTGRES_DOCKER_PORT=5432
+DATABASE_URL="postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}"
+```
+
+Если бекенд не может подключиться к БД — первым делом проверяйте эти два значения.
