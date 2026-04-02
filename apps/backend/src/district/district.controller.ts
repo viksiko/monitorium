@@ -1,4 +1,4 @@
-import { District } from '@monorepo/types';
+import { District, DistrictStats } from '@monorepo/types';
 import { Controller, Get, Param, Query, UseGuards } from '@nestjs/common';
 import { ApiHeader, ApiOperation, ApiParam, ApiQuery, ApiResponse } from '@nestjs/swagger';
 import { JwtAuthGuard } from '@src/auth/guards/jwt-auth.guard';
@@ -15,8 +15,6 @@ import {
 } from '@src/constants/swagger/shared-responses.swagger';
 import { DistrictService } from './district.service';
 
-@UseGuards(JwtAuthGuard)
-@ApiHeader(HEADERS_AUTHORIZATION)
 @ApiResponse(AUTHENTICATION_ERROR_RESPONSES)
 @ApiResponse(DATABASE_ERROR_RESPONSE)
 @Controller({
@@ -33,11 +31,13 @@ export class DistrictController {
         return this.districtService.getAllDistricts(areas === 'true');
     }
 
-    @Get(':id')
+    @Get(':id/stats')
+    @UseGuards(JwtAuthGuard)
     @ApiOperation({ summary: 'Получить все данные окргуа по id' })
+    @ApiHeader(HEADERS_AUTHORIZATION)
     @ApiParam(PARAM_DISTRICT_ID)
     @ApiResponse(DISTRICT_NOT_FOUND_RESPONSE)
-    async getDistrictById(@Param('id') id: string): Promise<District | null> {
-        return this.districtService.getDistrictById(id);
+    async getDistrictById(@Param('id') id: string): Promise<DistrictStats | null> {
+        return this.districtService.getDistrictStats(id);
     }
 }

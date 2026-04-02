@@ -1,4 +1,4 @@
-import { District } from '@monorepo/types';
+import { District, DistrictStats } from '@monorepo/types';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { DISTRICT_NOT_FOUND } from '@src/constants/api-messages.constants';
 import { logger } from '@src/logger/winston.logger';
@@ -22,19 +22,69 @@ export class DistrictService {
         }
     }
 
-    async getDistrictById(id: string): Promise<District | null> {
+    async getDistrictStats(id: string): Promise<DistrictStats | null> {
         try {
-            const district = await this.prisma.district.findUnique({
+            const districtStats = await this.prisma.district.findUnique({
                 where: { id },
+                include: {
+                    areas: {
+                        select: {
+                            id: true,
+                            name: true,
+                        },
+                    },
+                    tasks: {
+                        select: {
+                            id: true,
+                            title: true,
+                            status: true,
+                            createdAt: true,
+                            address: true,
+                            desiredResolutionDate: true,
+                            assignee: {
+                                select: {
+                                    name: true,
+                                },
+                            },
+                        },
+                        orderBy: { createdAt: 'desc' },
+                    },
+                    users: {
+                        where: {
+                            role: 'REPRESENTATIVE',
+                            isActive: true,
+                        },
+                        select: {
+                            id: true,
+                            name: true,
+                            email: true,
+                            districtId: true,
+                            isVerified: true,
+                            representativeProfile: {
+                                select: {
+                                    id: true,
+                                    position: true,
+                                    party: true,
+                                    rating: true,
+                                    tasksTotal: true,
+                                    tasksCompleted: true,
+                                    attendance: true,
+                                    lastActivity: true,
+                                },
+                            },
+                        },
+                        orderBy: { name: 'asc' },
+                    },
+                },
             });
 
-            if (!district) throw new NotFoundException(DISTRICT_NOT_FOUND);
+            if (!districtStats) throw new NotFoundException(DISTRICT_NOT_FOUND);
 
-            return district;
+            return districtStats;
         } catch (error) {
             logger.error('Failed when getting district by id', {
                 category: 'DistrictService',
-                operation: 'getDistrictById',
+                operation: 'getDistrictStats',
                 error: error instanceof Error ? error.message : error,
             });
 

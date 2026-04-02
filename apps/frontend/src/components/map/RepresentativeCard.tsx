@@ -1,4 +1,3 @@
-import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { User, ChevronDown, TrendingUp, Mail, SquareChevronLeft, ChevronLeft } from 'lucide-react';
@@ -30,7 +29,7 @@ const RepresentativeCard = ({ representative, onBack, onRequestMeeting }: Repres
             </div>
 
             <div className="text-honor-darkGray mb-4">
-                <p className="text-sm">{representative.district}</p>
+                <p className="text-sm">{representative.district.name}</p>
                 <p className="text-sm">Должность: {representative.representativeProfile.position}</p>
                 {/* <p className="text-sm">Тип: {representative.type}</p> */}
             </div>
@@ -71,10 +70,10 @@ const RepresentativeCard = ({ representative, onBack, onRequestMeeting }: Repres
             <div className="flex flex-col space-y-3">
                 <Dialog>
                     <DialogTrigger asChild>
-                        <Button className="w-full honor-button-primary flex items-center gap-2">
+                        {/* <Button className="w-full honor-button-primary flex items-center gap-2">
                             <Mail size={16} />
                             Запросить встречу
-                        </Button>
+                        </Button> */}
                     </DialogTrigger>
                     <DialogContent>
                         <DialogHeader>

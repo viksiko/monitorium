@@ -290,7 +290,7 @@ const MapVisualization = ({
                         <span>Создать задание</span>
                     </Button>
                 </Link>
-                <Button
+                {/* <Button
                     variant="outline"
                     className="bg-white w-full justify-start"
                     onClick={onToggleProblems}>
@@ -299,7 +299,7 @@ const MapVisualization = ({
                         className="mr-2"
                     />
                     {showProblems ? 'Скрыть проблемы' : 'Показать проблемы'}
-                </Button>
+                </Button> */}
                 <Button
                     variant="outline"
                     className="bg-white w-full justify-start"

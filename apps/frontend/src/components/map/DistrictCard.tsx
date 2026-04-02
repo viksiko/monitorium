@@ -1,14 +1,14 @@
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { MapPin, Bell, Calendar, TrendingUp, User, Building2, ChevronLeft } from 'lucide-react';
-import { Area, Representative, Task } from '@monorepo/types';
+import { Area, District, Representative, Task } from '@monorepo/types';
 import { useState, useEffect } from 'react';
 import { api } from '@/lib/api';
 import { constants } from 'buffer';
 import Loader from '../ui/loader';
 
 interface DistrictCardProps {
-    district: any;
+    district: District;
     onDistrictSelect: (name: string | null) => void;
     onSubscribe: (id: number) => void;
     onSelectRepresentative?: (rep: Representative) => void;
@@ -31,12 +31,12 @@ const DistrictCard = ({ district, onDistrictSelect, onSubscribe, onSelectReprese
                     api.get('/api/v1/users/filter', {
                         params: {
                             role: 'representative',
-                            district: district.name,
+                            districtId: district.id,
                         },
                     }),
                     api.get('/api/v1/tasks/filter', {
                         params: {
-                            district: district.name,
+                            districtId: district.id,
                         },
                     }),
                 ]);

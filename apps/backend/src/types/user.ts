@@ -188,7 +188,7 @@ export interface UserWithRepresentativeProfileDto {
     name: string;
     email: string;
     phone: string | null;
-    district: string | null;
+    district: District | null;
     isVerified: boolean;
     representativeProfile: RepresentativeProfileDto | null;
 }
@@ -202,7 +202,7 @@ export interface UserWithVoterProfileDto {
     id: string;
     name: string;
     email: string;
-    district: string | null;
+    district: District | null;
     isVerified: boolean;
     voterProfile: VoterProfileDto | null;
 }
@@ -248,4 +248,9 @@ export interface UserResponse {
             } | null;
         };
     }>;
+}
+
+interface District {
+    id: string;
+    name: string;
 }

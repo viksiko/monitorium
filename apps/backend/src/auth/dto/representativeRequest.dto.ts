@@ -26,9 +26,9 @@ export class RepresentativeRequestDto {
     @IsString()
     @IsNotEmpty({ message: 'Округ не может быть пустым' })
     @ApiProperty({
-        example: 'Окру №8',
+        example: 'cmnevxac40000n8jf8eu2uose',
     })
-    district?: string;
+    districtId?: string;
 
     @IsString()
     @IsNotEmpty({ message: 'Биография не может быть пустым' })

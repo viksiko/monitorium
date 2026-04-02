@@ -1,3 +1,5 @@
+import { District } from "./district";
+
 export interface Representative {
     id: string;
     name: string;
@@ -5,7 +7,7 @@ export interface Representative {
     role: 'REPRESENTATIVE';
     isRepresentative: boolean;
     isVerified: boolean;
-    district: string | null;
+    district: District;
     representativeProfile: {
         id: string;
         position: string;

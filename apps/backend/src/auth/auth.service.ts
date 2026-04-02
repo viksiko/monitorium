@@ -304,7 +304,7 @@ export class AuthService {
     }
 
     async representativeRequest(dto: RepresentativeRequestDto): Promise<{ message: string }> {
-        const { userId, position, district } = dto;
+        const { userId, position, districtId } = dto;
 
         try {
             // Проверяем, что пользователь существует
@@ -321,9 +321,11 @@ export class AuthService {
                 await tx.user.update({
                     where: { id: userId },
                     data: {
-                        district: district,
+                        district: {
+                            connect: { id: districtId },
+                        },
                         isRepresentative: true,
-                        isVerified: true, // TODO: убрать, верификация будет делаться по другому
+                        isVerified: true, // убрать, верификация будет делаться по другому
                         isActive: true,
                     },
                 });

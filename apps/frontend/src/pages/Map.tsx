@@ -10,7 +10,6 @@ import DistrictsList from '@/components/map/DistrictsList';
 import DistrictCard from '@/components/map/DistrictCard';
 import RepresentativeCard from '@/components/map/RepresentativeCard';
 import ComparisonTable from '@/components/map/ComparisonTable';
-import { DISTRICTS } from '@/constants/districts';
 import { api } from '@/lib/api';
 import { District } from '@monorepo/types';
 import { useApi } from '@/hooks/useApi';
@@ -45,12 +44,12 @@ const Map = () => {
             ),
     );
 
-    const handleSelectDistrict = (id: string) => {
-        setSelectedDistrict(id === selectedDistrict ? null : id);
+    const handleSelectDistrict = (name: string) => {
+        setSelectedDistrict(name === selectedDistrict ? null : name);
         setSelectedRepresentative(null);
     };
 
-    const selectedDistrictData = districts.find((d) => d.id === selectedDistrict);
+    const selectedDistrictData = districts.find((d) => d.name === selectedDistrict);
 
     const handleRequestMeeting = (representativeId: number) => {
         toast({
@@ -82,17 +81,17 @@ const Map = () => {
                     Интерактивная карта избирательных округов с информацией о представителях власти
                 </p>
 
-                <MapFilters
+                {/* <MapFilters
                     searchTerm={searchTerm}
                     onSearchChange={handleSearch}
                     onRepresentativeTypeChange={handleRepresentativeTypeChange}
                     onSortByChange={handleSortByChange}
-                />
+                /> */}
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     <div className="lg:col-span-2">
                         <MapVisualization
-                            districts={mockDistricts}
+                            districts={districts}
                             selectedDistrict={selectedDistrict}
                             showProblems={showProblems}
                             showStats={showStats}

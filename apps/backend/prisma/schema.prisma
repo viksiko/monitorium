@@ -81,8 +81,8 @@ model Task {
   possibleSolutions     String?
   desiredResolutionDate DateTime?
 
-  districtId String
   district   District @relation(fields: [districtId], references: [id]) // ← фиксируем округ на момент создания (берется от представителя при создании)
+  districtId String
 
   // Автор задачи
   authorId String
@@ -316,7 +316,7 @@ model District {
 
   users User[] // Связь с пользователями (если используешь district у User)
 
-  tasks Task[] // Связь задачами (если используешь district у User)
+  tasks Task[] // Связь задачами
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

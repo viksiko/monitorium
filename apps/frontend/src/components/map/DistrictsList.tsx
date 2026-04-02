@@ -61,7 +61,7 @@ const DistrictsList = ({ districts, loading, error, selectedDistrict, onSelectDi
                             {districts.map((district) => (
                                 <option
                                     key={district.id}
-                                    value={district.id}>
+                                    value={district.name}>
                                     {district.name}
                                 </option>
                             ))}
