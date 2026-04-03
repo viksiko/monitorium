@@ -2,20 +2,12 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "Back",
+      "label": "types:watch",
       "type": "shell",
-      "command": "npm run dev:back",
+      "command": "npm run types:watch",
       "isBackground": true,
-      "presentation": { "panel": "dedicated", "reveal": "always" },
-      "problemMatcher": []
-    },
-    {
-      "label": "Front",
-      "type": "shell",
-      "command": "npm run dev:front",
-      "isBackground": true,
-      "presentation": { "panel": "dedicated", "reveal": "always" },
-      "problemMatcher": []
+      "problemMatcher": "$tsc-watch",
+      "presentation": { "panel": "dedicated", "reveal": "silent" }
     }
   ]
 }

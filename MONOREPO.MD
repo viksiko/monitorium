@@ -2,6 +2,70 @@
 
 ---
 
+## Правка N4 — Прямой запуск серверов через F5
+
+Переделан `launch.json`: бекенд (`nest start --watch`) и фронтенд (`vite`) запускаются напрямую, минуя `npm` и `concurrently`.
+
+### Как пользоваться
+
+В панели отладки (выпадающий список слева от кнопки F5) выбрать конфигурацию и нажать F5:
+- **Full** — бекенд + фронтенд в раздельных терминалах
+- **Back** — только бекенд
+- **Front** — только фронтенд
+
+При запуске **Full** — если остановить один сервер, второй тоже остановится (`stopAll: true`).
+Чтобы перезапустить только один: остановить его кнопкой Stop → переключить выпадающий на **Back** или **Front** → нажать F5.
+
+### Как это работает внутри
+
+Обычный путь запуска (`npm run dev:back`) выглядит так:
+
+```
+npm.cmd → concurrently → tsc --watch
+                        → nest start --watch
+```
+
+На Windows `npm.cmd` — это batch-обёртка, которая порождает дочерний процесс и завершается.
+Отладчик VS Code следит за `npm.cmd`, а не за `nest` — поэтому он "отваливается" через секунду.
+
+Наш launch.json обходит это, запуская `node` напрямую на JS-файлы серверов:
+
+```
+node nest.js start --watch    ← VS Code видит этот процесс
+node vite.js                  ← и этот тоже
+```
+
+Пути к бинарникам (hoisted в корневой `node_modules` благодаря npm workspaces):
+- Бекенд: `node_modules/@nestjs/cli/bin/nest.js`
+- Фронтенд: `node_modules/vite/bin/vite.js`
+
+### Как загружаются переменные окружения
+
+Встроенный `envFile` в launch.json **не умеет** раскрывать ссылки типа `${API_PORT}` — он подставляет их буквально. А наш `.env` активно использует интерполяцию.
+
+Поэтому вместо `envFile` используется загрузчик `.vscode/dotenv-loader.js`:
+
+```js
+const dotenv = require('dotenv');        // читает .env файл
+const dotenvExpand = require('dotenv-expand'); // раскрывает ${...} ссылки
+```
+
+Он подключается через флаг `-r` (require) в `runtimeArgs` — node загружает его **до** запуска основной программы. К моменту старта `nest` или `vite` все переменные в `process.env` уже раскрыты:
+
+```
+.env:  VITE_API_PORT=${API_PORT}   →   process.env.VITE_API_PORT = "3000"
+.env:  DATABASE_URL=...${POSTGRES_HOST}...   →   process.env.DATABASE_URL = "postgresql://postgres:...@localhost:5432/monitorium"
+```
+
+Пакеты `dotenv` и `dotenv-expand` уже установлены как зависимости `dotenv-cli`.
+
+### Сборка типов
+
+`types:watch` (пересборка `@monorepo/types` при изменениях) вынесен в фоновую задачу (`tasks.json`).
+Каждая конфигурация запускает его как `preLaunchTask` — VS Code дожидается первой компиляции и только потом стартует сервер.
+
+---
+
 ## Правка N3 — Убраны `db:generate`, `db:migrate`, `db:deploy`, `db:studio` из корня
 
 Команды `db:generate`, `db:migrate`, `db:deploy`, `db:studio` удалены из корневого `package.json`.
