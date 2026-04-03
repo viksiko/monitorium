@@ -1,10 +1,12 @@
 import { ApiResponseOptions } from '@nestjs/swagger';
 import { TASK_MESSAGES } from '../api-messages.constants';
+import { BAD_REQUEST_PARAM } from './api-param.swagger';
 
 const dataTasksFull = [
     {
         id: 'def456ghi789',
         title: 'Ремонт крыши',
+        district: 'Округ №22',
         address: 'пр. Мира, д. 42',
         problemDescription: 'Протекает крыша после сильного дождя, повреждена гидроизоляция',
         possibleSolutions: 'Необходимо заменить участок кровли и восстановить гидроизоляционный слой',
@@ -36,6 +38,7 @@ const dataTasksFull = [
     {
         id: 'abc123def456',
         title: 'Замена лифта',
+        district: 'Округ №22',
         address: 'ул. Центральная, д. 25, подъезд 3',
         problemDescription: 'Лифт не работает уже неделю, жители вынуждены подниматься пешком',
         possibleSolutions: 'Требуется полная диагностика оборудования и замена изношенных деталей',
@@ -55,6 +58,7 @@ const dataTasksShort = [
     {
         id: 'cmlxwafsc000xb8jfcbe3pi5u',
         title: 'Утечка воды в подъезде',
+        district: 'Округ №22',
         address: 'ул. Ленина, д. 10, кв. 5',
         desiredResolutionDate: '2024-12-31T00:00:00.000Z',
         likesCount: 0,
@@ -65,6 +69,7 @@ const dataTasksShort = [
     {
         id: 'cmlxw8mgr000ub8jfbmek7lx4',
         title: 'Ремонт крышы',
+        district: 'Округ №22',
         address: 'ул. Советская, д. 10, кв. 5',
         desiredResolutionDate: '2024-12-31T00:00:00.000Z',
         likesCount: 0,
@@ -178,6 +183,33 @@ export const GET_TASK_STAGES_BY_TASK: ApiResponseOptions = {
     },
 };
 
+export const TASK_FILTER_LIST_SUCCESS_RESPONSE: ApiResponseOptions = {
+    status: 200,
+    description: 'Cписок задач по фильтру',
+    content: {
+        'application/json': {
+            examples: {
+                a: {
+                    summary: 'Задачи по определенному округу',
+                    value: {
+                        success: true,
+                        statusCode: 200,
+                        data: dataTasksFull,
+                    },
+                },
+                b: {
+                    summary: 'Задачи не найдены',
+                    value: {
+                        success: true,
+                        statusCode: 200,
+                        data: [],
+                    },
+                },
+            },
+        },
+    },
+};
+
 export const CREATE_TASK_SUCCESS_RESPONSE: ApiResponseOptions = {
     status: 201,
     description: 'Успешное создание задания',
@@ -244,6 +276,14 @@ export const CREATE_TASK_STAGES_VALIDATION_ERROR_RESPONSE: ApiResponseOptions = 
                 ],
             },
         },
+    },
+};
+
+export const TASK_BAD_REQUEST_RESPONSE: ApiResponseOptions = {
+    status: 400,
+    description: 'Неверный параметр запроса',
+    schema: {
+        example: BAD_REQUEST_PARAM,
     },
 };
 

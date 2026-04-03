@@ -5,6 +5,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Building, Loader2, MapPin, Upload } from 'lucide-react';
 import { PARTIES } from '@/constants/parties';
+import { DISTRICTS } from '@/constants/districts';
 
 interface RepresentativeDetailsProps {
     formData: {
@@ -83,7 +84,7 @@ const RepresentativeDetails = ({
                     Политическая партия
                 </Label>
                 <Select
-                    defaultValue={formData.party}
+                    value={formData.party}
                     onValueChange={(value) => handleSelectChange('party', value)}>
                     <SelectTrigger>
                         <SelectValue placeholder="Выберите партию" />
@@ -104,6 +105,30 @@ const RepresentativeDetails = ({
                 <Label
                     htmlFor="district"
                     className="block mb-2">
+                    Избирательный округ
+                </Label>
+                <Select
+                    value={formData.district}
+                    onValueChange={(value) => handleSelectChange('district', value)}>
+                    <SelectTrigger>
+                        <SelectValue placeholder="Выберите избирательный округ" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        {DISTRICTS.map((district) => (
+                            <SelectItem
+                                key={district.id}
+                                value={district.name}>
+                                {district.name}
+                            </SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+            </div>
+
+            {/* <div className="mb-6">
+                <Label
+                    htmlFor="district"
+                    className="block mb-2">
                     Избирательный округ/Район
                 </Label>
                 <div className="relative">
@@ -111,6 +136,15 @@ const RepresentativeDetails = ({
                         className="absolute left-3 top-1/2 transform -translate-y-1/2 text-honor-darkGray"
                         size={18}
                     />
+                    <SelectContent>
+                        {DISTRICTS.map((district) => (
+                            <SelectItem
+                                key={district.id}
+                                value={district.name}>
+                                {district.name}
+                            </SelectItem>
+                        ))}
+                    </SelectContent>
                     <Input
                         id="district"
                         name="district"
@@ -121,7 +155,7 @@ const RepresentativeDetails = ({
                         required
                     />
                 </div>
-            </div>
+            </div> */}
 
             <div className="mb-6">
                 <Label

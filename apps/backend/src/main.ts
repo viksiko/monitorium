@@ -1,4 +1,4 @@
-import { ValidationPipe, VersioningType } from '@nestjs/common';
+import { BadRequestException, ValidationPipe, VersioningType } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { HttpExceptionFilter } from '@shared/filter';
@@ -25,11 +25,25 @@ async function bootstrap(): Promise<void> {
             whitelist: true,
             forbidNonWhitelisted: true,
             transform: true,
+            exceptionFactory: (errors): BadRequestException => {
+                return new BadRequestException({
+                    message: errors
+                        .map((err) => {
+                            if (err.constraints?.whitelistValidation) {
+                                return `Указан недопустимый параметр "${err.property}"`;
+                            }
+                            return Object.values(err.constraints || {});
+                        })
+                        .flat(),
+                });
+            },
         }),
     );
 
+    // Устанавливаем глобальный префикс для всех роутов
     app.setGlobalPrefix('api', { exclude: ['/'] });
 
+    // Включаем версионирование API
     app.enableVersioning({
         type: VersioningType.URI,
     });

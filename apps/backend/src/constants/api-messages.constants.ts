@@ -8,6 +8,7 @@ export const EMAIL_VERIFICATION_FAILED =
     'Не удалось отправить ссылку для подтверждения почты. Попробуйте еще раз позже.';
 export const REGISTRATION_SUCCESS = 'Пожалуйста, проверьте вашу электронную почту для получения ссылки подтверждения.';
 export const EMAIL_NOT_VERIFIED = 'Учетная запись неактивна, требуется подтверждение по eamil.';
+export const ACCOUNT_INACTIVE = 'Учетная запись деактивирована. Обратитесь к администратору.';
 export const USER_DEACTIVATED_SUCCESS = 'Пользователь успешно деактивирован.';
 export const REGISTRATION_CONFIRMED_MESSAGE = 'Регистрация успешно подтверждена. Теперь вы можете войти в систему.';
 export const DEACTIVATE_OWN_ACCOUNT_ONLY = 'Вы можете деактивировать только свой собственный аккаунт.';

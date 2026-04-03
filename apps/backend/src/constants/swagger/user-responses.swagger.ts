@@ -1,5 +1,6 @@
 import { ApiResponseOptions } from '@nestjs/swagger';
 import { DEACTIVATE_OWN_ACCOUNT_ONLY, USER_DEACTIVATED_SUCCESS, USER_NOT_FOUND } from '../api-messages.constants';
+import { BAD_REQUEST_PARAM } from './api-param.swagger';
 
 export const USER_LIST_SUCCESS_RESPONSE: ApiResponseOptions = {
     status: 200,
@@ -269,15 +270,40 @@ export const GET_CURRENT_USER_RESPONSE: ApiResponseOptions = {
     },
 };
 
+// export const USER_BAD_REQUEST_RESPONSE: ApiResponseOptions = {
+//     status: 400,
+//     description: 'Неверный параметр запроса',
+//     schema: {
+//         example: {
+//             success: false,
+//             statusCode: 400,
+//             data: {
+//                 message: ['Указана недопустимая роль'],
+//             },
+//         },
+//     },
+// };
+
 export const USER_BAD_REQUEST_RESPONSE: ApiResponseOptions = {
     status: 400,
     description: 'Неверный параметр запроса',
-    schema: {
-        example: {
-            success: false,
-            statusCode: 400,
-            data: {
-                message: ['Указана недопустимая роль'],
+    content: {
+        'application/json': {
+            examples: {
+                a: {
+                    summary: 'Указан неверный параметр',
+                    value: BAD_REQUEST_PARAM,
+                },
+                b: {
+                    summary: 'Указана неверная роль',
+                    value: {
+                        success: false,
+                        statusCode: 400,
+                        data: {
+                            message: ['Указана недопустимая роль'],
+                        },
+                    },
+                },
             },
         },
     },

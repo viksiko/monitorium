@@ -8,6 +8,7 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
+import { Role } from '@prisma/client';
 import {
     AUTHORIZATION_REQUIRED,
     LOGOUT_SUCCESS_MSG,
@@ -62,7 +63,7 @@ export class AuthService {
         // 2. Создание пользователя
         const user = await this.userService.createUser({
             ...registerDto,
-            isRepresentative: registerDto.role === 'REPRESENTATIVE',
+            isRepresentative: registerDto.role === Role.REPRESENTATIVE,
         });
 
         return user;
@@ -286,7 +287,7 @@ export class AuthService {
             await this.prisma.$transaction(async (tx) => {
                 const updatedUser = await tx.user.update({
                     where: { id: userId },
-                    data: { isVerified: true },
+                    data: { isVerified: true, isActive: user.role === Role.VOTER },
                 });
 
                 return updatedUser;
@@ -303,7 +304,7 @@ export class AuthService {
     }
 
     async representativeRequest(dto: RepresentativeRequestDto): Promise<{ message: string }> {
-        const { userId, position } = dto;
+        const { userId, position, district } = dto;
 
         try {
             // Проверяем, что пользователь существует
@@ -320,8 +321,10 @@ export class AuthService {
                 await tx.user.update({
                     where: { id: userId },
                     data: {
+                        district: district,
                         isRepresentative: true,
                         isVerified: true, // TODO: убрать, верификация будет делаться по другому
+                        isActive: true,
                     },
                 });
 

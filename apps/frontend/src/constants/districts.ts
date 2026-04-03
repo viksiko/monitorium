@@ -1,4 +1,4 @@
-export const DISTRICS = [
+export const DISTRICTS = [
     {
         id: 1,
         name: 'Округ №1',

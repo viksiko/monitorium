@@ -18,7 +18,7 @@ import {
     USER_NOT_FOUND_RESPONSE,
 } from '@src/constants/swagger/user-responses.swagger';
 import { User, UserResponse, UserWithRepresentativeProfileDto, UserWithVoterProfileDto } from '@src/types/user';
-import { UsersFilterDto } from './dto/UsersFilterDto';
+import { UsersFilterDto } from './dto/users-filter.dto';
 import { UserService } from './user.service';
 
 @UseGuards(JwtAuthGuard)
@@ -47,7 +47,7 @@ export class UserController {
     @ApiOperation({ summary: 'Получить пользователей по параметрам фильтрации' })
     @ApiHeader(HEADERS_AUTHORIZATION)
     @ApiQuery({
-        name: 'role',
+        name: 'role/district',
         description: 'Фильтр по роли (voter | representative)',
         required: false,
         example: '/api/v1/users/filter?role=representative',

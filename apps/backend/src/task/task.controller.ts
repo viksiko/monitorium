@@ -1,7 +1,8 @@
 import { TaskListItem } from '@monorepo/types';
-import { Body, Controller, Delete, Get, Param, Patch, Post, Req, UseGuards } from '@nestjs/common';
-import { ApiHeader, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
-import { Task, TaskStage, User } from '@prisma/client';
+import { Task, TaskStage } from '@monorepo/types';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query, Req, UseGuards } from '@nestjs/common';
+import { ApiHeader, ApiOperation, ApiParam, ApiQuery, ApiResponse } from '@nestjs/swagger';
+import { User } from '@prisma/client';
 import { AdminGuard } from '@src/auth/guards/admin.guard';
 import { JwtAuthGuard } from '@src/auth/guards/jwt-auth.guard';
 import { HEADERS_AUTHORIZATION } from '@src/constants/swagger/api-headers.swagger';
@@ -20,12 +21,15 @@ import {
     GET_TASK_BY_ID,
     GET_TASK_STAGES_BY_TASK,
     NO_TASK_ACCESS_RESPONSE,
+    TASK_BAD_REQUEST_RESPONSE,
     TASK_DELETE_SUCCESS_RESPONSE,
+    TASK_FILTER_LIST_SUCCESS_RESPONSE,
     TASK_NOT_FOUND_RESPONSE,
 } from '@src/constants/swagger/task-responses.swagger';
 import { USER_NOT_FOUND_RESPONSE } from '@src/constants/swagger/user-responses.swagger';
 import { CreateTaskStageDto } from './dto/create-task-stage.dto';
 import { CreateTaskDto } from './dto/create-task.dto';
+import { TasksFilterDto } from './dto/tasks-filter.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { TaskService } from './task.service';
 
@@ -70,6 +74,23 @@ export class TaskController {
     async getTasksByUser(@Req() req: Request & { user: User }): Promise<TaskListItem[]> {
         const user = req.user;
         return await this.taskService.getTasksByUser(user);
+    }
+
+    // Получить всех задач по фильтру
+    @Get('filter')
+    @ApiOperation({ summary: 'Получить задачи по параметрам фильтрации' })
+    @ApiHeader(HEADERS_AUTHORIZATION)
+    @ApiQuery({
+        name: 'role/district',
+        description: 'Фильтр по округу',
+        required: false,
+        example: '/api/v1/tasks/district?=Округ №1',
+    })
+    @ApiResponse(TASK_FILTER_LIST_SUCCESS_RESPONSE)
+    @ApiResponse(TASK_BAD_REQUEST_RESPONSE)
+    // @ApiResponse(USER_BAD_REQUEST_RESPONSE)
+    async getUsersByFilter(@Query() query: TasksFilterDto): Promise<Task[]> {
+        return this.taskService.getTasksByFilter(query);
     }
 
     // Получение всех задач по userid

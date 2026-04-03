@@ -10,7 +10,7 @@ import DistrictsList from '@/components/map/DistrictsList';
 import DistrictCard from '@/components/map/DistrictCard';
 import RepresentativeCard from '@/components/map/RepresentativeCard';
 import ComparisonTable from '@/components/map/ComparisonTable';
-import { DISTRICS } from '@/constants/districts';
+import { DISTRICTS } from '@/constants/districts';
 
 const Map = () => {
     const [searchTerm, setSearchTerm] = useState('');
@@ -42,7 +42,7 @@ const Map = () => {
         setSelectedRepresentative(null);
     };
 
-    const selectedDistrictData = DISTRICS.find((d) => d.name === selectedDistrict);
+    const selectedDistrictData = DISTRICTS.find((d) => d.name === selectedDistrict);
 
     // const filteredRepresentatives = selectedDistrictData?.representatives
     //     .filter((rep) => (representativeType ? rep.type === representativeType : true))
@@ -120,7 +120,7 @@ const Map = () => {
                             />
                         ) : (
                             <DistrictsList
-                                districts={DISTRICS}
+                                districts={DISTRICTS}
                                 selectedDistrict={selectedDistrict}
                                 onSelectDistrict={handleSelectDistrict}
                             />

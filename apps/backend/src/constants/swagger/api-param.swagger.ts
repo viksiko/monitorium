@@ -53,3 +53,11 @@ export const PARAM_READ_DIALOG = {
     type: String,
     example: '/api/v1/dialogs/{dialogId}/read',
 };
+
+export const BAD_REQUEST_PARAM = {
+    success: false,
+    statusCode: 400,
+    data: {
+        message: ['Указан недопустимый параметр "name_param"'],
+    },
+};
