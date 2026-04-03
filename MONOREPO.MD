@@ -2,6 +2,14 @@
 
 ---
 
+## Правка N3 — Убраны `db:generate`, `db:migrate`, `db:deploy`, `db:studio` из корня
+
+Команды `db:generate`, `db:migrate`, `db:deploy`, `db:studio` удалены из корневого `package.json`.
+
+Причина: команда пользуется только `db:recreate` для работы с БД при разработке. Остальные prisma-команды по-прежнему доступны напрямую из `apps/backend/` (`npm run prisma:migrate`, `prisma:studio` и т.д.) — если понадобятся точечно.
+
+---
+
 ## Правка N2 — Добавлена `db:recreate`
 
 Новая команда `npm run db:recreate` — полный пересоздание БД с нуля из текущей схемы.
@@ -173,10 +181,16 @@ npm run dev:front   # только фронтенд
 ### Работа с базой данных
 
 ```bash
-npm run db:migrate   # создать и применить миграцию (после изменения schema.prisma)
-npm run db:generate  # пересобрать Prisma-клиент
-npm run db:studio    # открыть визуальный редактор БД в браузере
 npm run db:recreate  # СБРОС: удалить миграции, пересоздать БД, новая init-миграция
+```
+
+Остальные prisma-команды доступны из папки бекенда:
+```bash
+cd apps/backend
+npm run prisma:migrate    # создать и применить миграцию
+npm run prisma:generate   # пересобрать Prisma-клиент
+npm run prisma:studio     # визуальный редактор БД в браузере
+npm run prisma:deploy     # применить миграции на продакшне
 ```
 
 ### Деплой
