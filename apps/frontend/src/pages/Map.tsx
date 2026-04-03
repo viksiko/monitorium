@@ -20,7 +20,6 @@ const Map = () => {
     const [representativeType, setRepresentativeType] = useState<string | null>(null);
     const [sortBy, setSortBy] = useState<string | null>(null);
     const [showProblems, setShowProblems] = useState(false);
-    const [showStats, setShowStats] = useState(false);
     const [selectedRepresentative, setSelectedRepresentative] = useState<any | null>(null);
     const [districts, setDistricts] = useState([]);
     const { loading, error, request } = useApi<District[]>();
@@ -91,12 +90,9 @@ const Map = () => {
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     <div className="lg:col-span-2">
                         <MapVisualization
-                            districts={districts}
                             selectedDistrict={selectedDistrict}
                             showProblems={showProblems}
-                            showStats={showStats}
                             onToggleProblems={() => setShowProblems(!showProblems)}
-                            onToggleStats={() => setShowStats(!showStats)}
                             onSelectDistrict={handleSelectDistrict}
                         />
                     </div>

@@ -91,4 +91,56 @@ export class DistrictService {
             throw error;
         }
     }
+
+    async getAllDistrictsShortStats(): Promise<
+        {
+            name: string;
+            mapId: number;
+            tasksTotal: number;
+            tasksCompleted: number;
+        }[]
+    > {
+        try {
+            const districts = await this.prisma.district.findMany({
+                select: {
+                    id: true,
+                    name: true,
+                    mapId: true,
+                },
+            });
+
+            const stats = await Promise.all(
+                districts.map(async (district) => {
+                    const [tasksTotal, tasksCompleted] = await Promise.all([
+                        this.prisma.task.count({
+                            where: { districtId: district.id },
+                        }),
+                        this.prisma.task.count({
+                            where: {
+                                districtId: district.id,
+                                status: 'COMPLETED',
+                            },
+                        }),
+                    ]);
+
+                    return {
+                        name: district.name,
+                        mapId: district.mapId,
+                        tasksTotal,
+                        tasksCompleted,
+                    };
+                }),
+            );
+
+            return stats;
+        } catch (error) {
+            logger.error('Failed when getting all districts short stats', {
+                category: 'DistrictService',
+                operation: 'getAllDistrictsShortStats',
+                error: error instanceof Error ? error.message : error,
+            });
+
+            throw error;
+        }
+    }
 }

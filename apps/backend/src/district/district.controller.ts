@@ -40,4 +40,19 @@ export class DistrictController {
     async getDistrictById(@Param('id') id: string): Promise<DistrictStats | null> {
         return this.districtService.getDistrictStats(id);
     }
+
+    @Get('short-stats')
+    @UseGuards(JwtAuthGuard)
+    @ApiOperation({ summary: 'Краткая статистика по всем округам' })
+    @ApiHeader(HEADERS_AUTHORIZATION)
+    async getAllDistrictsShortStats(): Promise<
+        {
+            name: string;
+            mapId: number;
+            tasksTotal: number;
+            tasksCompleted: number;
+        }[]
+    > {
+        return this.districtService.getAllDistrictsShortStats();
+    }
 }
