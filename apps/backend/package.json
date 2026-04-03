@@ -7,31 +7,34 @@
   "license": "UNLICENSED",
   "scripts": {
     "build": "nest build",
-    "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\" \"libs/**/*.ts\"",
-    "start": "nest start",
+
     "start:dev": "nest start --watch",
-    "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
+
+    "prisma:generate": "dotenv -e ../../.env -- prisma generate",
+    "prisma:migrate": "dotenv -e ../../.env -- npx prisma migrate dev",
+    "prisma:deploy": "dotenv -e ../../.env -- npx prisma migrate deploy",
+    "prisma:studio": "dotenv -e ../../.env -- prisma studio",
+
+    "prisma:db-push": "prisma db push",
+    "prisma:db-pull": "prisma db pull",
+    "prisma:migrate-reset": "dotenv -e ../../.env -- npx prisma migrate reset",
+    "prisma:migrate-init": "dotenv -e ../../.env -- npx prisma migrate dev --name init",
+    "prisma:migrate-resolve": "dotenv -e ../../.env -- npx prisma migrate resolve --applied ...name_migration_file",
+    "prisma:validate": "dotenv -e ../../.env prisma validate",
+    "prisma:format": "prisma format",
+    "prisma:reset-db": "dotenv -e ../../.env -- npx prisma migrate reset",
+    "prisma:delete-migrations": "dotenv -e ../../.env -- rm -rf prisma/migrations",
+    "prisma:init-migration": "dotenv -e ../../.env -- npx prisma migrate dev --name init",
+
     "lint": "eslint \"{src,libs,test}/**/*.{ts,js}\" --fix",
+    "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\" \"libs/**/*.ts\"",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json",
-    "prisma:generate": "prisma generate",
-    "prisma:db-push": "prisma db push",
-    "prisma:db-pull": "prisma db pull",
-    "prisma:migrate": "dotenv -e ../../.env -- npx prisma migrate dev",
-    "prisma:migrate-reset": "dotenv -e ../../.env -- npx prisma migrate reset",
-    "prisma:migrate-init": "dotenv -e ../../.env -- npx prisma migrate dev --name init",
-    "prisma:migrate-resolve": "dotenv -e ../../.env -- npx prisma migrate resolve --applied ...name_migration_file",
-    "prisma:studio": "prisma studio",
-    "prisma:validate": "dotenv -e ../../.env prisma validate",
-    "prisma:format": "prisma format",
-    "prisma:deploy": "dotenv -e ../../.env -- npx prisma migrate deploy",
-    "prisma:reset-db": "dotenv -e ../../.env -- npx prisma migrate reset",
-    "prisma:delete-migrations": "dotenv -e ../../.env -- rm -rf prisma/migrations",
-    "prisma:init-migration": "dotenv -e ../../.env -- npx prisma migrate dev --name init"
+    "test:e2e": "jest --config ./test/jest-e2e.json"
+
   },
   "dependencies": {
     "@monorepo/types": "1.0.0",

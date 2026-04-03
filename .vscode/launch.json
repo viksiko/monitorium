@@ -2,27 +2,33 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Launch App (first run)",
-      "type": "chrome",
+      "name": "Back",
+      "type": "node",
       "request": "launch",
-      "url": "http://localhost:8080",
-      "webRoot": "${workspaceFolder}/apps/frontend",
-      "preLaunchTask": "Start app (first run)"
+      "program": "${workspaceFolder}/node_modules/@nestjs/cli/bin/nest.js",
+      "args": ["start", "--watch"],
+      "runtimeArgs": ["-r", "${workspaceFolder}/.vscode/dotenv-loader.js"],
+      "cwd": "${workspaceFolder}/apps/backend",
+      "console": "integratedTerminal",
+      "preLaunchTask": "types:watch"
     },
     {
-      "name": "Launch App",
-      "type": "chrome",
+      "name": "Front",
+      "type": "node",
       "request": "launch",
-      "url": "http://localhost:8080",
-      "webRoot": "${workspaceFolder}/apps/frontend",
-      "preLaunchTask": "Start app"
-    },
+      "program": "${workspaceFolder}/node_modules/vite/bin/vite.js",
+      "runtimeArgs": ["-r", "${workspaceFolder}/.vscode/dotenv-loader.js"],
+      "cwd": "${workspaceFolder}/apps/frontend",
+      "console": "integratedTerminal",
+      "preLaunchTask": "types:watch"
+    }
+  ],
+  "compounds": [
     {
-      "name": "Launch App (Chrome, no preLaunch)",
-      "type": "chrome",
-      "request": "launch",
-      "url": "http://localhost:8080",
-      "webRoot": "${workspaceFolder}/apps/frontend"
+      "name": "Full",
+      "configurations": ["Back", "Front"],
+      "preLaunchTask": "types:watch",
+      "stopAll": true
     }
   ]
 }
