@@ -3,6 +3,7 @@ import { ApiHeader, ApiOperation, ApiParam, ApiQuery, ApiResponse } from '@nestj
 import { AdminGuard } from '@src/auth/guards/admin.guard';
 import { JwtAuthGuard } from '@src/auth/guards/jwt-auth.guard';
 import { HEADERS_AUTHORIZATION } from '@src/constants/swagger/api-headers.swagger';
+import { USER_FILTER_QUERY_DISTRICT, USER_FILTER_QUERY_ROLE } from '@src/constants/swagger/api-query.swagger';
 import {
     AUTHENTICATION_ERROR_RESPONSES,
     DATABASE_ERROR_RESPONSE,
@@ -22,6 +23,9 @@ import { UsersFilterDto } from './dto/users-filter.dto';
 import { UserService } from './user.service';
 
 @UseGuards(JwtAuthGuard)
+@ApiHeader(HEADERS_AUTHORIZATION)
+@ApiResponse(AUTHENTICATION_ERROR_RESPONSES)
+@ApiResponse(DATABASE_ERROR_RESPONSE)
 @Controller({
     path: 'users',
     version: '1',
@@ -33,11 +37,8 @@ export class UserController {
     @UseGuards(AdminGuard)
     @Get()
     @ApiOperation({ summary: 'Получить всех пользователей (требуются права администратора)' })
-    @ApiHeader(HEADERS_AUTHORIZATION)
     @ApiResponse(USER_LIST_SUCCESS_RESPONSE)
     @ApiResponse(FORBIDDEN_RESOURCE_RESPONSE)
-    @ApiResponse(AUTHENTICATION_ERROR_RESPONSES)
-    @ApiResponse(DATABASE_ERROR_RESPONSE)
     async getAllUsers(): Promise<User[]> {
         return this.userService.getAllUsers();
     }
@@ -45,17 +46,10 @@ export class UserController {
     // Получить всех пользователей по фильтру
     @Get('filter')
     @ApiOperation({ summary: 'Получить пользователей по параметрам фильтрации' })
-    @ApiHeader(HEADERS_AUTHORIZATION)
-    @ApiQuery({
-        name: 'role/district',
-        description: 'Фильтр по роли (voter | representative)',
-        required: false,
-        example: '/api/v1/users/filter?role=representative',
-    })
+    @ApiQuery(USER_FILTER_QUERY_ROLE)
+    @ApiQuery(USER_FILTER_QUERY_DISTRICT)
     @ApiResponse(USER_FILTER_LIST_SUCCESS_RESPONSE)
-    @ApiResponse(AUTHENTICATION_ERROR_RESPONSES)
     @ApiResponse(USER_BAD_REQUEST_RESPONSE)
-    @ApiResponse(DATABASE_ERROR_RESPONSE)
     async getUsersByFilter(
         @Query() query: UsersFilterDto,
     ): Promise<UserWithRepresentativeProfileDto[] | UserWithVoterProfileDto[]> {
@@ -84,11 +78,8 @@ export class UserController {
     // получить данные текущего пользователя
     @Get('profile')
     @ApiOperation({ summary: 'Получить профиль текущего пользователя' })
-    @ApiHeader(HEADERS_AUTHORIZATION)
     @ApiResponse(GET_CURRENT_USER_RESPONSE)
-    @ApiResponse(AUTHENTICATION_ERROR_RESPONSES)
     @ApiResponse(USER_NOT_FOUND_RESPONSE)
-    @ApiResponse(DATABASE_ERROR_RESPONSE)
     async getUserProfile(@Req() req: Request & { user: { id: string } }): Promise<UserResponse> {
         return this.userService.getUserProfile(req.user.id);
     }
@@ -96,7 +87,6 @@ export class UserController {
     // Получить пользователя по id
     @Get(':id')
     @ApiOperation({ summary: 'Получить пользователя по Id' })
-    @ApiHeader(HEADERS_AUTHORIZATION)
     @ApiParam({
         name: 'id',
         description: 'Обязательный параметр',
@@ -106,9 +96,7 @@ export class UserController {
     })
     @ApiResponse(GET_CURRENT_USER_RESPONSE)
     @ApiResponse(USER_NOT_FOUND_RESPONSE)
-    @ApiResponse(AUTHENTICATION_ERROR_RESPONSES)
     @ApiResponse(USER_NOT_FOUND_RESPONSE)
-    @ApiResponse(DATABASE_ERROR_RESPONSE)
     async getUserById(@Param('id') id: string): Promise<UserResponse> {
         return this.userService.getUserById(id);
     }
@@ -116,7 +104,6 @@ export class UserController {
     // Деактивация пользователя
     @Patch(':id/deactivate')
     @ApiOperation({ summary: 'Деакивация (удаление) пользователя' })
-    @ApiHeader(HEADERS_AUTHORIZATION)
     @ApiParam({
         name: 'id',
         description: 'Обязательный параметр',
@@ -125,9 +112,7 @@ export class UserController {
         example: '/api/v1/users/cmik6d2sm0000mojf4oz1jraa/deactivate',
     })
     @ApiResponse(USER_ACCOUNT_DEACTIVATED_RESPONSE)
-    @ApiResponse(AUTHENTICATION_ERROR_RESPONSES)
     @ApiResponse(DEACTIVATE_OWN_ACCOUNT_ERROR_RESPONSE)
-    @ApiResponse(DATABASE_ERROR_RESPONSE)
 
     // @Roles('Admin', 'Self') // Проверяем, что запрос делает либо админ, либо сам пользователь
     async deactivateUser(@Param('id') id: string, @Req() req: Request & { user: User }): Promise<{ message: string }> {

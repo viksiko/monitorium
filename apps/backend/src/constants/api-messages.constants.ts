@@ -23,6 +23,7 @@ export const REPRESENTATIVE_REQUEST_CREATED = 'Заявка на предста�
 export const USER_NOT_FOUND = 'Пользователь не найден';
 export const POST_NOT_FOUND = 'Публикация не найдена';
 export const INVALID_ROLE = 'Недопустимая роль';
+export const DISTRICT_NOT_FOUND = 'Округ не найден';
 
 export const TASK_MESSAGES = {
     // Успешные операции

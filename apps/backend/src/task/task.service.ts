@@ -18,13 +18,13 @@ export class TaskService {
         try {
             const { stages, assigneeId, ...taskData } = dto;
 
-            let assigneeDistrict: string | null = null;
+            let assigneeDistrictId: string | null = null;
 
             // Если указан исполнитель — проверяем, что это представитель
             if (assigneeId) {
                 const assignee = await this.prisma.user.findUnique({
                     where: { id: assigneeId },
-                    select: { role: true, district: true },
+                    select: { role: true, districtId: true },
                 });
 
                 if (!assignee) {
@@ -35,11 +35,11 @@ export class TaskService {
                     throw new Error(TASK_MESSAGES.TASK_ASSIGNEE_MUST_BE_REPRESENTATIVE);
                 }
 
-                if (!assignee.district) {
+                if (!assignee.districtId) {
                     throw new Error('У представителя не указан округ');
                 }
 
-                assigneeDistrict = assignee.district;
+                assigneeDistrictId = assignee.districtId;
             }
 
             // Создание задачи с возможными этапами
@@ -47,7 +47,9 @@ export class TaskService {
                 data: {
                     ...taskData,
 
-                    district: assigneeDistrict!,
+                    district: {
+                        connect: { id: assigneeDistrictId! },
+                    },
 
                     // автор
                     author: {
@@ -203,13 +205,13 @@ export class TaskService {
         }
     }
 
-    async getTasksByFilter(query: { district?: string }): Promise<Task[]> {
+    async getTasksByFilter(query: { districtId?: string }): Promise<Task[]> {
         try {
-            const { district } = query;
+            const { districtId } = query;
 
             const tasks = await this.prisma.task.findMany({
                 where: {
-                    ...(district && { district }), // ← фильтр только если передан
+                    ...(districtId && { districtId }), // ← фильтр только если передан
                 },
                 include: {
                     author: { select: { id: true, name: true } },

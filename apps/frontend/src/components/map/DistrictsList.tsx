@@ -2,11 +2,13 @@ import { MapPin } from 'lucide-react';
 
 interface DistrictsListProps {
     districts: any[];
+    loading: boolean;
+    error: string | null;
     selectedDistrict: string | null;
     onSelectDistrict: (name: string) => void;
 }
 
-const DistrictsList = ({ districts, selectedDistrict, onSelectDistrict }: DistrictsListProps) => {
+const DistrictsList = ({ districts, loading, error, selectedDistrict, onSelectDistrict }: DistrictsListProps) => {
     return (
         <div className="honor-card h-full">
             <h2 className="text-xl font-bold mb-4">Избирательные округа</h2>
@@ -20,7 +22,7 @@ const DistrictsList = ({ districts, selectedDistrict, onSelectDistrict }: Distri
                         size={20}
                     />
                 </div>
-
+                {/* 
                 <select
                     className="w-full pl-10 pr-4 py-3 border rounded-xl bg-white focus:ring-2 focus:ring-honor-blue focus:border-honor-blue outline-none appearance-none transition-all cursor-pointer text-honor-darkGray"
                     value={selectedDistrict || ''}
@@ -37,6 +39,34 @@ const DistrictsList = ({ districts, selectedDistrict, onSelectDistrict }: Distri
                             {district.name}
                         </option>
                     ))}
+                </select> */}
+
+                <select
+                    className="w-full pl-10 pr-4 py-3 border rounded-xl bg-white focus:ring-2 focus:ring-honor-blue focus:border-honor-blue outline-none appearance-none transition-all cursor-pointer text-honor-darkGray"
+                    value={selectedDistrict || ''}
+                    onChange={(e) => onSelectDistrict(e.target.value)}
+                    disabled={loading || !!error}>
+                    {error ? (
+                        <option>Ошибка загрузки округов</option>
+                    ) : loading ? (
+                        <option>Загрузка округов...</option>
+                    ) : (
+                        <>
+                            <option
+                                value=""
+                                disabled>
+                                Выберите округ...
+                            </option>
+
+                            {districts.map((district) => (
+                                <option
+                                    key={district.id}
+                                    value={district.name}>
+                                    {district.name}
+                                </option>
+                            ))}
+                        </>
+                    )}
                 </select>
 
                 {/* Кастомная стрелочка (опционально) */}

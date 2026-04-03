@@ -7,5 +7,5 @@ export class UsersFilterDto {
     role?: Role;
 
     @IsOptional()
-    district?: string;
+    districtId?: string;
 }

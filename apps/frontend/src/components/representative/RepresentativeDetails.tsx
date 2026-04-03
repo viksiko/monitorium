@@ -6,12 +6,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Building, Loader2, MapPin, Upload } from 'lucide-react';
 import { PARTIES } from '@/constants/parties';
 import { DISTRICTS } from '@/constants/districts';
+import { useEffect, useState } from 'react';
+import { useApi } from '@/hooks/useApi';
+import { District } from '@monorepo/types';
 
 interface RepresentativeDetailsProps {
     formData: {
         position: string;
         party: string;
-        district: string;
+        districtId: string;
         bio: string;
         idCard: File | null;
     };
@@ -32,6 +35,13 @@ const RepresentativeDetails = ({
     goBack,
     isLoading,
 }: RepresentativeDetailsProps) => {
+    const [districts, setDistricts] = useState([]);
+    const { loading, error, request } = useApi<District[]>();
+
+    useEffect(() => {
+        request({ method: 'GET', url: '/api/v1/districts' }).then(setDistricts);
+    }, []);
+
     // Function to clear the file input
     const clearFileInput = () => {
         // Create a new FileList-like object with no files
@@ -47,6 +57,8 @@ const RepresentativeDetails = ({
             target: fileInput,
         } as React.ChangeEvent<HTMLInputElement>);
     };
+
+    console.log(districts, 'd');
 
     return (
         <form
@@ -103,24 +115,48 @@ const RepresentativeDetails = ({
 
             <div className="mb-6">
                 <Label
-                    htmlFor="district"
+                    htmlFor="districtId"
                     className="block mb-2">
                     Избирательный округ
                 </Label>
                 <Select
-                    value={formData.district}
-                    onValueChange={(value) => handleSelectChange('district', value)}>
+                    value={formData.districtId}
+                    onValueChange={(value) => handleSelectChange('districtId', value)}
+                    disabled={loading || !!error}>
                     <SelectTrigger>
-                        <SelectValue placeholder="Выберите избирательный округ" />
+                        <SelectValue
+                            placeholder={
+                                loading
+                                    ? 'Загрузка округов...'
+                                    : error
+                                      ? 'Ошибка загрузки округов'
+                                      : 'Выберите избирательный округ'
+                            }
+                        />
                     </SelectTrigger>
+
                     <SelectContent>
-                        {DISTRICTS.map((district) => (
+                        {error ? (
                             <SelectItem
-                                key={district.id}
-                                value={district.name}>
-                                {district.name}
+                                value="error"
+                                disabled>
+                                Ошибка загрузки округов
                             </SelectItem>
-                        ))}
+                        ) : loading ? (
+                            <SelectItem
+                                value="loading"
+                                disabled>
+                                Загрузка...
+                            </SelectItem>
+                        ) : (
+                            districts.map((district) => (
+                                <SelectItem
+                                    key={district.id}
+                                    value={district.id}>
+                                    {district.name}
+                                </SelectItem>
+                            ))
+                        )}
                     </SelectContent>
                 </Select>
             </div>

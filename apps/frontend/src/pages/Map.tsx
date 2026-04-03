@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Layout from '@/components/layout/Layout';
-import { useToast } from '@/hooks/use-toast';
+import { toast, useToast } from '@/hooks/use-toast';
 import { mockDistricts } from '@/data/mockDistricts';
 
 // Import refactored components
@@ -10,7 +10,9 @@ import DistrictsList from '@/components/map/DistrictsList';
 import DistrictCard from '@/components/map/DistrictCard';
 import RepresentativeCard from '@/components/map/RepresentativeCard';
 import ComparisonTable from '@/components/map/ComparisonTable';
-import { DISTRICTS } from '@/constants/districts';
+import { api } from '@/lib/api';
+import { District } from '@monorepo/types';
+import { useApi } from '@/hooks/useApi';
 
 const Map = () => {
     const [searchTerm, setSearchTerm] = useState('');
@@ -18,9 +20,13 @@ const Map = () => {
     const [representativeType, setRepresentativeType] = useState<string | null>(null);
     const [sortBy, setSortBy] = useState<string | null>(null);
     const [showProblems, setShowProblems] = useState(false);
-    const [showStats, setShowStats] = useState(false);
     const [selectedRepresentative, setSelectedRepresentative] = useState<any | null>(null);
-    const { toast } = useToast();
+    const [districts, setDistricts] = useState([]);
+    const { loading, error, request } = useApi<District[]>();
+
+    useEffect(() => {
+        request({ method: 'GET', url: '/api/v1/districts?areas=true' }).then(setDistricts);
+    }, []);
 
     const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
         setSearchTerm(e.target.value);
@@ -42,17 +48,7 @@ const Map = () => {
         setSelectedRepresentative(null);
     };
 
-    const selectedDistrictData = DISTRICTS.find((d) => d.name === selectedDistrict);
-
-    // const filteredRepresentatives = selectedDistrictData?.representatives
-    //     .filter((rep) => (representativeType ? rep.type === representativeType : true))
-    //     .sort((a, b) => {
-    //         if (!sortBy) return 0;
-    //         if (sortBy === 'rating') return b.rating - a.rating;
-    //         if (sortBy === 'tasks') return b.tasksCompleted - a.tasksCompleted;
-    //         if (sortBy === 'attendance') return b.attendance - a.attendance;
-    //         return 0;
-    //     });
+    const selectedDistrictData = districts.find((d) => d.name === selectedDistrict);
 
     const handleRequestMeeting = (representativeId: number) => {
         toast({
@@ -84,22 +80,19 @@ const Map = () => {
                     Интерактивная карта избирательных округов с информацией о представителях власти
                 </p>
 
-                <MapFilters
+                {/* <MapFilters
                     searchTerm={searchTerm}
                     onSearchChange={handleSearch}
                     onRepresentativeTypeChange={handleRepresentativeTypeChange}
                     onSortByChange={handleSortByChange}
-                />
+                /> */}
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     <div className="lg:col-span-2">
                         <MapVisualization
-                            districts={mockDistricts}
                             selectedDistrict={selectedDistrict}
                             showProblems={showProblems}
-                            showStats={showStats}
                             onToggleProblems={() => setShowProblems(!showProblems)}
-                            onToggleStats={() => setShowStats(!showStats)}
                             onSelectDistrict={handleSelectDistrict}
                         />
                     </div>
@@ -120,7 +113,9 @@ const Map = () => {
                             />
                         ) : (
                             <DistrictsList
-                                districts={DISTRICTS}
+                                districts={districts}
+                                loading={loading}
+                                error={error}
                                 selectedDistrict={selectedDistrict}
                                 onSelectDistrict={handleSelectDistrict}
                             />

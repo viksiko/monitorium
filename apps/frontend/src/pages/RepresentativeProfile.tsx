@@ -132,7 +132,7 @@ const RepresentativeProfile = () => {
                                         size={16}
                                         className="text-honor-blue mr-1"
                                     />
-                                    <span className="text-sm">{representative.district}</span>
+                                    <span className="text-sm">{representative.district.name}</span>
                                 </div>
                                 <Badge className="mt-2 bg-honor-blue">
                                     {formatPartyName(representative.representativeProfile.party)}

@@ -1,9 +1,10 @@
 import { Button } from '@/components/ui/button';
 import { MapPin, Award } from 'lucide-react';
 import { formatPartyName } from '@/utils/formatPartyName';
+import { District } from '@monorepo/types';
 
 interface RepresentativesFiltersProps {
-    districts: string[];
+    districts: District[];
     parties: string[];
     selectedDistrict: string;
     selectedParty: string;
@@ -21,6 +22,8 @@ const RepresentativesFilters = ({
     handlePartyFilter,
     resetFilters,
 }: RepresentativesFiltersProps) => {
+    console.log(districts, 'districts');
+
     return (
         <div className="honor-card mb-6">
             <h3 className="text-lg font-semibold mb-4">Фильтры</h3>
@@ -30,10 +33,10 @@ const RepresentativesFilters = ({
                 <div className="space-y-2">
                     {districts.map((district) => (
                         <button
-                            key={district}
-                            onClick={() => handleDistrictFilter(district)}
+                            key={district.id}
+                            onClick={() => handleDistrictFilter(district.id)}
                             className={`flex items-center w-full text-left px-3 py-2 rounded-lg text-sm ${
-                                selectedDistrict === district
+                                selectedDistrict === district.id
                                     ? 'bg-honor-blue text-white'
                                     : 'hover:bg-honor-gray text-honor-darkGray'
                             }`}>
@@ -41,7 +44,7 @@ const RepresentativesFilters = ({
                                 size={16}
                                 className="mr-2"
                             />
-                            {district}
+                            {district.name}
                         </button>
                     ))}
                 </div>

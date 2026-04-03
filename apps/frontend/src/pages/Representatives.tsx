@@ -51,12 +51,11 @@ const Representatives = () => {
     }, []);
 
     const filteredRepresentatives = representatives.filter((rep) => {
-        const matchesSearch =
-            rep.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            rep.representativeProfile.party.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            rep.district.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesSearch = rep.name.toLowerCase().includes(searchTerm.toLowerCase());
+        // || rep.representativeProfile.party.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        // rep.district.name.toLowerCase().includes(searchTerm.toLowerCase());
 
-        const matchesDistrict = selectedDistrict === '' || rep.district === selectedDistrict;
+        const matchesDistrict = selectedDistrict === '' || rep.district.id === selectedDistrict;
         const matchesParty = selectedParty === '' || rep.representativeProfile.party === selectedParty;
 
         return matchesSearch && matchesDistrict && matchesParty;

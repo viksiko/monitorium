@@ -59,24 +59,29 @@ export class UserService {
 
     async getUsersByFilter(query: {
         role?: string;
-        district?: string;
+        districtId?: string;
     }): Promise<UserWithRepresentativeProfileDto[] | UserWithVoterProfileDto[]> {
         try {
-            const { role, district } = query;
+            const { role, districtId } = query;
 
             return await this.prisma.user.findMany({
                 where: {
                     role: role === 'representative' ? Role.REPRESENTATIVE : Role.VOTER,
                     isActive: true,
-                    ...(district && { district }),
+                    districtId,
                 },
                 select: {
                     id: true,
                     name: true,
                     email: true,
                     phone: true,
-                    district: true,
                     isVerified: true,
+                    district: {
+                        select: {
+                            id: true,
+                            name: true,
+                        },
+                    },
                     representativeProfile: {
                         select: {
                             id: true,
@@ -143,7 +148,12 @@ export class UserService {
                     isRepresentative: true,
                     isVerified: true,
                     isActive: true,
-                    district: true,
+                    district: {
+                        select: {
+                            id: true,
+                            name: true,
+                        },
+                    },
                     representativeProfile: {
                         select: {
                             id: true,
@@ -214,7 +224,12 @@ export class UserService {
                     isRepresentative: true,
                     isVerified: true,
                     isActive: true,
-                    district: true,
+                    district: {
+                        select: {
+                            id: true,
+                            name: true,
+                        },
+                    },
                     representativeProfile: {
                         select: {
                             id: true,

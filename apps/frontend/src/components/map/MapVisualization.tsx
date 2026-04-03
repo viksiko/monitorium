@@ -1,9 +1,11 @@
-import React, { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { MapPin, Plus, AlertTriangle, BarChart, TrendingUp } from 'lucide-react';
+import { useApi } from '@/hooks/useApi';
+import { useToggleShowShortStats } from '@/shared/stores/toggleShowShortStats.store';
 
-interface District {
+interface DistrictsShortStats {
     id: number;
     name: string;
     description: string;
@@ -20,31 +22,30 @@ interface District {
 }
 
 interface MapVisualizationProps {
-    districts: District[];
     selectedDistrict: string | null;
     showProblems: boolean;
-    showStats: boolean;
     onToggleProblems: () => void;
-    onToggleStats: () => void;
     onSelectDistrict: (name: string) => void;
 }
 
 const MapVisualization = ({
-    districts,
     selectedDistrict,
     showProblems,
-    showStats,
     onToggleProblems,
-    onToggleStats,
     onSelectDistrict,
 }: MapVisualizationProps) => {
     // const selectedDistrictData = districts.find((d) => d.id === selectedDistrict);
+
+    const [districtsShortStats, setDistrictsShortStats] = useState([]);
+    const { request } = useApi<DistrictsShortStats[]>();
 
     const mapRef = useRef<HTMLDivElement | null>(null);
     const mapInstance = useRef<any>(null);
     const objectManagerRef = useRef<any>(null);
 
-    // Загружает скрипт Яндекс.Карт только при необходимости
+    const { isShortStatsVisible, toggleShowShortStats } = useToggleShowShortStats();
+
+    // Загружает скрипт Яндекс.Карт
     const loadYandexMapsScript = () => {
         return new Promise((resolve) => {
             // Если API уже загружен — сразу возвращаем
@@ -55,7 +56,7 @@ const MapVisualization = ({
 
             // Создаём script тег с API
             const script = document.createElement('script');
-            script.src = 'https://api-maps.yandex.ru/2.1/?apikey=2f6480a4-3d69-4cc8-8d9d-e941e9d56385&lang=ru_RU';
+            script.src = `https://api-maps.yandex.ru/2.1/?apikey=${import.meta.env.VITE_API_MAP_YANDEX_KEY}&lang=ru_RU`;
             script.async = true;
 
             // Ждём загрузки API
@@ -65,12 +66,48 @@ const MapVisualization = ({
         });
     };
 
+    // const onToggleStats2 = () => {
+    //     const newValue = !showStats;
+    //     setShowStats2(newValue);
+
+    //     if (!objectManagerRef.current) return;
+
+    //     objectManagerRef.current.objects.each((obj: any) => {
+    //         objectManagerRef.current.objects.setObjectProperties(obj.id, {
+    //             ...obj.properties,
+    //             showStatsGlobal: newValue,
+    //         });
+    //     });
+    // };
+
+    useEffect(() => {
+        request({ method: 'GET', url: '/api/v1/districts/short-stats' }).then(setDistrictsShortStats);
+    }, []);
+
     useEffect(() => {
         let map: any;
 
         // Загружаем API и инициализируем карту
         loadYandexMapsScript().then((ymaps: any) => {
             ymaps.ready(() => {
+                // Шаблон блока с информацией о задачах рядом с каждым point
+                const statsTasks = ymaps.templateLayoutFactory.createClass(`
+                    <div style="display: flex; align-items: center;">
+                      {% if properties.showStatsGlobal %}
+                        <div style="background: white; padding: 4px 6px; border-radius:5px; font-size: 12px;">
+                          <div style="display: flex;">
+                            <div style="margin-right: 2px;">Выполнено:</div>
+                            <div style="display: flex;"><span>{{ properties.tasksCompleted }}</span> / <span>{{ properties.tasksTotal }}</span></div> 
+                          </div>
+                            <div style="width:100%; height:6px; background-color:#E5E7EB; border-radius:50px; overflow:hidden;">
+                              <div style="background-color: #0052CC; height: 100%; width: {{ properties.percent }}%; border-radius: 50px; transition: width 0.3s ease;"></div>
+                            </div>
+                        </div>
+                        
+                      {% endif %}
+                    </div>
+                  `);
+
                 if (!mapRef.current) return; // контейнер ещё не готов
 
                 // Создание карты
@@ -79,6 +116,9 @@ const MapVisualization = ({
                     zoom: 7,
                     controls: ['zoomControl'], // только нужные контролы
                 });
+
+                map.options.set('maxZoom', 12);
+                map.options.set('minZoom', 6);
 
                 // Загружаем GeoJSON
                 fetch('/map.geojson')
@@ -92,45 +132,72 @@ const MapVisualization = ({
                             clusterize: false, // отключаем кластеризацию
                         });
 
-                        // ⚠️ Подготавливаем данные со стилями ДО add()
-                        const prepared = {
-                            ...converted,
-                            features: converted.features.map((feature: any) => {
-                                const props = feature.properties || {};
+                        const preparedFeatures = converted.features.flatMap((feature: any) => {
+                            const props = feature.properties || {};
+                            const id = feature.id;
+                            const stats = serverDataMap[id];
+                            const percent =
+                                stats?.tasksTotal > 0 ? Math.round((stats.tasksCompleted / stats.tasksTotal) * 100) : 0;
 
-                                // Стили для полигонов
-                                if (feature.geometry.type === 'Polygon') {
-                                    return {
+                            const customProps = {
+                                ...props,
+                                tasksTotal: stats?.tasksTotal ?? 0,
+                                tasksCompleted: stats?.tasksCompleted ?? 0,
+                                percent: percent,
+                            };
+
+                            if (feature.geometry.type === 'Point') {
+                                // оригинальный preset
+                                const baseFeature = {
+                                    ...feature,
+                                    id,
+                                    properties: customProps,
+                                    options: {
+                                        // iconLayout: 'islands#dotIcon',
+                                        preset: 'islands#dotIcon',
+                                        iconColor: props['marker-color'] || '#ed4543',
+                                    },
+                                };
+
+                                // кастомный блок
+                                const customFeature = {
+                                    ...feature,
+                                    id: `custom-${id}`,
+                                    geometry: {
+                                        type: 'Point',
+                                        coordinates: [feature.geometry.coordinates[0], feature.geometry.coordinates[1]],
+                                    },
+                                    properties: {
+                                        ...customProps,
+                                        showStatsGlobal: isShortStatsVisible,
+                                    },
+                                    options: { iconLayout: statsTasks },
+                                };
+
+                                return [baseFeature, customFeature];
+                            }
+
+                            if (feature.geometry.type === 'Polygon') {
+                                return [
+                                    {
                                         ...feature,
+                                        properties: customProps,
                                         options: {
-                                            fillColor: props.fill || '#1e98ff',
+                                            fillColor: props.fill || '#1e98ff', // берём именно текущий feature
                                             fillOpacity: props['fill-opacity'] || 0.4,
                                             strokeColor: props.stroke || '#b3b3b3',
                                             strokeWidth: Number(props['stroke-width']) || 2,
                                             strokeOpacity: props['stroke-opacity'] || 0.9,
                                         },
-                                    };
-                                }
+                                    },
+                                ];
+                            }
 
-                                // Стили для точек (маркеров)
-                                if (feature.geometry.type === 'Point') {
-                                    return {
-                                        ...feature,
-                                        options: {
-                                            preset: 'islands#dotIcon',
-                                            iconColor: props['marker-color'] || '#ed4543',
-                                        },
-                                    };
-                                }
-
-                                return feature; // остальные типы без изменений
-                            }),
-                        };
+                            return [feature];
+                        });
 
                         // ⚠️ Добавляем данные ОДИН раз
-                        objectManager.add(prepared);
-
-                        // Добавляем на карту
+                        objectManager.add({ ...converted, features: preparedFeatures });
                         map.geoObjects.add(objectManager);
 
                         mapInstance.current = map;
@@ -146,7 +213,9 @@ const MapVisualization = ({
 
                             // 👉 выбираем округ (это обновит select)
                             if (districtName) {
-                                onSelectDistrict(districtName);
+                                const parts = districtName.trim().split(/\s+/);
+                                const valueForSelect = parts.length > 1 ? parts.slice(-2).join(' ') : parts[0];
+                                onSelectDistrict(valueForSelect);
                             }
 
                             // 👉 логика зума для Point
@@ -159,23 +228,23 @@ const MapVisualization = ({
                             }
 
                             // 👉 логика зума для Polygon
-                            if (object.geometry.type === 'Polygon') {
-                                const coords = object.geometry.coordinates[0];
+                            // if (object.geometry.type === 'Polygon') {
+                            //     const coords = object.geometry.coordinates[0];
 
-                                let latSum = 0;
-                                let lngSum = 0;
+                            //     let latSum = 0;
+                            //     let lngSum = 0;
 
-                                coords.forEach(([lat, lng]) => {
-                                    latSum += lat;
-                                    lngSum += lng;
-                                });
+                            //     coords.forEach(([lat, lng]) => {
+                            //         latSum += lat;
+                            //         lngSum += lng;
+                            //     });
 
-                                const center = [latSum / coords.length, lngSum / coords.length];
+                            //     const center = [latSum / coords.length, lngSum / coords.length];
 
-                                mapInstance.current.setCenter(center, 11, {
-                                    duration: 300,
-                                });
-                            }
+                            //     mapInstance.current.setCenter(center, 11, {
+                            //         duration: 300,
+                            //     });
+                            // }
                         });
 
                         objectManager.objects.events.add('mouseenter', (e: any) => {
@@ -215,7 +284,7 @@ const MapVisualization = ({
                 map.destroy();
             }
         };
-    }, []);
+    }, [isShortStatsVisible]);
 
     useEffect(() => {
         if (!selectedDistrict || !objectManagerRef.current || !mapInstance.current) return;
@@ -240,6 +309,7 @@ const MapVisualization = ({
         }
     }, [selectedDistrict]);
 
+    // Использовалось для того что бы блок с выполненыыми задачами на карте появлялся без перередеринга карты. Возможно к этом надо будет снова прийти
     // useEffect(() => {
     //     console.log('t', !objectManagerRef.current, !selectedDistrict);
     //     if (!objectManagerRef.current || !selectedDistrict) return;
@@ -253,16 +323,26 @@ const MapVisualization = ({
     //     });
     // }, [selectedDistrict]);
 
+    const serverDataMap = Object.fromEntries(
+        districtsShortStats.map((item) => [
+            item.mapId,
+            {
+                tasksTotal: item.tasksTotal,
+                tasksCompleted: item.tasksCompleted,
+            },
+        ]),
+    );
+
     // 🔁 Рекурсивно переворачивает координаты [lng, lat] → [lat, lng]
-    function flipCoords(coords: any): any {
+    const flipCoords = (coords: any): any => {
         if (typeof coords[0] === 'number') {
             return [coords[1], coords[0]];
         }
         return coords.map(flipCoords);
-    }
+    };
 
     // 🔄 Конвертирует весь GeoJSON под формат Яндекс.Карт
-    function convertGeoJSON(data: any) {
+    const convertGeoJSON = (data: any) => {
         return {
             ...data,
             features: data.features.map((feature: any) => ({
@@ -273,7 +353,7 @@ const MapVisualization = ({
                 },
             })),
         };
-    }
+    };
 
     return (
         <div className="honor-card relative min-h-[500px] flex items-center justify-center">
@@ -290,7 +370,7 @@ const MapVisualization = ({
                         <span>Создать задание</span>
                     </Button>
                 </Link>
-                <Button
+                {/* <Button
                     variant="outline"
                     className="bg-white w-full justify-start"
                     onClick={onToggleProblems}>
@@ -299,21 +379,21 @@ const MapVisualization = ({
                         className="mr-2"
                     />
                     {showProblems ? 'Скрыть проблемы' : 'Показать проблемы'}
-                </Button>
+                </Button> */}
                 <Button
                     variant="outline"
                     className="bg-white w-full justify-start"
-                    onClick={onToggleStats}>
+                    onClick={toggleShowShortStats}>
                     <BarChart
                         size={18}
                         className="mr-2"
                     />
-                    {showStats ? 'Скрыть статистику' : 'Показать статистику'}
+                    {isShortStatsVisible ? 'Скрыть статистику' : 'Показать статистику'}
                 </Button>
             </div>
 
             {/* Статистика по округам на карте */}
-            {showStats &&
+            {/* {showStats &&
                 districts.map((district, index) => (
                     <div
                         key={`stat-${district.id}`}
@@ -339,7 +419,7 @@ const MapVisualization = ({
                                 }}></div>
                         </div>
                     </div>
-                ))}
+                ))} */}
         </div>
     );
 };

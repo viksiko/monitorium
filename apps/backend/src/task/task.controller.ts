@@ -7,6 +7,7 @@ import { AdminGuard } from '@src/auth/guards/admin.guard';
 import { JwtAuthGuard } from '@src/auth/guards/jwt-auth.guard';
 import { HEADERS_AUTHORIZATION } from '@src/constants/swagger/api-headers.swagger';
 import { PARAM_TASK_ID, PARAM_TASK_ID_STAGE, PARAM_TASK_USER_ID } from '@src/constants/swagger/api-param.swagger';
+import { TASK_FILTER_QUERY_DISTRICT } from '@src/constants/swagger/api-query.swagger';
 import {
     AUTHENTICATION_ERROR_RESPONSES,
     DATABASE_ERROR_RESPONSE,
@@ -79,13 +80,7 @@ export class TaskController {
     // Получить всех задач по фильтру
     @Get('filter')
     @ApiOperation({ summary: 'Получить задачи по параметрам фильтрации' })
-    @ApiHeader(HEADERS_AUTHORIZATION)
-    @ApiQuery({
-        name: 'role/district',
-        description: 'Фильтр по округу',
-        required: false,
-        example: '/api/v1/tasks/district?=Округ №1',
-    })
+    @ApiQuery(TASK_FILTER_QUERY_DISTRICT)
     @ApiResponse(TASK_FILTER_LIST_SUCCESS_RESPONSE)
     @ApiResponse(TASK_BAD_REQUEST_RESPONSE)
     // @ApiResponse(USER_BAD_REQUEST_RESPONSE)

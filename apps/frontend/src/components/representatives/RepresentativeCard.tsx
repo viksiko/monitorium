@@ -34,7 +34,7 @@ const RepresentativeCard = ({ representative }: RepresentativeCardProps) => {
                                             size={14}
                                             className="mr-1"
                                         />
-                                        <span>{representative.district}</span>
+                                        <span>{representative.district.name}</span>
                                     </div>
                                     <span className="mx-2">•</span>
                                     <div className="flex items-center">

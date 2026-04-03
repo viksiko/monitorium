@@ -2,12 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import { useToast } from '@/components/ui/use-toast';
-import {
-    RepresentativeStep1,
-    VerificationStep,
-    RegisterFooter,
-    RepresentativeDetails,
-} from '@/components/voter';
+import { RepresentativeStep1, VerificationStep, RegisterFooter, RepresentativeDetails } from '@/components/voter';
 import GosuslugiAuthButton from '@/components/auth/GosuslugiAuthButton';
 import { Separator } from '@/components/ui/separator';
 import { useAuth } from '@/context/AuthContext';
@@ -32,15 +27,13 @@ const RepresentativeRegister = () => {
         email: '',
         position: '',
         party: '',
-        district: '',
+        districtId: '',
         bio: '',
         verificationCode: '',
         idCard: null as File | null,
     });
 
-    const handleChange = (
-        e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-    ) => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
         setFormData({
             ...formData,
@@ -164,7 +157,7 @@ const RepresentativeRegister = () => {
             userId: userId,
             position: formData.position,
             party: formData.party,
-            district: formData.district,
+            districtId: formData.districtId,
             bio: formData.bio,
             idCard: formData.idCard?.name ?? null,
         };
@@ -178,7 +171,7 @@ const RepresentativeRegister = () => {
                 ...prev,
                 position: '',
                 party: '',
-                district: '',
+                districtId: '',
                 bio: '',
                 idCard: null,
             }));
@@ -186,8 +179,7 @@ const RepresentativeRegister = () => {
 
             toast({
                 title: 'Заявка отправлена!',
-                description:
-                    'Ваша заявка на регистрацию отправлена и будет рассмотрена в ближайшее время.',
+                description: 'Ваша заявка на регистрацию отправлена и будет рассмотрена в ближайшее время.',
                 variant: 'success',
             });
         } catch (error) {
@@ -208,9 +200,7 @@ const RepresentativeRegister = () => {
         <Layout>
             <div className="honor-container py-12">
                 <div className="max-w-md mx-auto">
-                    <h1 className="text-3xl font-bold mb-8 text-center">
-                        Регистрация представителя власти
-                    </h1>
+                    <h1 className="text-3xl font-bold mb-8 text-center">Регистрация представителя власти</h1>
 
                     {/* <GosuslugiAuthButton
                         isRepresentative={true}
