@@ -2,27 +2,28 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Launch App (first run)",
-      "type": "chrome",
+      "name": "Back",
+      "type": "node",
       "request": "launch",
-      "url": "http://localhost:8080",
-      "webRoot": "${workspaceFolder}/apps/frontend",
-      "preLaunchTask": "Start app (first run)"
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev:back"],
+      "console": "integratedTerminal",
+      "skipFiles": ["<node_internals>/**"]
     },
     {
-      "name": "Launch App",
-      "type": "chrome",
+      "name": "Front",
+      "type": "node",
       "request": "launch",
-      "url": "http://localhost:8080",
-      "webRoot": "${workspaceFolder}/apps/frontend",
-      "preLaunchTask": "Start app"
-    },
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev:front"],
+      "console": "integratedTerminal",
+      "skipFiles": ["<node_internals>/**"]
+    }
+  ],
+  "compounds": [
     {
-      "name": "Launch App (Chrome, no preLaunch)",
-      "type": "chrome",
-      "request": "launch",
-      "url": "http://localhost:8080",
-      "webRoot": "${workspaceFolder}/apps/frontend"
+      "name": "Full",
+      "configurations": ["Back", "Front"]
     }
   ]
 }
