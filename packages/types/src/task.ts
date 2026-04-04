@@ -14,7 +14,6 @@ export interface Task {
     stages?: TaskStage[];
     likesCount: number;
     viewsCount: number;
-    comments?: TaskComment[];
 }
 
 interface Author {
@@ -25,14 +24,6 @@ interface Author {
 interface Assignee {
     id: string;
     name: string;
-}
-
-export interface TaskComment {
-    id: string;
-    taskId: string;
-    userId: string;
-    text: string;
-    createdAt: Date | string;
 }
 
 export const TASK_STATUSES = ['PLANNED', 'IN_PROGRESS', 'COMPLETED', 'REJECTED'] as const;
@@ -59,7 +50,6 @@ export type TaskListItem = Pick<
     | 'createdAt'
     | 'likesCount'
     | 'viewsCount'
-    | 'comments'
     | 'author'
     | 'assignee'
 >;

@@ -43,9 +43,6 @@ model User {
   voterProfile          VoterProfile?
   representativeProfile RepresentativeProfile?
 
-  // Связь с заданиями
-  taskComments TaskComment[]
-
   // Созданные задачи
   authoredTasks Task[] @relation("AuthoredTasks")
 
@@ -61,8 +58,8 @@ model User {
   // Связь с постами
   posts Post[]
 
-  // Связь с комментариями постов
-  postComments PostComment[]
+  // Связь с комментариями
+  comments Comment[]
 
   voterDialogs          Dialog[]  @relation("VoterDialogs")
   representativeDialogs Dialog[]  @relation("RepresentativeDialogs")
@@ -95,9 +92,10 @@ model Task {
   stages TaskStage[] // Этапы решения
   status TaskStatus  @default(PLANNED) // Статус задания
 
-  likesCount Int           @default(0) // Количество лайков
-  viewsCount Int           @default(0) // Количество просмотров
-  comments   TaskComment[] //  комментарии
+  likesCount Int       @default(0) // Количество лайков
+  viewsCount Int       @default(0) // Количество просмотров
+
+  comments   Comment[] //  комментарии
 
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
@@ -202,19 +200,6 @@ model TaskFile {
   @@map("task_files")
 }
 
-model TaskComment {
-  id        String   @id @default(cuid())
-  taskId    String
-  userId    String // кто оставил комментарий
-  text      String
-  createdAt DateTime @default(now())
-
-  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
-  user User @relation(fields: [userId], references: [id])
-
-  @@map("task_comments")
-}
-
 // таблица для постов
 model Post {
   id          String   @id @default(cuid())
@@ -229,27 +214,14 @@ model Post {
   // Файлы блога
   files PostFile[]
 
-  likesCount Int           @default(0) // Количество лайков
-  viewsCount Int           @default(0) // Количество просмотров
-  comments   PostComment[] //  комментарии
+  likesCount Int       @default(0) // Количество лайков
+  viewsCount Int       @default(0) // Количество просмотров
+  comments   Comment[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@map("posts")
-}
-
-model PostComment {
-  id        String   @id @default(cuid())
-  taskId    String
-  userId    String // кто оставил комментарий
-  text      String
-  createdAt DateTime @default(now())
-
-  post Post @relation(fields: [taskId], references: [id], onDelete: Cascade)
-  user User @relation(fields: [userId], references: [id])
-
-  @@map("post_comments")
 }
 
 // для файлов в блоге
@@ -266,6 +238,28 @@ model PostFile {
   createdAt DateTime @default(now())
 
   @@map("post_files")
+}
+
+model Comment {
+  id      String @id @default(cuid())
+  content String
+
+  authorId String
+  author   User   @relation(fields: [authorId], references: [id])
+
+  postId String?
+  post   Post?   @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  taskId String?
+  task   Task?   @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+
+  @@index([postId])
+  @@index([taskId])
+  @@map("comments")
 }
 
 model Dialog {
