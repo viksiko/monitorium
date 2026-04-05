@@ -55,7 +55,11 @@ async function bootstrap(): Promise<void> {
         .setVersion('1.0')
         .build();
 
-    const document = SwaggerModule.createDocument(app, config);
+    const document = SwaggerModule.createDocument(app, config, {
+        operationIdFactory: (controllerKey: string, methodKey: string) => {
+            return `${methodKey}`;
+        },
+    });
 
     SwaggerModule.setup('api/v1/docs', app, document);
 
