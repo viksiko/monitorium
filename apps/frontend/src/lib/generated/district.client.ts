@@ -12,7 +12,7 @@ export const district = {
         return customInstance<DistrictModel[]>({
             url: `/api/v1/districts`,
             method: 'GET',
-            params: { ...(areas !== undefined && areas !== null ? { areas: areas } : {}) },
+            params: { ...(areas != null ? { areas: areas } : {}) },
         });
     },
     getDistrictById: async (id: string) => {

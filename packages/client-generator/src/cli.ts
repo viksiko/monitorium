@@ -4,8 +4,10 @@ import path from 'path';
 import { mergeConfig, type GeneratorConfig } from './config';
 import { generate } from './generate';
 
-/** Объединение дефолтов с путями под эту монорепу; править здесь при смене layout. */
-const cliConfig: Partial<GeneratorConfig> = {
+type FileConfig = Partial<GeneratorConfig> & { repoRoot?: string };
+
+/** Дефолты, если CLI вызван без `--config` */
+const cliFallbackConfig: Partial<GeneratorConfig> & { repoRoot: string } = {
     repoRoot: path.resolve(__dirname, '..', '..', '..'),
     backendTsconfig: 'apps/backend/tsconfig.json',
     sharedTypesPackage: '@monorepo/types',
@@ -18,8 +20,67 @@ const cliConfig: Partial<GeneratorConfig> = {
     strictTypes: false,
 };
 
+function parseArgs(argv: string[]): { configPath?: string } {
+    const out: { configPath?: string } = {};
+    for (let i = 2; i < argv.length; i++) {
+        const a = argv[i];
+        if ((a === '--config' || a === '-c') && argv[i + 1]) {
+            out.configPath = argv[++i];
+        }
+    }
+    return out;
+}
+
+function loadConfigFile(resolvedPath: string): FileConfig {
+    const ext = path.extname(resolvedPath).toLowerCase();
+    if (ext === '.json') {
+        const raw = fs.readFileSync(resolvedPath, 'utf-8');
+        return JSON.parse(raw) as FileConfig;
+    }
+    if (ext === '.cjs' || ext === '.js') {
+        const reqPath = require.resolve(path.resolve(resolvedPath));
+        delete require.cache[reqPath];
+        const m = require(reqPath) as FileConfig | { default: FileConfig };
+        const cfg = (m as { default?: FileConfig }).default ?? m;
+        return cfg as FileConfig;
+    }
+    throw new Error(
+        `[client-generator] Неподдерживаемый формат конфига: ${ext}. Используйте .json, .cjs или .js (CommonJS).`,
+    );
+}
+
+function resolveRepoRoot(raw: FileConfig, configFilePath: string | undefined): string {
+    let repoRoot = raw.repoRoot;
+    if (repoRoot === undefined || repoRoot === '') {
+        throw new Error('[client-generator] В конфиге нужно указать repoRoot (абсолютный или относительно файла конфига).');
+    }
+    if (!path.isAbsolute(repoRoot)) {
+        const base = configFilePath ? path.dirname(configFilePath) : process.cwd();
+        repoRoot = path.resolve(base, repoRoot);
+    }
+    return repoRoot;
+}
+
 async function main(): Promise<void> {
-    const cfg = mergeConfig({ ...cliConfig, repoRoot: cliConfig.repoRoot! });
+    const { configPath } = parseArgs(process.argv);
+
+    let partial: FileConfig;
+    let configFileResolved: string | undefined;
+
+    if (configPath) {
+        configFileResolved = path.isAbsolute(configPath) ? configPath : path.resolve(process.cwd(), configPath);
+        if (!fs.existsSync(configFileResolved)) {
+            console.error(`[client-generator] Файл конфига не найден: ${configFileResolved}`);
+            process.exit(1);
+        }
+        partial = loadConfigFile(configFileResolved);
+    } else {
+        partial = { ...cliFallbackConfig };
+    }
+
+    const repoRoot = resolveRepoRoot(partial, configFileResolved);
+    const cfg = mergeConfig({ ...partial, repoRoot } as Partial<GeneratorConfig> & { repoRoot: string });
+
     const tsConfigPath = path.join(cfg.repoRoot, cfg.backendTsconfig);
     if (!fs.existsSync(tsConfigPath)) {
         console.error(`[client-generator] Не найден tsconfig: ${tsConfigPath}`);

@@ -36,7 +36,7 @@ exports.defaultGeneratorConfig = {
     mutatorExportName: 'customInstance',
     outputDir: 'apps/frontend/src/lib/generated',
     globalPrefix: 'api',
-    modelsLayout: 'bundle',
+    modelsLayout: 'split',
     modelSuffix: 'Model',
     strictTypes: false,
     builtinTypeNames: exports.defaultBuiltinTypeNames,
