@@ -44,7 +44,6 @@ export class DialogController {
     @ApiResponse(NO_SUBSCRIPTION_RESPONSE)
     async createDialog(@Body() dto: CreateDialogDto, @Req() req): Promise<CreateDialog> {
         const userId = req.user.id;
-
         return this.dialogsService.createDialog(userId, dto);
     }
 

@@ -69,7 +69,7 @@ const PostDetails = () => {
                                     className="space-y-6 mt-0">
                                     <Card className="honor-card">
                                         <div className="flex items-center mb-4">
-                                            <Avatar className="h-10 w-10 mr-3">
+                                            <Avatar className="justify-center items-center h-10 w-10 mr-3">
                                                 <User size={20} />
                                             </Avatar>
                                             <div>

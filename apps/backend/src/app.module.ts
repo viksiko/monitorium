@@ -5,6 +5,7 @@ import { LoggerMiddleware } from '@shared/middleware';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
+import { BalanceModule } from './balance/balance.module';
 import { DialogModule } from './dialog/dialog.module';
 import { DistrictModule } from './district/district.module';
 import { PostModule } from './post/post.module';
@@ -30,6 +31,7 @@ import { UserModule } from './user/user.module';
         PostModule,
         DialogModule,
         DistrictModule,
+        BalanceModule,
     ],
     controllers: [AppController],
     providers: [AppService],

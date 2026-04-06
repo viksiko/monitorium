@@ -1,0 +1,8 @@
+export const TOKEN_PARAMS = {
+    MAX: 999999,
+    MIN: 1,
+    TOP_UP_AMOUNTS: [10, 20, 50, 100, 200, 500],
+    TASK_CREATION_PRICE: 10,
+    MESSAGE_CREATION_PRICE: 10,
+    WATCH_AD_PRICE: 1,
+} as const;

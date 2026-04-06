@@ -1,8 +1,9 @@
 import * as crypto from 'crypto';
 import { UserProfile } from '@monorepo/types';
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
+import { Prisma } from '@prisma/client';
 import { AUTHORIZATION_REQUIRED } from '@src/constants/api-messages.constants';
 import { logger } from '@src/logger/winston.logger';
 import { PrismaService } from '@src/prisma/prisma.service';
@@ -59,15 +60,8 @@ export class TokenSevice {
     }
 
     // Сохранение refresh токена в базу
-    private async saveRefreshToken(
-        userId: string,
-        refreshToken: string,
-        expiresAt: Date,
-    ): Promise<void> {
-        const hashed = this.hashToken(
-            refreshToken,
-            this.configService.get('JWT_REFRESH_SALT'),
-        );
+    private async saveRefreshToken(userId: string, refreshToken: string, expiresAt: Date): Promise<void> {
+        const hashed = this.hashToken(refreshToken, this.configService.get('JWT_REFRESH_SALT'));
 
         try {
             await this.prisma.token.create({
@@ -94,10 +88,7 @@ export class TokenSevice {
     }
 
     async deleteTokensByHash(refreshToken: string): Promise<number> {
-        const hashedToken = this.hashToken(
-            refreshToken,
-            this.configService.get('JWT_REFRESH_SALT'),
-        );
+        const hashedToken = this.hashToken(refreshToken, this.configService.get('JWT_REFRESH_SALT'));
 
         const deleteResult = await this.prisma.token.deleteMany({
             where: { hashedToken },
@@ -105,11 +96,9 @@ export class TokenSevice {
         return deleteResult.count;
     }
 
+    // Хеширует входящий токен и ищет его в базе
     async consumeRefreshToken(refreshToken: string): Promise<string> {
-        const hashedToken = this.hashToken(
-            refreshToken,
-            this.configService.get('JWT_REFRESH_SALT'),
-        );
+        const hashedToken = this.hashToken(refreshToken, this.configService.get('JWT_REFRESH_SALT'));
 
         const tokenRecord = await this.prisma.token.findUnique({
             where: { hashedToken },
@@ -125,5 +114,16 @@ export class TokenSevice {
         });
 
         return tokenRecord.userId;
+    }
+
+    // Удаление токена, например при подтверждении регистрации
+    async deleteTokenById(tx: Prisma.TransactionClient, tokenId: string): Promise<void> {
+        const deleted = await tx.token.deleteMany({
+            where: { id: tokenId },
+        });
+
+        if (deleted.count === 0) {
+            throw new NotFoundException(`Token with id ${tokenId} not found`);
+        }
     }
 }

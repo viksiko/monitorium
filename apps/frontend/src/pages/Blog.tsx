@@ -5,14 +5,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Avatar } from '@/components/ui/avatar';
-import {
-    Calendar,
-    ThumbsUp,
-    MessageSquare,
-    User,
-    Clock,
-    Share2,
-} from 'lucide-react';
+import { Calendar, ThumbsUp, MessageSquare, User, Clock, Share2 } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 
 // Mock blog posts
@@ -93,9 +86,7 @@ const mockPosts = [
 const Blog = () => {
     const { id } = useParams();
     const { toast } = useToast();
-    const [selectedPost, setSelectedPost] = useState(
-        id ? mockPosts.find((post) => post.id === parseInt(id)) : null,
-    );
+    const [selectedPost, setSelectedPost] = useState(id ? mockPosts.find((post) => post.id === parseInt(id)) : null);
 
     const handleShare = () => {
         navigator.clipboard.writeText(window.location.href);
@@ -122,37 +113,25 @@ const Blog = () => {
                     <div className="lg:col-span-1">
                         <Card className="honor-card mb-6">
                             <div className="p-6">
-                                <h2 className="text-xl font-bold mb-4">
-                                    Блог представителя
-                                </h2>
+                                <h2 className="text-xl font-bold mb-4">Блог представителя</h2>
                                 <div className="flex items-center mb-6">
-                                    <Avatar className="h-12 w-12 mr-4">
+                                    <Avatar className="justify-center items-centerh-12 w-12 mr-4">
                                         <User size={24} />
                                     </Avatar>
                                     <div>
-                                        <h3 className="font-bold">
-                                            Иванов Иван Иванович
-                                        </h3>
-                                        <p className="text-sm text-honor-darkGray">
-                                            Депутат городской думы
-                                        </p>
+                                        <h3 className="font-bold">Иванов Иван Иванович</h3>
+                                        <p className="text-sm text-honor-darkGray">Депутат городской думы</p>
                                     </div>
                                 </div>
 
-                                <Button className="w-full honor-button-primary mb-2">
-                                    Подписаться на блог
-                                </Button>
-                                <Button className="w-full honor-button-secondary">
-                                    Профиль представителя
-                                </Button>
+                                <Button className="w-full honor-button-primary mb-2">Подписаться на блог</Button>
+                                <Button className="w-full honor-button-secondary">Профиль представителя</Button>
                             </div>
 
                             <Separator />
 
                             <div className="p-6">
-                                <h3 className="text-lg font-semibold mb-4">
-                                    Последние публикации
-                                </h3>
+                                <h3 className="text-lg font-semibold mb-4">Последние публикации</h3>
                                 <div className="space-y-4">
                                     {mockPosts.map((post) => (
                                         <button
@@ -162,16 +141,10 @@ const Blog = () => {
                                                     ? 'bg-honor-blue/10'
                                                     : 'hover:bg-honor-gray'
                                             }`}
-                                            onClick={() =>
-                                                setSelectedPost(post)
-                                            }>
-                                            <h4 className="font-medium line-clamp-2">
-                                                {post.title}
-                                            </h4>
+                                            onClick={() => setSelectedPost(post)}>
+                                            <h4 className="font-medium line-clamp-2">{post.title}</h4>
                                             <p className="text-xs text-honor-darkGray mt-1">
-                                                {new Date(
-                                                    post.date,
-                                                ).toLocaleDateString('ru-RU')}
+                                                {new Date(post.date).toLocaleDateString('ru-RU')}
                                             </p>
                                         </button>
                                     ))}
@@ -186,31 +159,23 @@ const Blog = () => {
                             <Card className="honor-card">
                                 <div className="p-6">
                                     <div className="flex items-center mb-4">
-                                        <Avatar className="h-10 w-10 mr-3">
+                                        <Avatar className="justify-center items-centerh-10 w-10 mr-3">
                                             <User size={20} />
                                         </Avatar>
                                         <div>
-                                            <p className="font-medium">
-                                                {selectedPost.author}
-                                            </p>
-                                            <p className="text-xs text-honor-darkGray">
-                                                {selectedPost.authorRole}
-                                            </p>
+                                            <p className="font-medium">{selectedPost.author}</p>
+                                            <p className="text-xs text-honor-darkGray">{selectedPost.authorRole}</p>
                                         </div>
                                         <div className="ml-auto text-sm text-honor-darkGray">
                                             <Calendar
                                                 size={14}
                                                 className="inline mr-1"
                                             />
-                                            {new Date(
-                                                selectedPost.date,
-                                            ).toLocaleDateString('ru-RU')}
+                                            {new Date(selectedPost.date).toLocaleDateString('ru-RU')}
                                         </div>
                                     </div>
 
-                                    <h1 className="text-2xl font-bold mb-4">
-                                        {selectedPost.title}
-                                    </h1>
+                                    <h1 className="text-2xl font-bold mb-4">{selectedPost.title}</h1>
 
                                     <div
                                         className="prose max-w-none mb-6"
@@ -225,15 +190,11 @@ const Blog = () => {
                                                 className="flex items-center space-x-1 text-honor-darkGray hover:text-honor-blue"
                                                 onClick={handleLike}>
                                                 <ThumbsUp size={18} />
-                                                <span>
-                                                    {selectedPost.likes}
-                                                </span>
+                                                <span>{selectedPost.likes}</span>
                                             </button>
                                             <div className="flex items-center space-x-1 text-honor-darkGray">
                                                 <MessageSquare size={18} />
-                                                <span>
-                                                    {selectedPost.comments}
-                                                </span>
+                                                <span>{selectedPost.comments}</span>
                                             </div>
                                         </div>
                                         <button
@@ -246,12 +207,9 @@ const Blog = () => {
                             </Card>
                         ) : (
                             <div className="text-center py-12">
-                                <h2 className="text-2xl font-bold mb-4">
-                                    Выберите публикацию
-                                </h2>
+                                <h2 className="text-2xl font-bold mb-4">Выберите публикацию</h2>
                                 <p className="text-honor-darkGray">
-                                    Выберите публикацию из списка слева, чтобы
-                                    прочитать полный текст
+                                    Выберите публикацию из списка слева, чтобы прочитать полный текст
                                 </p>
                             </div>
                         )}

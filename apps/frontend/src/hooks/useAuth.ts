@@ -60,6 +60,7 @@ export const useUser = () => {
     return useQuery({
         queryKey: ['user'],
         queryFn: async () => {
+            console.log('FETCH USER 🔥');
             const { data } = await api.get('/api/v1/users/profile');
             return data.data;
         },

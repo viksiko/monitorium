@@ -16,14 +16,12 @@ import { useNavigate } from 'react-router-dom';
 
 const Header = () => {
     const navigate = useNavigate();
-    const { user, isLoading } = useAuth();
+    const { user } = useAuth();
     const { mutate: logout } = useLogout();
 
     // if (isLoading) {
     //     return null; // или skeleton
     // }
-
-    const test = true;
 
     return (
         <header className="bg-white shadow-sm">
@@ -73,13 +71,16 @@ const Header = () => {
                                 {!user.isRepresentative && (
                                     <Link
                                         to="/balance"
-                                        className="flex items-center px-3 py-1 rounded-full bg-honor-gray hover:bg-honor-blue/10 transition-colors">
-                                        <Ticket
-                                            size={16}
-                                            className="text-honor-blue mr-1"
-                                        />
-
-                                        <span className="text-sm font-medium">{user.voterProfile.balance}</span>
+                                        className="flex items-center gap-2 px-2 py-0 rounded-full bg-gradient-to-r from-honor-blue/10 to-honor-blue/5 hover:from-honor-blue/20 hover:to-honor-blue/10 transition-all duration-300 border border-honor-blue/20">
+                                        <div className="relative">
+                                            <Ticket
+                                                size={18}
+                                                className="text-honor-blue"
+                                            />
+                                        </div>
+                                        <span className="text-sm font-medium text-honor-darkGray">Баланс:</span>
+                                        <span className="font-bold text-honor-blue">{user.voterProfile.balance}</span>
+                                        <span className="text-xs text-honor-darkGray"></span>
                                     </Link>
                                 )}
 

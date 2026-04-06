@@ -7,6 +7,12 @@ CREATE TYPE "TokenType" AS ENUM ('REFRESH', 'VERIFY_EMAIL', 'RESET_PASSWORD');
 -- CreateEnum
 CREATE TYPE "TaskStatus" AS ENUM ('PLANNED', 'IN_PROGRESS', 'COMPLETED', 'REJECTED');
 
+-- CreateEnum
+CREATE TYPE "BalanceTransactionType" AS ENUM ('REGISTRATION_BONUS', 'WATCH_AD', 'CREATE_TASK', 'MESSAGE_REPRESENTATIVE', 'PURCHASE_TICKETS', 'REPRESENTATIVE_SUBSCRIPTION');
+
+-- CreateEnum
+CREATE TYPE "TransactionDirection" AS ENUM ('CREDIT', 'DEBIT');
+
 -- CreateTable
 CREATE TABLE "users" (
     "id" TEXT NOT NULL,
@@ -223,6 +229,22 @@ CREATE TABLE "areas" (
     CONSTRAINT "areas_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateTable
+CREATE TABLE "balance_transactions" (
+    "id" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
+    "type" "BalanceTransactionType" NOT NULL,
+    "amount" INTEGER NOT NULL,
+    "balanceAfter" INTEGER NOT NULL,
+    "direction" "TransactionDirection" NOT NULL,
+    "description" TEXT,
+    "taskId" TEXT,
+    "messageId" TEXT,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "balance_transactions_pkey" PRIMARY KEY ("id")
+);
+
 -- CreateIndex
 CREATE UNIQUE INDEX "users_email_key" ON "users"("email");
 
@@ -330,3 +352,6 @@ ALTER TABLE "messages" ADD CONSTRAINT "messages_senderId_fkey" FOREIGN KEY ("sen
 
 -- AddForeignKey
 ALTER TABLE "areas" ADD CONSTRAINT "areas_districtId_fkey" FOREIGN KEY ("districtId") REFERENCES "districts"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "balance_transactions" ADD CONSTRAINT "balance_transactions_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;

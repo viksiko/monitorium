@@ -37,7 +37,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         refreshTokenMutation.mutate();
     }, []);
 
-    // Этот useEffect используется для очистки данных пользователя из кэша, если статус не fresh.
+    // Этот useEffect используется для очистки данных пользователя из кэша, если статус не fresh. Возможно надо удалить это.
     useEffect(() => {
         if (status !== 'fresh') {
             queryClient.removeQueries({ queryKey: ['user'] });
@@ -52,7 +52,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 description: 'Вы успешно вошли в систему.',
                 variant: 'success',
             });
-        } catch (error: any) {
+        } catch (error) {
             toast({
                 title: 'Ошибка входа',
                 description: error.response?.data?.message || 'Неверный email или пароль.',
@@ -125,7 +125,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     };
 
     const refreshUser = async () => {
-        await queryClient.invalidateQueries({
+        await queryClient.refetchQueries({
             queryKey: ['user'],
         });
     };

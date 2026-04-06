@@ -24,7 +24,6 @@ export class PostService {
                 },
             });
         } catch (error) {
-            console.error('Error creating post:', error);
             logger.error('Failed create post', {
                 category: 'PostService',
                 operation: 'createPost',

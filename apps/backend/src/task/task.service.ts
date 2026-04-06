@@ -1,7 +1,9 @@
 import { Task, TaskListItem, TaskStage } from '@monorepo/types';
 import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
-import { User } from '@prisma/client';
+import { BalanceTransactionType, User } from '@prisma/client';
+import { BalanceService } from '@src/balance/balance.service';
 import { TASK_MESSAGES, USER_NOT_FOUND } from '@src/constants/api-messages.constants';
+import { TOKEN_PARAMS } from '@src/constants/tokens-params';
 import { logger } from '@src/logger/winston.logger';
 import { PrismaService } from '@src/prisma/prisma.service';
 import { UpdateTaskData } from '@src/types/task';
@@ -12,72 +14,87 @@ import { mapTaskListItemToDto } from './task.mapper';
 
 @Injectable()
 export class TaskService {
-    constructor(private prisma: PrismaService) {}
+    constructor(
+        private prisma: PrismaService,
+        private balanceService: BalanceService,
+    ) {}
 
     async createTask(authorId: string, dto: CreateTaskDto): Promise<Task> {
         try {
             const { stages, assigneeId, ...taskData } = dto;
 
-            let assigneeDistrictId: string | null = null;
+            return await this.prisma.$transaction(async (tx) => {
+                // Списание билеты у пользователя
+                await this.balanceService.withdrawBalanceTx(
+                    tx,
+                    authorId,
+                    TOKEN_PARAMS.TASK_CREATION_PRICE,
+                    BalanceTransactionType.CREATE_TASK,
+                );
 
-            // Если указан исполнитель — проверяем, что это представитель
-            if (assigneeId) {
-                const assignee = await this.prisma.user.findUnique({
-                    where: { id: assigneeId },
-                    select: { role: true, districtId: true },
+                let assigneeDistrictId: string | null = null;
+
+                // Если указан исполнитель — проверяем, что это представитель
+                if (assigneeId) {
+                    const assignee = await tx.user.findUnique({
+                        where: { id: assigneeId },
+                        select: { role: true, districtId: true },
+                    });
+
+                    if (!assignee) {
+                        throw new Error(TASK_MESSAGES.ASSIGNEE_NOT_FOUND);
+                    }
+
+                    if (assignee.role !== 'REPRESENTATIVE') {
+                        throw new Error(TASK_MESSAGES.TASK_ASSIGNEE_MUST_BE_REPRESENTATIVE);
+                    }
+
+                    if (!assignee.districtId) {
+                        throw new Error('У представителя не указан округ');
+                    }
+
+                    assigneeDistrictId = assignee.districtId;
+                }
+
+                // Создание задачи с возможными этапами
+                const task = await tx.task.create({
+                    data: {
+                        ...taskData,
+
+                        district: {
+                            connect: { id: assigneeDistrictId! },
+                        },
+
+                        // автор
+                        author: {
+                            connect: { id: authorId },
+                        },
+
+                        // исполнитель (опционально)
+                        ...(assigneeId && {
+                            assignee: {
+                                connect: { id: assigneeId },
+                            },
+                        }),
+
+                        // этапы
+                        ...(stages?.length && {
+                            stages: {
+                                create: stages.map((stage) => ({
+                                    title: stage.title,
+                                    date: new Date(stage.date),
+                                })),
+                            },
+                        }),
+                    },
+                    include: {
+                        author: { select: { id: true, name: true } },
+                        assignee: assigneeId ? { select: { id: true, name: true } } : false,
+                        stages: true,
+                    },
                 });
 
-                if (!assignee) {
-                    throw new Error(TASK_MESSAGES.ASSIGNEE_NOT_FOUND);
-                }
-
-                if (assignee.role !== 'REPRESENTATIVE') {
-                    throw new Error(TASK_MESSAGES.TASK_ASSIGNEE_MUST_BE_REPRESENTATIVE);
-                }
-
-                if (!assignee.districtId) {
-                    throw new Error('У представителя не указан округ');
-                }
-
-                assigneeDistrictId = assignee.districtId;
-            }
-
-            // Создание задачи с возможными этапами
-            return await this.prisma.task.create({
-                data: {
-                    ...taskData,
-
-                    district: {
-                        connect: { id: assigneeDistrictId! },
-                    },
-
-                    // автор
-                    author: {
-                        connect: { id: authorId },
-                    },
-
-                    // исполнитель (опционально)
-                    ...(assigneeId && {
-                        assignee: {
-                            connect: { id: assigneeId },
-                        },
-                    }),
-
-                    // этапы
-                    ...(stages?.length && {
-                        stages: {
-                            create: stages.map((stage) => ({
-                                title: stage.title,
-                                date: new Date(stage.date),
-                            })),
-                        },
-                    }),
-                },
-                include: {
-                    author: { select: { id: true, name: true } },
-                    assignee: assigneeId ? { select: { id: true, name: true } } : false,
-                    stages: true,
-                },
+                return task;
             });
         } catch (error) {
             logger.error('Failed create task', {

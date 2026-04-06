@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
+import { BalanceService } from '@src/balance/balance.service';
 import { UserService } from '@src/user/user.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { AuthController } from './auth.controller';
@@ -23,6 +24,7 @@ import { RefreshStrategy } from './strategies/refresh.strategy';
         CookieTokenService,
         MailService,
         JwtStrategy,
+        BalanceService,
     ],
     exports: [JwtModule],
 })

@@ -22,8 +22,6 @@ const RepresentativesFilters = ({
     handlePartyFilter,
     resetFilters,
 }: RepresentativesFiltersProps) => {
-    console.log(districts, 'districts');
-
     return (
         <div className="honor-card mb-6">
             <h3 className="text-lg font-semibold mb-4">Фильтры</h3>
