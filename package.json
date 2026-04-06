@@ -21,7 +21,7 @@
     "types:build": "npm run build --workspace=@monorepo/types",
     "types:watch": "npm run watch --workspace=@monorepo/types",
 
-    "api:generate": "dotenv -e ./.env -- node ./scripts/api-generate.mjs && prettier --write apps/frontend/src/lib/generated",
+    "api:generate": "npm run generate --workspace=@monorepo/client-generator && prettier --write apps/frontend/src/lib/generated",
 
     "prepare": "husky",
 
