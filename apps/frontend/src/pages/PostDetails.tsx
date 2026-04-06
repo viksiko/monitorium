@@ -13,13 +13,14 @@ import { TaskStatusBadge } from '@/components/ui/task-status-badge';
 import RepresantiveProfileSidebar from '@/components/representative/RepresantiveProfileSidebar';
 import { Avatar } from '@/components/ui/avatar';
 import DashboardBackButton from '@/components/ui/dashboardBackButton';
+import { useGetPostById } from '@/lib/query/post.query';
 
 const PostDetails = () => {
     const accessToken = useAuthStore((state) => state.accessToken);
     const { postId } = useParams<{ postId: string }>();
-    const { data: post, loading, error } = useAuthorizedFetch<Post>(`/api/v1/posts/${postId}`, accessToken);
+    const { data: post, isLoading, isPending, error } = useGetPostById(postId);
 
-    if (loading) {
+    if (isLoading || isPending) {
         return (
             <Layout>
                 <Loader />
@@ -31,18 +32,7 @@ const PostDetails = () => {
         return (
             <Layout>
                 <div className="honor-container py-12">
-                    <p className="text-red-500">{error}</p>
-                </div>
-            </Layout>
-        );
-    }
-
-    if (!postId) {
-        return (
-            <Layout>
-                <div className="honor-container py-12">
-                    <p>Статья не найдена</p>
-                    <Link to="/posts">← Вернуться к списку</Link>
+                    <p className="text-red-500">{error.message}</p>
                 </div>
             </Layout>
         );
@@ -57,9 +47,7 @@ const PostDetails = () => {
             <div className="honor-container py-12">
                 <h1 className="text-3xl font-bold  text-honor-darkGray mb-8">Статья «{post.title}»</h1>
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    <div className="relative lg:col-span-1">
-                        <RepresantiveProfileSidebar />
-                    </div>
+                    <div className="relative lg:col-span-1">{/* <RepresantiveProfileSidebar /> */}</div>
                     <div className="relative lg:col-span-2 ">
                         <DashboardBackButton />
                         <div>

@@ -9,5 +9,5 @@ export function customInstance<T>(config: AxiosRequestConfig, options?: AxiosReq
     return api({
         ...config,
         ...options,
-    }).then(({ data }) => data);
+    }).then(({ data }) => data?.data);
 }
