@@ -1,13 +1,23 @@
 #!/usr/bin/env node
 import fs from 'fs';
 import path from 'path';
-import { mergeConfig, type GeneratorConfig } from './config';
+import { mergeConfig, type GeneratorConfig, type GeneratorPlugin } from './config';
 import { generate } from './generate';
+import { prismaPlugin } from './plugins/prisma';
 
-type FileConfig = Partial<GeneratorConfig> & { repoRoot?: string };
+/** Встроенные плагины, доступные по строковому имени в конфиге */
+const BUILTIN_PLUGINS: Record<string, GeneratorPlugin> = {
+    prisma: prismaPlugin,
+};
+
+type FileConfig = Omit<Partial<GeneratorConfig>, 'plugins'> & {
+    repoRoot?: string;
+    /** Плагины: строка-псевдоним встроенного плагина или объект GeneratorPlugin */
+    plugins?: (string | GeneratorPlugin)[];
+};
 
 /** Дефолты, если CLI вызван без `--config` */
-const cliFallbackConfig: Partial<GeneratorConfig> & { repoRoot: string } = {
+const cliFallbackConfig: FileConfig & { repoRoot: string } = {
     repoRoot: path.resolve(__dirname, '..', '..', '..'),
     backendTsconfig: 'apps/backend/tsconfig.json',
     sharedTypesPackage: '@monorepo/types',
@@ -61,6 +71,27 @@ function resolveRepoRoot(raw: FileConfig, configFilePath: string | undefined): s
     return repoRoot;
 }
 
+/**
+ * Разрешает массив плагинов из конфига:
+ * - строка → встроенный плагин из BUILTIN_PLUGINS
+ * - объект → используется как есть
+ */
+function resolvePlugins(raw: (string | GeneratorPlugin)[] | undefined): GeneratorPlugin[] {
+    if (!raw || raw.length === 0) return [];
+    return raw.map((p) => {
+        if (typeof p === 'string') {
+            const builtin = BUILTIN_PLUGINS[p];
+            if (!builtin) {
+                throw new Error(
+                    `[client-generator] Неизвестный плагин: "${p}". Доступные встроенные плагины: ${Object.keys(BUILTIN_PLUGINS).join(', ')}.`,
+                );
+            }
+            return builtin;
+        }
+        return p;
+    });
+}
+
 async function main(): Promise<void> {
     const { configPath } = parseArgs(process.argv);
 
@@ -79,7 +110,12 @@ async function main(): Promise<void> {
     }
 
     const repoRoot = resolveRepoRoot(partial, configFileResolved);
-    const cfg = mergeConfig({ ...partial, repoRoot } as Partial<GeneratorConfig> & { repoRoot: string });
+    const plugins = resolvePlugins(partial.plugins);
+    const cfg = mergeConfig({
+        ...(partial as Partial<GeneratorConfig>),
+        repoRoot,
+        plugins,
+    });
 
     const tsConfigPath = path.join(cfg.repoRoot, cfg.backendTsconfig);
     if (!fs.existsSync(tsConfigPath)) {

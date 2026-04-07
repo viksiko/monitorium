@@ -149,9 +149,18 @@ function collectEnums(sorted, cfg) {
     return [...byName.values()];
 }
 // ---------------------------------------------------------------------------
-// Генерация исходника одного интерфейса
+// Вспомогательные функции генерации исходника
 // ---------------------------------------------------------------------------
-function buildInterfaceSrc(decl, registry, cfg) {
+/** Генерация строки `export type Foo = "A" | "B";` для внешнего типа */
+function externalTypeAliasSrc(name, values) {
+    const union = values.map((v) => JSON.stringify(v)).join(' | ');
+    return `export type ${name} = ${union};`;
+}
+/**
+ * Генерация исходника одного интерфейса.
+ * `externalAliases` — типы, разрешённые плагинами (не заменяются на `unknown`).
+ */
+function buildInterfaceSrc(decl, registry, cfg, externalAliases) {
     const iface = registry.modelName.get(decl.getName());
     if (!iface)
         return '';
@@ -160,10 +169,12 @@ function buildInterfaceSrc(decl, registry, cfg) {
         const opt = prop.hasQuestionToken() ? '?' : '';
         let mapped = registry.mapType(prop.getTypeNode()?.getText() ?? 'unknown');
         for (const r of (0, ast_helpers_1.collectTypeRefNames)(prop.getTypeNode())) {
+            if (externalAliases.has(r))
+                continue;
             const resolved = (0, ast_helpers_1.resolveStruct)(r, decl.getSourceFile());
             const externalFile = resolved?.getSourceFile().getFilePath();
-            const prismaByImport = !resolved && (0, ast_helpers_1.isPrismaModule)((0, ast_helpers_1.findImportOf)(decl.getSourceFile(), r)?.module ?? '');
-            if ((externalFile && (0, ast_helpers_1.isInNodeModules)(externalFile)) || prismaByImport) {
+            const isExternalImport = !resolved && (0, ast_helpers_1.isPrismaModule)((0, ast_helpers_1.findImportOf)(decl.getSourceFile(), r)?.module ?? '');
+            if ((externalFile && (0, ast_helpers_1.isInNodeModules)(externalFile)) || isExternalImport) {
                 if (cfg.strictTypes)
                     throw new Error(`[client-generator] Внешний тип "${r}" в ${decl.getName()}.${prop.getName()} (strictTypes=true)`);
                 mapped = mapped.replace(new RegExp(`\\b${(0, ast_helpers_1.escapeRegExp)(r)}\\b`, 'g'), 'unknown');
@@ -206,7 +217,7 @@ function sharedImportLines(shared) {
 // ---------------------------------------------------------------------------
 // Запись моделей (bundle)
 // ---------------------------------------------------------------------------
-function buildBundleContent(sorted, enums, registry, cfg) {
+function buildBundleContent(sorted, enums, registry, cfg, externalTypeAliases = new Map()) {
     const shared = new Map();
     for (const decl of sorted) {
         for (const [mod, set] of sharedImportsForStruct(decl, cfg)) {
@@ -220,16 +231,19 @@ function buildBundleContent(sorted, enums, registry, cfg) {
     const imp = sharedImportLines(shared);
     if (imp.length)
         parts.push(...imp, '');
+    for (const [name, values] of [...externalTypeAliases.entries()].sort(([a], [b]) => a.localeCompare(b))) {
+        parts.push(externalTypeAliasSrc(name, values), '');
+    }
     for (const en of enums)
         parts.push(enumSrc(en), '');
     for (const decl of sorted)
-        parts.push(buildInterfaceSrc(decl, registry, cfg), '');
+        parts.push(buildInterfaceSrc(decl, registry, cfg, externalTypeAliases), '');
     return parts.join('\n');
 }
 // ---------------------------------------------------------------------------
 // Запись моделей (split)
 // ---------------------------------------------------------------------------
-function buildSplitFileSrc(decl, registry, cfg, enumNames) {
+function buildSplitFileSrc(decl, registry, cfg, enumNames, externalTypeAliases) {
     const iface = registry.modelName.get(decl.getName());
     const shared = sharedImportsForStruct(decl, cfg);
     const sibling = new Set();
@@ -245,6 +259,9 @@ function buildSplitFileSrc(decl, registry, cfg, enumNames) {
                 if (exp !== iface)
                     sibling.add(exp);
             }
+            else if (externalTypeAliases.has(r)) {
+                sibling.add(r);
+            }
             else if (enumNames.has(r)) {
                 sibling.add(r);
             }
@@ -256,25 +273,29 @@ function buildSplitFileSrc(decl, registry, cfg, enumNames) {
         lines.push(`import type { ${x} } from './${x}';`);
     if (lines[lines.length - 1] !== '')
         lines.push('');
-    lines.push(buildInterfaceSrc(decl, registry, cfg), '');
+    lines.push(buildInterfaceSrc(decl, registry, cfg, externalTypeAliases), '');
     return lines.join('\n');
 }
 // ---------------------------------------------------------------------------
 // Запись файлов
 // ---------------------------------------------------------------------------
-async function writeModels(sorted, enums, registry, cfg, modelsDir) {
+async function writeModels(sorted, enums, registry, cfg, modelsDir, externalTypeAliases = new Map()) {
     await promises_1.default.mkdir(modelsDir, { recursive: true });
-    // Очистить старые .ts
     for (const f of await promises_1.default.readdir(modelsDir).catch(() => [])) {
         if (f.endsWith('.ts'))
             await promises_1.default.unlink(path_1.default.join(modelsDir, f)).catch(() => undefined);
     }
     if (cfg.modelsLayout === 'bundle') {
-        await promises_1.default.writeFile(path_1.default.join(modelsDir, 'index.ts'), buildBundleContent(sorted, enums, registry, cfg), 'utf-8');
+        await promises_1.default.writeFile(path_1.default.join(modelsDir, 'index.ts'), buildBundleContent(sorted, enums, registry, cfg, externalTypeAliases), 'utf-8');
         return;
     }
     // split
     const enumNames = new Set(enums.map((e) => e.getName()).filter(Boolean));
+    const externalNames = new Set(externalTypeAliases.keys());
+    // Записать файл для каждого внешнего типа-алиаса (Prisma enum и т.п.)
+    for (const [name, values] of [...externalTypeAliases.entries()].sort(([a], [b]) => a.localeCompare(b))) {
+        await promises_1.default.writeFile(path_1.default.join(modelsDir, `${name}.ts`), `/** @generated */\n\n${externalTypeAliasSrc(name, values)}\n`, 'utf-8');
+    }
     for (const en of enums) {
         await promises_1.default.writeFile(path_1.default.join(modelsDir, `${en.getName()}.ts`), `/** @generated */\n\n${enumSrc(en)}\n`, 'utf-8');
     }
@@ -282,9 +303,10 @@ async function writeModels(sorted, enums, registry, cfg, modelsDir) {
         const iface = registry.modelName.get(decl.getName());
         if (!iface)
             continue;
-        await promises_1.default.writeFile(path_1.default.join(modelsDir, `${iface}.ts`), buildSplitFileSrc(decl, registry, cfg, enumNames), 'utf-8');
+        await promises_1.default.writeFile(path_1.default.join(modelsDir, `${iface}.ts`), buildSplitFileSrc(decl, registry, cfg, enumNames, externalTypeAliases), 'utf-8');
     }
     const allExports = [
+        ...externalNames,
         ...enumNames,
         ...sorted.map((d) => registry.modelName.get(d.getName())).filter((x) => Boolean(x)),
     ];

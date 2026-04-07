@@ -1,6 +1,7 @@
 /** @generated */
 
 import type { RepresentativeProfileModel } from './RepresentativeProfileModel';
+import type { Role } from './Role';
 import type { TaskCommentModel } from './TaskCommentModel';
 import type { TaskModel } from './TaskModel';
 import type { TokenModel } from './TokenModel';
@@ -13,7 +14,7 @@ export interface UserModel {
     password?: string | null;
     phone?: string | null;
     district?: string | null;
-    role: unknown;
+    role: Role;
     gosuslugiId?: string | null;
     sberId?: string | null;
     tinkoffId?: string | null;

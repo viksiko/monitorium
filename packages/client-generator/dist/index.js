@@ -1,9 +1,11 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.generate = exports.defaultBuiltinTypeNames = exports.defaultGeneratorConfig = exports.mergeConfig = void 0;
+exports.prismaPlugin = exports.generate = exports.defaultBuiltinTypeNames = exports.defaultGeneratorConfig = exports.mergeConfig = void 0;
 var config_1 = require("./config");
 Object.defineProperty(exports, "mergeConfig", { enumerable: true, get: function () { return config_1.mergeConfig; } });
 Object.defineProperty(exports, "defaultGeneratorConfig", { enumerable: true, get: function () { return config_1.defaultGeneratorConfig; } });
 Object.defineProperty(exports, "defaultBuiltinTypeNames", { enumerable: true, get: function () { return config_1.defaultBuiltinTypeNames; } });
 var generate_1 = require("./generate");
 Object.defineProperty(exports, "generate", { enumerable: true, get: function () { return generate_1.generate; } });
+var prisma_1 = require("./plugins/prisma");
+Object.defineProperty(exports, "prismaPlugin", { enumerable: true, get: function () { return prisma_1.prismaPlugin; } });

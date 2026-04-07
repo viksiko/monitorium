@@ -8,6 +8,11 @@ const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
 const config_1 = require("./config");
 const generate_1 = require("./generate");
+const prisma_1 = require("./plugins/prisma");
+/** Встроенные плагины, доступные по строковому имени в конфиге */
+const BUILTIN_PLUGINS = {
+    prisma: prisma_1.prismaPlugin,
+};
 /** Дефолты, если CLI вызван без `--config` */
 const cliFallbackConfig = {
     repoRoot: path_1.default.resolve(__dirname, '..', '..', '..'),
@@ -57,6 +62,25 @@ function resolveRepoRoot(raw, configFilePath) {
     }
     return repoRoot;
 }
+/**
+ * Разрешает массив плагинов из конфига:
+ * - строка → встроенный плагин из BUILTIN_PLUGINS
+ * - объект → используется как есть
+ */
+function resolvePlugins(raw) {
+    if (!raw || raw.length === 0)
+        return [];
+    return raw.map((p) => {
+        if (typeof p === 'string') {
+            const builtin = BUILTIN_PLUGINS[p];
+            if (!builtin) {
+                throw new Error(`[client-generator] Неизвестный плагин: "${p}". Доступные встроенные плагины: ${Object.keys(BUILTIN_PLUGINS).join(', ')}.`);
+            }
+            return builtin;
+        }
+        return p;
+    });
+}
 async function main() {
     const { configPath } = parseArgs(process.argv);
     let partial;
@@ -73,7 +97,12 @@ async function main() {
         partial = { ...cliFallbackConfig };
     }
     const repoRoot = resolveRepoRoot(partial, configFileResolved);
-    const cfg = (0, config_1.mergeConfig)({ ...partial, repoRoot });
+    const plugins = resolvePlugins(partial.plugins);
+    const cfg = (0, config_1.mergeConfig)({
+        ...partial,
+        repoRoot,
+        plugins,
+    });
     const tsConfigPath = path_1.default.join(cfg.repoRoot, cfg.backendTsconfig);
     if (!fs_1.default.existsSync(tsConfigPath)) {
         console.error(`[client-generator] Не найден tsconfig: ${tsConfigPath}`);

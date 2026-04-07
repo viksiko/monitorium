@@ -1,11 +1,13 @@
 /** @generated */
 
+import type { Role } from './Role';
+
 export interface UserResponseModel {
     id: string;
     name: string;
     email: string;
     phone: string | null;
-    role: unknown;
+    role: Role;
     isRepresentative: boolean;
     isVerified: boolean;
     isActive: boolean;

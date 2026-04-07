@@ -6,7 +6,7 @@ import type { UpdateTaskStageDtoModel } from './UpdateTaskStageDtoModel';
 export interface UpdateTaskDtoModel {
     desiredResolutionDate: string;
     possibleSolutions: string;
-    status: unknown;
+    status: TaskStatus;
     stages?: UpdateTaskStageDtoModel[];
     deletedStageIds?: string[];
 }

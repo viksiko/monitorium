@@ -1,7 +1,7 @@
 import fs from 'fs/promises';
 import path from 'path';
 import { Project } from 'ts-morph';
-import type { GeneratorConfig } from './config';
+import type { ExternalTypesCtx, GeneratorConfig } from './config';
 import { isBackendFile } from './ast-helpers';
 import { emitClientFile } from './emit-client';
 import { ModelRegistry, collectEnums, collectModelsFromNode, expandModels, topoSort, writeModels } from './models';
@@ -37,7 +37,6 @@ export async function generate(cfg: GeneratorConfig): Promise<GenerateResult> {
             const endpoints = parseControllerEndpoints(sf, cd, ctrlMeta);
             if (endpoints.length === 0) continue;
 
-            // Собрать все типы параметров и возвратов в реестр моделей
             for (const ep of endpoints) {
                 const method = cd.getMethod(ep.methodName);
                 if (!method) continue;
@@ -54,10 +53,37 @@ export async function generate(cfg: GeneratorConfig): Promise<GenerateResult> {
     const sorted = topoSort(registry);
     const enums = collectEnums(sorted, cfg);
 
+    // ---------------------------------------------------------------------------
+    // Plugin pipeline: resolveExternalTypes
+    // ---------------------------------------------------------------------------
+    const externalTypeAliases = new Map<string, string[]>();
+
+    if (cfg.plugins.length > 0) {
+        const ctx: ExternalTypesCtx = { cfg, project, sorted, externalTypeAliases };
+        for (const plugin of cfg.plugins) {
+            if (plugin.resolveExternalTypes) {
+                await plugin.resolveExternalTypes(ctx);
+            }
+        }
+    }
+
+    // ---------------------------------------------------------------------------
+    // Запись файлов
+    // ---------------------------------------------------------------------------
     const modelsDir = path.join(cfg.repoRoot, cfg.outputDir, 'models');
     const outDir = path.join(cfg.repoRoot, cfg.outputDir);
     await fs.mkdir(outDir, { recursive: true });
-    await writeModels(sorted, enums, registry, cfg, modelsDir);
+    await writeModels(sorted, enums, registry, cfg, modelsDir, externalTypeAliases);
+
+    // Plugin pipeline: afterWrite
+    if (cfg.plugins.length > 0) {
+        const ctx: ExternalTypesCtx = { cfg, project, sorted, externalTypeAliases };
+        for (const plugin of cfg.plugins) {
+            if (plugin.afterWrite) {
+                await plugin.afterWrite(outDir, cfg);
+            }
+        }
+    }
 
     const controllerFiles: string[] = [];
     const barrelExports: string[] = [];

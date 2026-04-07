@@ -40,12 +40,14 @@ exports.defaultGeneratorConfig = {
     modelSuffix: 'Model',
     strictTypes: false,
     builtinTypeNames: exports.defaultBuiltinTypeNames,
+    plugins: [],
 };
 function mergeConfig(partial) {
     return {
         ...exports.defaultGeneratorConfig,
         ...partial,
         builtinTypeNames: partial.builtinTypeNames ?? exports.defaultBuiltinTypeNames,
+        plugins: partial.plugins ?? [],
         repoRoot: path_1.default.resolve(partial.repoRoot),
     };
 }

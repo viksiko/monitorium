@@ -1,7 +1,31 @@
 import path from 'path';
+import type { Project } from 'ts-morph';
+import type { StructDecl } from './types';
 
 /** `bundle` — все модели и enum в `models/index.ts`. `split` — файл на каждое имя экспорта (`UserModel.ts`, `TokenType.ts`, …) + `index.ts` как barrel. */
 export type ModelsLayout = 'bundle' | 'split';
+
+/**
+ * Контекст, передаваемый плагинам на этапе разрешения внешних типов.
+ * Плагин записывает результаты в `externalTypeAliases`.
+ */
+export interface ExternalTypesCtx {
+    cfg: GeneratorConfig;
+    /** ts-morph Project бэкенда (для разрешения node_modules .d.ts через TypeScript) */
+    project: Project;
+    /** Модели после topoSort — плагин ищет в них внешние ссылки */
+    sorted: StructDecl[];
+    /** Карта: имя внешнего типа → строковые значения union. Плагины пишут сюда. */
+    externalTypeAliases: Map<string, string[]>;
+}
+
+export interface GeneratorPlugin {
+    name: string;
+    /** Разрешить внешние типы (Prisma enum и т.п.) в строковые union-значения */
+    resolveExternalTypes?(ctx: ExternalTypesCtx): Promise<void>;
+    /** Хук после записи всех сгенерированных файлов */
+    afterWrite?(outDir: string, cfg: GeneratorConfig): Promise<void>;
+}
 
 export interface GeneratorConfig {
     /** Монорепозиторий: абсолютный путь к корню */
@@ -33,6 +57,8 @@ export interface GeneratorConfig {
     strictTypes: boolean;
     /** Идентификаторы, не считающиеся пользовательскими типами при разборе ссылок */
     builtinTypeNames: Set<string>;
+    /** Плагины pipeline генератора. Порядок важен: каждый плагин вызывается последовательно. */
+    plugins: GeneratorPlugin[];
 }
 
 export const defaultBuiltinTypeNames = new Set([
@@ -70,6 +96,7 @@ export const defaultGeneratorConfig: Omit<GeneratorConfig, 'repoRoot'> = {
     modelSuffix: 'Model',
     strictTypes: false,
     builtinTypeNames: defaultBuiltinTypeNames,
+    plugins: [],
 };
 
 export function mergeConfig(partial: Partial<GeneratorConfig> & { repoRoot: string }): GeneratorConfig {
@@ -77,6 +104,7 @@ export function mergeConfig(partial: Partial<GeneratorConfig> & { repoRoot: stri
         ...defaultGeneratorConfig,
         ...partial,
         builtinTypeNames: partial.builtinTypeNames ?? defaultBuiltinTypeNames,
+        plugins: partial.plugins ?? [],
         repoRoot: path.resolve(partial.repoRoot),
     };
 }

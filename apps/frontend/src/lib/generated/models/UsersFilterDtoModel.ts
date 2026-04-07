@@ -1,6 +1,8 @@
 /** @generated */
 
+import type { Role } from './Role';
+
 export interface UsersFilterDtoModel {
-    role?: unknown;
+    role?: Role;
     districtId?: string;
 }

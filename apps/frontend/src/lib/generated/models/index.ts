@@ -19,6 +19,7 @@ export * from './RepresentativeProfileDtoModel';
 export * from './RepresentativeProfileModel';
 export * from './RepresentativeRequestDtoModel';
 export * from './ResetPasswordDtoModel';
+export * from './Role';
 export * from './SubscribeDtoModel';
 export * from './SubscriptionModel';
 export * from './TaskCommentModel';

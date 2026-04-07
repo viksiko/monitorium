@@ -19,4 +19,14 @@ module.exports = {
     modelsLayout: 'split',
     modelSuffix: 'Model',
     strictTypes: false,
+    /**
+     * Плагины pipeline генератора.
+     * Встроенные плагины указываются строкой:
+     *   'prisma' — дублирует Prisma enum-типы во фронтенд без зависимости на @prisma/client.
+     *              Читает значения из сгенерированного @prisma/client .d.ts (точные значения с @map),
+     *              при недоступности — fallback на apps/backend/prisma/schema.prisma.
+     *
+     * Для кастомных плагинов можно передать объект { name, resolveExternalTypes?, afterWrite? }.
+     */
+    plugins: ['prisma'],
 };

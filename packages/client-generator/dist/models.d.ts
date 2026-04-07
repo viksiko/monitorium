@@ -18,5 +18,5 @@ export declare function expandModels(registry: ModelRegistry, cfg: GeneratorConf
 /** Топологическая сортировка (зависимости — раньше) */
 export declare function topoSort(registry: ModelRegistry): StructDecl[];
 export declare function collectEnums(sorted: StructDecl[], cfg: GeneratorConfig): EnumDeclaration[];
-export declare function buildBundleContent(sorted: StructDecl[], enums: EnumDeclaration[], registry: ModelRegistry, cfg: GeneratorConfig): string;
-export declare function writeModels(sorted: StructDecl[], enums: EnumDeclaration[], registry: ModelRegistry, cfg: GeneratorConfig, modelsDir: string): Promise<void>;
+export declare function buildBundleContent(sorted: StructDecl[], enums: EnumDeclaration[], registry: ModelRegistry, cfg: GeneratorConfig, externalTypeAliases?: ReadonlyMap<string, string[]>): string;
+export declare function writeModels(sorted: StructDecl[], enums: EnumDeclaration[], registry: ModelRegistry, cfg: GeneratorConfig, modelsDir: string, externalTypeAliases?: ReadonlyMap<string, string[]>): Promise<void>;

@@ -28,7 +28,6 @@ async function generate(cfg) {
             const endpoints = (0, parse_1.parseControllerEndpoints)(sf, cd, ctrlMeta);
             if (endpoints.length === 0)
                 continue;
-            // Собрать все типы параметров и возвратов в реестр моделей
             for (const ep of endpoints) {
                 const method = cd.getMethod(ep.methodName);
                 if (!method)
@@ -43,10 +42,34 @@ async function generate(cfg) {
     (0, models_1.expandModels)(registry, cfg);
     const sorted = (0, models_1.topoSort)(registry);
     const enums = (0, models_1.collectEnums)(sorted, cfg);
+    // ---------------------------------------------------------------------------
+    // Plugin pipeline: resolveExternalTypes
+    // ---------------------------------------------------------------------------
+    const externalTypeAliases = new Map();
+    if (cfg.plugins.length > 0) {
+        const ctx = { cfg, project, sorted, externalTypeAliases };
+        for (const plugin of cfg.plugins) {
+            if (plugin.resolveExternalTypes) {
+                await plugin.resolveExternalTypes(ctx);
+            }
+        }
+    }
+    // ---------------------------------------------------------------------------
+    // Запись файлов
+    // ---------------------------------------------------------------------------
     const modelsDir = path_1.default.join(cfg.repoRoot, cfg.outputDir, 'models');
     const outDir = path_1.default.join(cfg.repoRoot, cfg.outputDir);
     await promises_1.default.mkdir(outDir, { recursive: true });
-    await (0, models_1.writeModels)(sorted, enums, registry, cfg, modelsDir);
+    await (0, models_1.writeModels)(sorted, enums, registry, cfg, modelsDir, externalTypeAliases);
+    // Plugin pipeline: afterWrite
+    if (cfg.plugins.length > 0) {
+        const ctx = { cfg, project, sorted, externalTypeAliases };
+        for (const plugin of cfg.plugins) {
+            if (plugin.afterWrite) {
+                await plugin.afterWrite(outDir, cfg);
+            }
+        }
+    }
     const controllerFiles = [];
     const barrelExports = [];
     for (const { classDecl, ctrlMeta, endpoints } of planned) {

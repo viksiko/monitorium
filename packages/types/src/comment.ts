@@ -11,6 +11,8 @@ export type Comment = {
     taskId?: string | null;
 }
 
+export type CommentOriginType = 'post' | 'task';
+
 export type PostComment = Comment & {
     postId: string;
 }

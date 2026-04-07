@@ -142,10 +142,25 @@ export function collectEnums(sorted: StructDecl[], cfg: GeneratorConfig): EnumDe
 }
 
 // ---------------------------------------------------------------------------
-// Генерация исходника одного интерфейса
+// Вспомогательные функции генерации исходника
 // ---------------------------------------------------------------------------
 
-function buildInterfaceSrc(decl: StructDecl, registry: ModelRegistry, cfg: GeneratorConfig): string {
+/** Генерация строки `export type Foo = "A" | "B";` для внешнего типа */
+function externalTypeAliasSrc(name: string, values: string[]): string {
+    const union = values.map((v) => JSON.stringify(v)).join(' | ');
+    return `export type ${name} = ${union};`;
+}
+
+/**
+ * Генерация исходника одного интерфейса.
+ * `externalAliases` — типы, разрешённые плагинами (не заменяются на `unknown`).
+ */
+function buildInterfaceSrc(
+    decl: StructDecl,
+    registry: ModelRegistry,
+    cfg: GeneratorConfig,
+    externalAliases: ReadonlyMap<string, string[]>,
+): string {
     const iface = registry.modelName.get(decl.getName()!);
     if (!iface) return '';
     const lines: string[] = [`export interface ${iface} {`];
@@ -153,10 +168,11 @@ function buildInterfaceSrc(decl: StructDecl, registry: ModelRegistry, cfg: Gener
         const opt = prop.hasQuestionToken() ? '?' : '';
         let mapped = registry.mapType(prop.getTypeNode()?.getText() ?? 'unknown');
         for (const r of collectTypeRefNames(prop.getTypeNode())) {
+            if (externalAliases.has(r)) continue;
             const resolved = resolveStruct(r, decl.getSourceFile());
             const externalFile = resolved?.getSourceFile().getFilePath();
-            const prismaByImport = !resolved && isPrismaModule(findImportOf(decl.getSourceFile(), r)?.module ?? '');
-            if ((externalFile && isInNodeModules(externalFile)) || prismaByImport) {
+            const isExternalImport = !resolved && isPrismaModule(findImportOf(decl.getSourceFile(), r)?.module ?? '');
+            if ((externalFile && isInNodeModules(externalFile)) || isExternalImport) {
                 if (cfg.strictTypes) throw new Error(`[client-generator] Внешний тип "${r}" в ${decl.getName()}.${prop.getName()} (strictTypes=true)`);
                 mapped = mapped.replace(new RegExp(`\\b${escapeRegExp(r)}\\b`, 'g'), 'unknown');
             }
@@ -200,7 +216,13 @@ function sharedImportLines(shared: Map<string, Set<string>>): string[] {
 // Запись моделей (bundle)
 // ---------------------------------------------------------------------------
 
-export function buildBundleContent(sorted: StructDecl[], enums: EnumDeclaration[], registry: ModelRegistry, cfg: GeneratorConfig): string {
+export function buildBundleContent(
+    sorted: StructDecl[],
+    enums: EnumDeclaration[],
+    registry: ModelRegistry,
+    cfg: GeneratorConfig,
+    externalTypeAliases: ReadonlyMap<string, string[]> = new Map(),
+): string {
     const shared = new Map<string, Set<string>>();
     for (const decl of sorted) {
         for (const [mod, set] of sharedImportsForStruct(decl, cfg)) {
@@ -211,8 +233,11 @@ export function buildBundleContent(sorted: StructDecl[], enums: EnumDeclaration[
     const parts: string[] = ['/** Сгенерировано @monorepo/client-generator — не редактировать вручную */', ''];
     const imp = sharedImportLines(shared);
     if (imp.length) parts.push(...imp, '');
+    for (const [name, values] of [...externalTypeAliases.entries()].sort(([a], [b]) => a.localeCompare(b))) {
+        parts.push(externalTypeAliasSrc(name, values), '');
+    }
     for (const en of enums) parts.push(enumSrc(en), '');
-    for (const decl of sorted) parts.push(buildInterfaceSrc(decl, registry, cfg), '');
+    for (const decl of sorted) parts.push(buildInterfaceSrc(decl, registry, cfg, externalTypeAliases), '');
     return parts.join('\n');
 }
 
@@ -220,7 +245,13 @@ export function buildBundleContent(sorted: StructDecl[], enums: EnumDeclaration[
 // Запись моделей (split)
 // ---------------------------------------------------------------------------
 
-function buildSplitFileSrc(decl: StructDecl, registry: ModelRegistry, cfg: GeneratorConfig, enumNames: Set<string>): string {
+function buildSplitFileSrc(
+    decl: StructDecl,
+    registry: ModelRegistry,
+    cfg: GeneratorConfig,
+    enumNames: Set<string>,
+    externalTypeAliases: ReadonlyMap<string, string[]>,
+): string {
     const iface = registry.modelName.get(decl.getName()!)!;
     const shared = sharedImportsForStruct(decl, cfg);
     const sibling = new Set<string>();
@@ -233,6 +264,8 @@ function buildSplitFileSrc(decl: StructDecl, registry: ModelRegistry, cfg: Gener
             if (registry.has(r)) {
                 const exp = registry.modelName.get(r)!;
                 if (exp !== iface) sibling.add(exp);
+            } else if (externalTypeAliases.has(r)) {
+                sibling.add(r);
             } else if (enumNames.has(r)) {
                 sibling.add(r);
             }
@@ -243,7 +276,7 @@ function buildSplitFileSrc(decl: StructDecl, registry: ModelRegistry, cfg: Gener
     lines.push(...sharedImportLines(shared));
     for (const x of [...sibling].sort()) lines.push(`import type { ${x} } from './${x}';`);
     if (lines[lines.length - 1] !== '') lines.push('');
-    lines.push(buildInterfaceSrc(decl, registry, cfg), '');
+    lines.push(buildInterfaceSrc(decl, registry, cfg, externalTypeAliases), '');
     return lines.join('\n');
 }
 
@@ -257,30 +290,49 @@ export async function writeModels(
     registry: ModelRegistry,
     cfg: GeneratorConfig,
     modelsDir: string,
+    externalTypeAliases: ReadonlyMap<string, string[]> = new Map(),
 ): Promise<void> {
     await fs.mkdir(modelsDir, { recursive: true });
-    // Очистить старые .ts
     for (const f of await fs.readdir(modelsDir).catch(() => [] as string[])) {
         if (f.endsWith('.ts')) await fs.unlink(path.join(modelsDir, f)).catch(() => undefined);
     }
 
     if (cfg.modelsLayout === 'bundle') {
-        await fs.writeFile(path.join(modelsDir, 'index.ts'), buildBundleContent(sorted, enums, registry, cfg), 'utf-8');
+        await fs.writeFile(
+            path.join(modelsDir, 'index.ts'),
+            buildBundleContent(sorted, enums, registry, cfg, externalTypeAliases),
+            'utf-8',
+        );
         return;
     }
 
     // split
     const enumNames = new Set(enums.map((e) => e.getName()!).filter(Boolean));
+    const externalNames = new Set(externalTypeAliases.keys());
+
+    // Записать файл для каждого внешнего типа-алиаса (Prisma enum и т.п.)
+    for (const [name, values] of [...externalTypeAliases.entries()].sort(([a], [b]) => a.localeCompare(b))) {
+        await fs.writeFile(
+            path.join(modelsDir, `${name}.ts`),
+            `/** @generated */\n\n${externalTypeAliasSrc(name, values)}\n`,
+            'utf-8',
+        );
+    }
     for (const en of enums) {
         await fs.writeFile(path.join(modelsDir, `${en.getName()!}.ts`), `/** @generated */\n\n${enumSrc(en)}\n`, 'utf-8');
     }
     for (const decl of sorted) {
         const iface = registry.modelName.get(decl.getName()!);
         if (!iface) continue;
-        await fs.writeFile(path.join(modelsDir, `${iface}.ts`), buildSplitFileSrc(decl, registry, cfg, enumNames), 'utf-8');
+        await fs.writeFile(
+            path.join(modelsDir, `${iface}.ts`),
+            buildSplitFileSrc(decl, registry, cfg, enumNames, externalTypeAliases),
+            'utf-8',
+        );
     }
 
     const allExports = [
+        ...externalNames,
         ...enumNames,
         ...sorted.map((d) => registry.modelName.get(d.getName()!)).filter((x): x is string => Boolean(x)),
     ];
