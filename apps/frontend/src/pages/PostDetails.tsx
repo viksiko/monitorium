@@ -14,11 +14,18 @@ import RepresantiveProfileSidebar from '@/components/representative/Represantive
 import { Avatar } from '@/components/ui/avatar';
 import DashboardBackButton from '@/components/ui/dashboardBackButton';
 import { useGetPostById } from '@/lib/query/post.query';
+import { Author, AuthorRoleIcon } from '@/components/common/Author';
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { CommentsSection } from '@/components/comment/CommentsSection';
+import { CommentComponent } from '@/components/comment/CommentComponent';
 
 const PostDetails = () => {
     const accessToken = useAuthStore((state) => state.accessToken);
     const { postId } = useParams<{ postId: string }>();
     const { data: post, isLoading, isPending, error } = useGetPostById(postId);
+
+    const [displayComments, setDisplayComments] = useState(false);
 
     if (isLoading || isPending) {
         return (
@@ -57,16 +64,16 @@ const PostDetails = () => {
                                     className="space-y-6 mt-0">
                                     <Card className="honor-card">
                                         <div className="flex items-center mb-4">
-                                            <Avatar className="h-10 w-10 mr-3">
-                                                <User size={20} />
-                                            </Avatar>
-                                            <div>
-                                                <p className="font-medium">{post.author.name}</p>
+                                            <Author size="large">
+                                                <Author.Name name={post.author.name}>
+                                                    <AuthorRoleIcon role={'REPRESENTATIVE'} />
+                                                </Author.Name>
                                                 <p className="text-xs text-honor-darkGray">
                                                     {post.author.representativeProfile.position}
                                                 </p>
-                                            </div>
-                                            <div className="ml-auto text-sm text-honor-darkGray">
+                                            </Author>
+
+                                            <div className="ml-auto text-sm flex items-center text-honor-darkGray">
                                                 <Calendar
                                                     size={14}
                                                     className="inline mr-1"
@@ -77,33 +84,37 @@ const PostDetails = () => {
 
                                         <h1 className="text-2xl font-bold mb-4">{post.title}</h1>
 
-                                        {/* // !!! не безопасно */}
-                                        <div
-                                            className="prose max-w-none mb-6"
-                                            dangerouslySetInnerHTML={{
-                                                __html: post.content,
-                                            }}
-                                        />
+                                        <p className="max-w-none mb-6">{post.content}</p>
 
-                                        <div className="flex justify-between items-center pt-4 border-t">
-                                            <div className="flex space-x-4">
-                                                <button
-                                                    className="flex items-center space-x-1 text-honor-darkGray hover:text-honor-blue"
-                                                    onClick={handleLike}>
-                                                    <ThumbsUp size={18} />
-                                                    <span>{post.likesCount}</span>
-                                                </button>
-                                                <div className="flex items-center space-x-1 text-honor-darkGray">
-                                                    <MessageSquare size={18} />
-                                                    {/* <span>{post.comments}</span> */}
-                                                </div>
-                                            </div>
-                                            {/* <button
-                                                    className="text-honor-darkGray hover:text-honor-blue"
-                                                    onClick={handleShare}>
-                                                    <Share2 size={18} />
-                                                </button> */}
+                                        <div className="flex space-x-4 items-center pt-4 border-t">
+                                            <Button
+                                                className="flex items-center group bg-white hover:bg-slate-100"
+                                                onClick={handleLike}>
+                                                <ThumbsUp
+                                                    size={20}
+                                                    className="text-honor-darkGray group-hover:text-honor-blue"
+                                                />
+                                                <span className="text-honor-darkGray group-hover:text-honor-blue">
+                                                    {post.likesCount}
+                                                </span>
+                                            </Button>
+                                            <Button
+                                                className={`flex items-center group ${displayComments ? 'bg-slate-100' : 'bg-white'} hover:bg-slate-100`}
+                                                onClick={() => setDisplayComments(!displayComments)}>
+                                                <MessageSquare
+                                                    size={20}
+                                                    className="text-honor-darkGray group-hover:text-honor-blue"
+                                                />
+                                            </Button>
                                         </div>
+                                        {displayComments && (
+                                            <CommentsSection
+                                                id={post.id}
+                                                type={'post'}
+                                                className="mt-4">
+                                                <CommentsSection.List CommentPropComponent={CommentComponent} />
+                                            </CommentsSection>
+                                        )}
                                     </Card>
                                 </TabsContent>
                             </Tabs>
