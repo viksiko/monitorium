@@ -16,14 +16,14 @@ const sizeStyles: Record<
 > = {
     tiny: {
         rootGap: 'gap-0.5',
-        nameGap: 'gap-0.5',
+        nameGap: 'gap-1',
         nameText: 'text-xs font-medium',
         iconPx: 12,
         iconBox: 'w-3 h-3 shrink-0',
     },
     small: {
         rootGap: 'gap-0.5',
-        nameGap: 'gap-0.5',
+        nameGap: 'gap-1',
         nameText: 'text-sm font-medium',
         iconPx: 14,
         iconBox: 'w-3.5 h-3.5 shrink-0',

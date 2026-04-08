@@ -17,15 +17,14 @@ import { useGetPostById } from '@/lib/query/post.query';
 import { Author, AuthorRoleIcon } from '@/components/common/Author';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { CommentsSection } from '@/components/comment/CommentsSection';
-import { CommentComponent } from '@/components/comment/CommentComponent';
+import { PostCommentsSection } from '@/components/comment/PostCommentsSection';
 
 const PostDetails = () => {
     const accessToken = useAuthStore((state) => state.accessToken);
     const { postId } = useParams<{ postId: string }>();
     const { data: post, isLoading, isPending, error } = useGetPostById(postId);
 
-    const [displayComments, setDisplayComments] = useState(false);
+    const [commentsVisible, setDisplayComments] = useState(false);
 
     if (isLoading || isPending) {
         return (
@@ -99,21 +98,20 @@ const PostDetails = () => {
                                                 </span>
                                             </Button>
                                             <Button
-                                                className={`flex items-center group ${displayComments ? 'bg-slate-100' : 'bg-white'} hover:bg-slate-100`}
-                                                onClick={() => setDisplayComments(!displayComments)}>
+                                                className={`flex items-center group ${commentsVisible ? 'bg-slate-100' : 'bg-white'} hover:bg-slate-100`}
+                                                onClick={() => setDisplayComments(!commentsVisible)}>
                                                 <MessageSquare
                                                     size={20}
                                                     className="text-honor-darkGray group-hover:text-honor-blue"
                                                 />
                                             </Button>
                                         </div>
-                                        {displayComments && (
-                                            <CommentsSection
-                                                id={post.id}
-                                                type={'post'}
-                                                className="mt-4">
-                                                <CommentsSection.List CommentPropComponent={CommentComponent} />
-                                            </CommentsSection>
+                                        {commentsVisible && (
+                                            <PostCommentsSection
+                                                key={post.id}
+                                                postId={post.id}
+                                                className="mt-4"
+                                            />
                                         )}
                                     </Card>
                                 </TabsContent>

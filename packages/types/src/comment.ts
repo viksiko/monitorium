@@ -38,3 +38,16 @@ export function isPostComment(comment: Comment): comment is PostComment {
 export function isTaskComment(comment: Comment): comment is TaskComment {
     return 'taskId' in comment && comment.taskId !== null;
 }
+
+/**
+ * Проверяет содержимое комментария на пустоту
+ * @param content - Содержимое комментария
+ * @returns true, если содержимое комментария не пустое, false в противном случае
+ */
+export function validateCommentContent(content: string): boolean {
+    const trimmedContent = content.trim();
+    if (trimmedContent.length === 0) {
+        return false;
+    }
+    return true;
+}

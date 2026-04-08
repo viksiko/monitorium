@@ -1,37 +1,36 @@
-import { CreateCommentDtoModel, EditCommentDtoModel, DeleteCommentDtoModel } from '@/lib/generated/models';
 import { useGetComments } from '@/lib/query/comment.query';
 import { CommentOriginType } from '@monorepo/types';
-import { createContext, useContext, useState } from 'react';
-import { CommentSectionContext, useCommentSectionContext } from './CommentsSectionContext';
-import { CommentComponent } from './CommentComponent';
+import { useRef } from 'react';
+import { CommentSectionContext, CommentSectionFormState, useCommentSectionContext } from './CommentsSectionContext';
 import { Comment } from '@monorepo/types';
 import { cn } from '@/lib/utils';
-import { Input } from '../ui/input';
+import { create, StoreApi, UseBoundStore } from 'zustand';
+import { CommentsForm, CommentsFormInput, CommentsFormSendButton } from './CommentsSectionForm.tsx';
 
 // ЗДЕСЬ РАСПОЛОЖЕНЫ КОМПОНЕНТЫ ДЛЯ РАБОТЫ С КОММЕНТАРИЯМИ
 
 export interface CommentsSectionProps {
-    id: string;
+    originId: string;
     type: CommentOriginType;
     children: React.ReactNode;
     className?: string;
 }
 
-export const CommentsSectionRoot = ({ id, type, children, className }: CommentsSectionProps) => {
-    const { data: comments } = useGetComments(id, type);
+export const CommentsSectionRoot = ({ originId, type, children, className }: CommentsSectionProps) => {
+    const storeRef = useRef<UseBoundStore<StoreApi<CommentSectionFormState>> | null>(null);
+    if (!storeRef.current) {
+        storeRef.current = create<CommentSectionFormState>((set) => ({
+            content: '',
+            changeContent: (content) => set({ content }),
+            clearContent: () => set({ content: '' }),
+        }));
+    }
+    const formStore = storeRef.current;
 
     const context: CommentSectionContext = {
-        originId: id,
+        originId,
         type,
-        send: (dto: CreateCommentDtoModel) => {
-            // comment.createComment(dto);
-        },
-        edit: (dto: EditCommentDtoModel) => {
-            // comment.editComment(dto);
-        },
-        remove: (dto: DeleteCommentDtoModel) => {
-            // comment.deleteComment(dto);
-        },
+        formStore,
     };
 
     return (
@@ -43,9 +42,9 @@ export const CommentsSectionRoot = ({ id, type, children, className }: CommentsS
 
 export interface CommentsSectionListProps {
     className?: string;
-    CommentPropComponent: React.ComponentType<{ comment: Comment }>;
+    renderComment: (comment: Comment) => React.ReactNode;
 }
-export const CommentsSectionList = ({ className, CommentPropComponent }: CommentsSectionListProps) => {
+export const CommentsSectionList = ({ className, renderComment }: CommentsSectionListProps) => {
     const { originId, type } = useCommentSectionContext();
     const { data: comments, isLoading } = useGetComments(originId, type);
 
@@ -53,35 +52,12 @@ export const CommentsSectionList = ({ className, CommentPropComponent }: Comment
 
     if (!comments) return <p>Комментариев нет</p>;
 
-    return (
-        <div className={cn('flex-col gap-2', className)}>
-            {comments.map((comment) => (
-                <CommentPropComponent
-                    key={comment.id}
-                    comment={comment}
-                />
-            ))}
-        </div>
-    );
-};
-
-export interface CommentsFormProps {
-    className?: string;
-    children: React.ReactNode;
-}
-
-export const CommentsForm = ({ className, children }: CommentsFormProps) => {
-    return { children };
-};
-
-export interface CommentsFormInputProps {
-    className?: string;
-    children: React.ReactNode;
-}
-export const CommentsFormInput = ({ className, children }: CommentsFormInputProps) => {
-    return <Input className={className} />;
+    return <div className={cn('flex-col gap-2', className)}>{comments.map((comment) => renderComment(comment))}</div>;
 };
 
 export const CommentsSection = Object.assign(CommentsSectionRoot, {
     List: CommentsSectionList,
+    Form: CommentsForm,
+    Input: CommentsFormInput,
+    SendButton: CommentsFormSendButton,
 });

@@ -2,13 +2,18 @@ import { CreateCommentDtoModel, EditCommentDtoModel, DeleteCommentDtoModel } fro
 import { CommentOriginType } from '@monorepo/types';
 import { createContext, useContext } from 'react';
 import { Comment } from '@monorepo/types';
+import { create, StoreApi, UseBoundStore } from 'zustand';
+
+export interface CommentSectionFormState {
+    content: string;
+    changeContent: (content: string) => void;
+    clearContent: () => void;
+}
 
 export interface CommentSectionContext {
     originId: string;
     type: CommentOriginType;
-    send: (dto: CreateCommentDtoModel) => void;
-    edit: (dto: EditCommentDtoModel) => void;
-    remove: (dto: DeleteCommentDtoModel) => void;
+    formStore: UseBoundStore<StoreApi<CommentSectionFormState>>;
 }
 
 export const CommentSectionContext = createContext<CommentSectionContext | null>(null);
