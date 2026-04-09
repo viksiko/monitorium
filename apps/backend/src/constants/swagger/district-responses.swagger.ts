@@ -98,6 +98,37 @@ export const GET_ALL_DISTRICTS_SUCCESS_RESPONSE: ApiResponseOptions = {
     },
 };
 
+export const GET_SHORT_STATS_DISTRICTS: ApiResponseOptions = {
+    status: 200,
+    description: 'Получить краткую информацию по округу',
+    schema: {
+        example: {
+            success: true,
+            statusCode: 200,
+            data: [
+                {
+                    name: 'Округ №1',
+                    mapId: 82,
+                    tasksTotal: 0,
+                    tasksCompleted: 0,
+                },
+                {
+                    name: 'Округ №2',
+                    mapId: 83,
+                    tasksTotal: 0,
+                    tasksCompleted: 0,
+                },
+                {
+                    name: 'Округ №3',
+                    mapId: 84,
+                    tasksTotal: 0,
+                    tasksCompleted: 0,
+                },
+            ],
+        },
+    },
+};
+
 export const DISTRICT_NOT_FOUND_RESPONSE: ApiResponseOptions = {
     status: 404,
     description: 'Округ не найден',

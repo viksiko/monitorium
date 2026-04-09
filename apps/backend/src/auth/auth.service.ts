@@ -8,7 +8,8 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import { Role } from '@prisma/client';
+import { BalanceTransactionType, Prisma, Role } from '@prisma/client';
+import { BalanceService } from '@src/balance/balance.service';
 import {
     AUTHORIZATION_REQUIRED,
     LOGOUT_SUCCESS_MSG,
@@ -19,6 +20,7 @@ import {
     USER_NOT_FOUND,
     VERIFICATION_MESSAGES,
 } from '@src/constants/api-messages.constants';
+import { TOKEN_PARAMS } from '@src/constants/tokens-params';
 import { logger } from '@src/logger/winston.logger';
 import { User } from '@src/types/user';
 import { UserService } from '@src/user/user.service';
@@ -39,13 +41,14 @@ import { TokenSevice } from './services/token.service';
 @Injectable()
 export class AuthService {
     constructor(
-        private userService: UserService,
-        private prisma: PrismaService,
-        private jwtService: JwtService,
-        private configService: ConfigService,
-        private tokenService: TokenSevice,
-        private cookieTokenService: CookieTokenService,
-        private mailService: MailService,
+        private readonly userService: UserService,
+        private readonly prisma: PrismaService,
+        private readonly jwtService: JwtService,
+        private readonly configService: ConfigService,
+        private readonly tokenService: TokenSevice,
+        private readonly cookieTokenService: CookieTokenService,
+        private readonly mailService: MailService,
+        private readonly balanceService: BalanceService,
     ) {}
 
     // Регистрация
@@ -268,30 +271,53 @@ export class AuthService {
         const { userId, code } = dto;
 
         try {
+            // Ищем verification токен пользователя
             const token = await this.prisma.token.findFirst({
                 where: { userId, type: 'VERIFY_EMAIL' },
             });
 
             if (!token) throw new BadRequestException(VERIFICATION_MESSAGES.CODE_NOT_FOUND);
 
+            // Проверяем срок действия токена
             if (token.exp < new Date()) throw new BadRequestException(VERIFICATION_MESSAGES.CODE_EXPIRED);
 
+            // Хешируем введённый код и сравниваем с сохранённым
             const hashed = this.tokenService.hashToken(code, this.configService.get('JWT_VERIFY_SALT'));
             if (hashed !== token.hashedToken) throw new BadRequestException(VERIFICATION_MESSAGES.CODE_INVALID);
 
-            const user = await this.prisma.user.findUnique({
-                where: { id: userId },
-            });
-            if (!user) throw new NotFoundException(USER_NOT_FOUND);
-
-            await this.prisma.$transaction(async (tx) => {
-                const updatedUser = await tx.user.update({
+            // Выполняем критические операции в транзакции
+            await this.prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+                const user = await this.prisma.user.findUnique({
                     where: { id: userId },
-                    data: { isVerified: true, isActive: user.role === Role.VOTER },
+                });
+                if (!user) throw new NotFoundException(USER_NOT_FOUND);
+
+                if (user.isVerified) {
+                    throw new BadRequestException('Already verified');
+                }
+
+                await tx.user.update({
+                    where: { id: userId },
+                    data: {
+                        isVerified: true,
+                        isActive: user.role === Role.VOTER,
+                    },
                 });
 
-                return updatedUser;
+                // Начисляем бонус новым пользователям (если VOTER)
+                if (user.role === Role.VOTER) {
+                    await this.balanceService.depositBalanceTx(
+                        tx,
+                        userId,
+                        TOKEN_PARAMS.REGISTRATION_PRICE,
+                        BalanceTransactionType.REGISTRATION_BONUS,
+                    );
+                }
+
+                // Удаляем токен верификации
+                await this.tokenService.deleteTokenById(tx, token.id);
             });
+
             return { message: REGISTRATION_CONFIRMED_MESSAGE };
         } catch (error) {
             logger.error('Failed to verify user code', {

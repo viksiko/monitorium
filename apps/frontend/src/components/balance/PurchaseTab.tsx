@@ -1,34 +1,44 @@
-import React from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { CreditCard } from 'lucide-react';
+import { CreditCard, Loader2 } from 'lucide-react';
+import { TOKEN_PARAMS } from '@/constants/tokens-params';
 
 interface PurchaseTabProps {
     selectedAmount: number | null;
     setSelectedAmount: (amount: number | null) => void;
     handlePurchase: () => void;
+    isLoading: boolean;
 }
 
-const PurchaseTab: React.FC<PurchaseTabProps> = ({
-    selectedAmount,
-    setSelectedAmount,
-    handlePurchase,
-}) => {
+const PurchaseTab: React.FC<PurchaseTabProps> = ({ selectedAmount, setSelectedAmount, handlePurchase, isLoading }) => {
+    const handleAmountChange = (value: string) => {
+        if (!value) {
+            setSelectedAmount(null);
+            return;
+        }
+
+        let num = parseInt(value);
+
+        if (isNaN(num)) return;
+
+        if (num > TOKEN_PARAMS.MAX) num = TOKEN_PARAMS.MAX;
+        if (num < TOKEN_PARAMS.MIN) num = TOKEN_PARAMS.MIN;
+
+        setSelectedAmount(num);
+    };
+
     return (
         <Card className="honor-card mb-6">
             <div className="p-6">
-                <h2 className="text-xl font-bold mb-4">
-                    Пополнение баланса билетов
-                </h2>
+                <h2 className="text-xl font-bold mb-4">Пополнение баланса билетов</h2>
                 <p className="text-honor-darkGray mb-6">
-                    Выберите количество билетов для покупки. 10 билетов = 100
-                    рублей.
+                    Выберите количество билетов для покупки. 10 билетов = 100 рублей.
                 </p>
 
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-6">
-                    {[10, 20, 50, 100, 200, 500].map((amount) => (
+                    {TOKEN_PARAMS.TOP_UP_AMOUNTS.map((amount) => (
                         <button
                             key={amount}
                             className={`border rounded-xl p-4 text-center transition-colors ${
@@ -38,12 +48,7 @@ const PurchaseTab: React.FC<PurchaseTabProps> = ({
                             }`}
                             onClick={() => setSelectedAmount(amount)}>
                             <p className="font-bold text-lg">{amount}</p>
-                            <p
-                                className={
-                                    selectedAmount === amount
-                                        ? 'text-white/80'
-                                        : 'text-honor-darkGray'
-                                }>
+                            <p className={selectedAmount === amount ? 'text-white/80' : 'text-honor-darkGray'}>
                                 билетов
                             </p>
                             <p
@@ -58,23 +63,21 @@ const PurchaseTab: React.FC<PurchaseTabProps> = ({
                     <Label
                         htmlFor="custom-amount"
                         className="block mb-2">
-                        Или введите своё количество
+                        Или введите своё количество билетов
                     </Label>
                     <div className="flex">
                         <Input
                             id="custom-amount"
                             type="number"
                             min="1"
+                            max="999999"
                             placeholder="Количество билетов"
                             className="honor-input"
-                            onChange={(e) =>
-                                setSelectedAmount(
-                                    parseInt(e.target.value) || null,
-                                )
-                            }
+                            onChange={(e) => handleAmountChange(e.target.value)}
+                            value={selectedAmount ?? ''}
                         />
-                        <div className="ml-4 py-2 px-4 bg-gray-100 rounded-xl flex items-center">
-                            <span className="text-sm text-honor-darkGray">
+                        <div className="flex justify-center ml-4 py-2 px-4 bg-gray-100 rounded-xl flex items-center w-[130px]">
+                            <span className="text-honor-darkGray font-bold">
                                 {selectedAmount ? selectedAmount * 10 : 0} ₽
                             </span>
                         </div>
@@ -118,9 +121,9 @@ const PurchaseTab: React.FC<PurchaseTabProps> = ({
 
                 <Button
                     className="w-full honor-button-primary"
-                    disabled={!selectedAmount}
+                    disabled={!selectedAmount || isLoading}
                     onClick={handlePurchase}>
-                    Перейти к оплате
+                    {isLoading ? <Loader2 className="h-8 w-8 animate-spin" /> : 'Пополнить баланс'}
                 </Button>
             </div>
         </Card>

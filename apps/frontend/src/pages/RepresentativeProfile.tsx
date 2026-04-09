@@ -46,27 +46,29 @@ const RepresentativeProfile = () => {
         fetchRepresentative();
     }, []);
 
-    const handleLike = (type: string, id: number) => {
-        const key = `${type}-${id}`;
-        if (liked[key]) return;
+    // const handleLike = (type: string, id: number) => {
+    //     const key = `${type}-${id}`;
+    //     if (liked[key]) return;
 
-        setLiked({ ...liked, [key]: true });
-        toast({
-            title: 'Реакция учтена',
-            description: 'Вы оценили публикацию положительно',
-            variant: 'default',
-        });
-    };
+    //     setLiked({ ...liked, [key]: true });
+    //     toast({
+    //         title: 'Реакция учтена',
+    //         description: 'Вы оценили публикацию положительно',
+    //         variant: 'default',
+    //     });
+    // };
 
     const handleSubscribe = async () => {
         if (isSubscribed) return;
 
         try {
-            await api.post('/api/v1/subscriptions', {
+            const response = await api.post('/api/v1/subscriptions', {
                 representativeId: representative.id,
             });
 
-            await refreshUser();
+            if (response) {
+                await refreshUser();
+            }
 
             toast({
                 title: 'Подписка оформлена',
@@ -84,13 +86,13 @@ const RepresentativeProfile = () => {
         }
     };
 
-    const handleSendMessage = () => {
-        toast({
-            title: 'Сообщение',
-            description: 'Для отправки сообщения нужно 10 билетов',
-            variant: 'default',
-        });
-    };
+    // const handleSendMessage = () => {
+    //     toast({
+    //         title: 'Сообщение',
+    //         description: 'Для отправки сообщения нужно 10 билетов',
+    //         variant: 'default',
+    //     });
+    // };
 
     const isSubscribed =
         representative && user?.subscriptions?.some((sub) => sub.representative.id === representative.id);
@@ -122,7 +124,7 @@ const RepresentativeProfile = () => {
                     <div className="lg:col-span-1">
                         <div className="honor-card mb-6">
                             <div className="flex flex-col items-center mb-6">
-                                <Avatar className="h-24 w-24 mb-4">
+                                <Avatar className="justify-center items-centerh-24 w-24 mb-4">
                                     <User size={48} />
                                 </Avatar>
                                 <h1 className="text-2xl font-bold text-center">{representative.name}</h1>
@@ -211,7 +213,7 @@ const RepresentativeProfile = () => {
                                     className="honor-button-primary"
                                     onClick={handleSubscribe}
                                     disabled={isSubscribed}>
-                                    {isSubscribed ? 'Вы подписаны' : 'Подписаться'}
+                                    {isSubscribed ? 'Вы подписаны' : 'Подписаться (+3 билета)'}
                                 </Button>
                                 {/* 
                                 {user.subscriptions.length > 0 && (

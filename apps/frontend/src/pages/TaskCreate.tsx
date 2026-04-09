@@ -25,12 +25,13 @@ import { FormError, formInputClass } from '@/components/ui/formInputClass';
 import { add } from 'date-fns';
 import { useAuth } from '@/context/AuthContext';
 import { api } from '@/lib/api';
+import { TOKEN_PARAMS } from '@/constants/tokens-params';
 
 const TaskCreate = () => {
     const accessToken = useAuthStore((state) => state.accessToken);
     const { toast } = useToast();
     const [stages, setStages] = useState([{ title: '', date: '' }]);
-    const { user } = useAuth();
+    const { user, refreshUser } = useAuth();
 
     const {
         register,
@@ -68,6 +69,16 @@ const TaskCreate = () => {
     };
 
     const onSubmit = async (data) => {
+        if (user.voterProfile.balance < TOKEN_PARAMS.TASK_CREATION_PRICE) {
+            toast({
+                title: 'Ошибка',
+                description: 'Недостаточно средств на балансе',
+                variant: 'destructive',
+            });
+
+            return;
+        }
+
         const payload = {
             assigneeId: data.assigneeId,
             title: data.title,
@@ -84,6 +95,9 @@ const TaskCreate = () => {
 
         try {
             await api.post('/api/v1/tasks', payload);
+
+            // для оновления баланса
+            await refreshUser();
 
             toast({
                 title: 'Задание создано',
@@ -328,8 +342,10 @@ const TaskCreate = () => {
 
                         <Button
                             type="submit"
-                            className="w-full honor-button-primary">
-                            Создать задание (10 билетов)
+                            className="w-full honor-button-primary"
+                            // disabled={!user || user.voterProfile.balance < TOKEN_PARAMS.TASK_CREATION_PRICE}
+                        >
+                            Создать задание ({TOKEN_PARAMS.TASK_CREATION_PRICE} билетов)
                         </Button>
                     </form>
                 </div>

@@ -16,9 +16,10 @@ import Loader from '@/components/ui/loader';
 import { formatDate, formatTime } from '@/utils/date';
 import DashboardBackButton from '@/components/ui/dashboardBackButton';
 import { RegisterRoleEnum } from '@monorepo/types';
+import { TOKEN_PARAMS } from '@/constants/tokens-params';
 
 const MessageCenter = () => {
-    const { user } = useAuth();
+    const { user, refreshUser } = useAuth();
     const { toast } = useToast();
     const [selectedDialog, setSelectedDialog] = useState<Dialog | null>(null);
     const [messageText, setMessageText] = useState('');
@@ -51,7 +52,7 @@ const MessageCenter = () => {
         };
 
         fetchDialogs();
-    }, []); // Зависимости пустые, выполнится только один раз
+    }, []);
 
     // автоматическое обновление сообщений каждые 5 секунд
     useEffect(() => {
@@ -106,6 +107,16 @@ const MessageCenter = () => {
     const handleSendMessage = async () => {
         if (!messageText.trim()) return;
 
+        if (user.voterProfile.balance < TOKEN_PARAMS.MESSAGE_CREATION_PRICE) {
+            toast({
+                title: 'Ошибка',
+                description: 'Недостаточно средств на балансе',
+                variant: 'destructive',
+            });
+
+            return;
+        }
+
         try {
             if (selectedDialog.id) {
                 // обычная отправка когда диалог уже есть
@@ -114,6 +125,11 @@ const MessageCenter = () => {
                     url: `/api/v1/dialogs/${selectedDialog.id}/messages`,
                     data: { text: messageText },
                 });
+
+                // для оновления баланса
+                if (newMessage) {
+                    await refreshUser();
+                }
 
                 setMessages((prev) => [...prev, newMessage]);
 
@@ -135,6 +151,12 @@ const MessageCenter = () => {
                     url: `/api/v1/dialogs`,
                     data: { representativeId: selectedDialog.representative.id, text: messageText },
                 });
+
+                // для оновления баланса
+
+                if (result) {
+                    await refreshUser();
+                }
 
                 // Удаляем подписку (id: null) и добавляем новый диалог
                 setDialogs((prev) => {
@@ -328,7 +350,7 @@ const MessageCenter = () => {
                                                     isSelected ? 'bg-honor-blue/10' : 'hover:bg-honor-gray'
                                                 }`}
                                                 onClick={() => handleSelectDialog(dialog)}>
-                                                <Avatar className="h-12 w-12 mr-4">
+                                                <Avatar className="justify-center items-centerh-12 w-12 mr-4">
                                                     <User size={24} />
                                                 </Avatar>
                                                 <div className="flex-1 text-left">
@@ -380,7 +402,7 @@ const MessageCenter = () => {
                                         <>
                                             {/* Chat header */}
                                             <div className="p-4 border-b flex items-center">
-                                                <Avatar className="h-10 w-10 mr-3">
+                                                <Avatar className="justify-center items-center h-10 w-10 mr-3">
                                                     <User size={20} />
                                                 </Avatar>
                                                 <div>

@@ -13,7 +13,7 @@ const RepresantiveProfileSidebar = () => {
     return (
         <Card className="honor-card mb-6">
             <div className="flex flex-col items-center p-6">
-                <Avatar className="h-24 w-24 mb-4">
+                <Avatar className="justify-center items-center h-24 w-24 mb-4">
                     <User size={48} />
                 </Avatar>
                 <h1 className="text-2xl font-bold">{user.name}</h1>

@@ -170,7 +170,7 @@ export class UserService {
                     voterProfile: {
                         select: {
                             id: true,
-                            // balance: true, // надо будет ли это? может, не стоит отдавать баланс в этом эндпоинте?
+                            balance: true, // Данные профиля может получить только владелец профиля
                         },
                     },
                     subscriptions: {

@@ -81,6 +81,7 @@ export class UserController {
     @ApiResponse(GET_CURRENT_USER_RESPONSE)
     @ApiResponse(USER_NOT_FOUND_RESPONSE)
     async getUserProfile(@Req() req: Request & { user: { id: string } }): Promise<UserResponse> {
+        console.log('profile');
         return this.userService.getUserProfile(req.user.id);
     }
 

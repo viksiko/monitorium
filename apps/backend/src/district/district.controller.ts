@@ -8,6 +8,7 @@ import { DISTRICT_QUERY_AREAS } from '@src/constants/swagger/api-query.swagger';
 import {
     DISTRICT_NOT_FOUND_RESPONSE,
     GET_ALL_DISTRICTS_SUCCESS_RESPONSE,
+    GET_SHORT_STATS_DISTRICTS,
 } from '@src/constants/swagger/district-responses.swagger';
 import {
     AUTHENTICATION_ERROR_RESPONSES,
@@ -43,6 +44,7 @@ export class DistrictController {
 
     @Get('short-stats')
     @UseGuards(JwtAuthGuard)
+    @ApiResponse(GET_SHORT_STATS_DISTRICTS)
     @ApiOperation({ summary: 'Краткая статистика по всем округам' })
     @ApiHeader(HEADERS_AUTHORIZATION)
     async getAllDistrictsShortStats(): Promise<

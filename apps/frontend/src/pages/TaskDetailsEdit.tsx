@@ -610,7 +610,9 @@ const TaskDetailsEdit = () => {
                                                     </div>
                                                 ))
                                             ) : (
-                                                <p className="text-sm text-honor-darkGray italic">Этапов пока нет</p>
+                                                <div className="text-center py-2">
+                                                    <p className="text-honor-darkGray italic">Нет добавленных этапов</p>
+                                                </div>
                                             )}
                                         </div>
 

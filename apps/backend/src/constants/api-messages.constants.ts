@@ -24,6 +24,8 @@ export const USER_NOT_FOUND = 'Пользователь не найден';
 export const POST_NOT_FOUND = 'Публикация не найдена';
 export const INVALID_ROLE = 'Недопустимая роль';
 export const DISTRICT_NOT_FOUND = 'Округ не найден';
+export const NOT_ENOUGH_FUNDS = 'Недостаточно средств';
+export const VOTER_PROFILE_NOT_FOUND = 'Профиль избирателя не найден';
 
 export const COMMENT_MESSAGES = {
     DELETE_SUCCESS: 'Комментарий успешно удален',

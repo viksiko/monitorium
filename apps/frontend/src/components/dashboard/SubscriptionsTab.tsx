@@ -36,7 +36,7 @@ const SubscriptionsTab = () => {
                                 <Link
                                     to={`/representative/profile/${sub.representative.id}`}
                                     className="flex items-center hover:bg-honor-gray/10 p-2 rounded-lg transition-colors">
-                                    <Avatar className="h-12 w-12 mr-4">
+                                    <Avatar className="justify-center items-center h-12 w-12 mr-4">
                                         <User size={24} />
                                     </Avatar>
                                     <div>

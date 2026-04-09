@@ -5,4 +5,5 @@ export * from './task';
 export * from './post';
 export * from './dialog';
 export * from './district';
+export * from './balance';
 export * from './comment';

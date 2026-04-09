@@ -4,10 +4,7 @@ import { Button } from '@/components/ui/button';
 import { MapPin, Mail, Phone, User, Lock, Loader2 } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import {
-    registerStep1Schema,
-    RegisterStep1FormValues,
-} from '@/zod/registerStep1.schema';
+import { registerStep1Schema, RegisterStep1FormValues } from '@/zod/registerStep1.schema';
 import { FormError, formInputClass } from '../ui/formInputClass';
 
 interface RegisterStep1Props {
@@ -199,17 +196,12 @@ const RegisterStep1 = ({ onSubmit, isLoading }: RegisterStep1Props) => {
                 type="submit"
                 disabled={isLoading}
                 className="w-full honor-button-primary">
-                {isLoading ? (
-                    <Loader2 className="h-8 w-8 animate-spin" />
-                ) : (
-                    'Продолжить'
-                )}
+                {isLoading ? <Loader2 className="h-8 w-8 animate-spin" /> : 'Продолжить'}
             </Button>
 
             <div className="mt-4 text-xs text-honor-darkGray text-center">
-                Нажимая "Зарегистрироваться", вы соглашаетесь с правилами
-                использования платформы и даете согласие на обработку
-                персональных данных
+                Нажимая "Зарегистрироваться", вы соглашаетесь с правилами использования платформы и даете согласие на
+                обработку персональных данных
             </div>
         </form>
     );

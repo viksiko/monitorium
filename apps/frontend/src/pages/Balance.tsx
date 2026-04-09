@@ -1,26 +1,46 @@
-import React, { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Layout from '@/components/layout/Layout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/components/ui/use-toast';
-import {
-    BalanceSummary,
-    PurchaseTab,
-    HistoryTab,
-    UsageTab,
-} from '@/components/balance';
-import { mockTransactions } from '@/data/mockTransactions';
+import { BalanceSummary, PurchaseTab, HistoryTab, UsageTab } from '@/components/balance';
+// import { mockTransactions } from '@/data/mockTransactions';
+import { useApi } from '@/hooks/useApi';
+import { useAuth } from '@/context/AuthContext';
+import { TOKEN_PARAMS } from '@/constants/tokens-params';
+import { BalanceTransactionType, District } from '@monorepo/types';
+import { Transaction } from '@monorepo/types';
 
 const Balance = () => {
     const { toast } = useToast();
-    const [referralLink, setReferralLink] = useState(
-        'https://honor-platform.ru/ref/user123',
-    );
+    const [referralLink, setReferralLink] = useState('https://honor-platform.ru/ref/user123');
     const [selectedAmount, setSelectedAmount] = useState<number | null>(null);
+    const { request: requestTransaction } = useApi<Transaction[]>();
+    const { loading, error, request } = useApi<District[]>();
+    const { refreshUser } = useAuth();
+    const [transaction, setTransaction] = useState([]);
 
-    const currentBalance = mockTransactions.reduce(
-        (sum, transaction) => sum + transaction.amount,
-        0,
-    );
+    useEffect(() => {
+        fetchTransactions();
+    }, []);
+
+    const fetchTransactions = async () => {
+        try {
+            const response = await requestTransaction({
+                method: 'GET',
+                url: '/api/v1/balance/transactions',
+            });
+
+            if (response) {
+                setTransaction(response);
+            }
+        } catch (err) {
+            toast({
+                title: 'Ошибка',
+                description: 'Не удалось загрузить транзакции',
+                variant: 'destructive',
+            });
+        }
+    };
 
     const handleShareReferral = () => {
         navigator.clipboard.writeText(referralLink);
@@ -31,22 +51,60 @@ const Balance = () => {
         });
     };
 
-    const handlePurchase = () => {
+    const handlePurchase = async () => {
         if (!selectedAmount) return;
 
-        toast({
-            title: 'Переход к оплате',
-            description: `Оплата ${selectedAmount} билетов на сумму ${selectedAmount * 10} руб.`,
-            variant: 'default',
-        });
+        try {
+            const response = await request({
+                method: 'POST',
+                url: `/api/v1/balance/deposit`,
+                data: { amount: selectedAmount, type: BalanceTransactionType.PURCHASE_TICKETS },
+            });
+
+            if (response) {
+                await refreshUser();
+                await fetchTransactions();
+            }
+
+            toast({
+                title: 'Оплата успешно прошла',
+                description: `Оплата ${selectedAmount} билетов на сумму ${selectedAmount * 10} руб.`,
+                variant: 'success',
+            });
+        } catch (error) {
+            toast({
+                title: 'Оплата не прошла',
+                description: `Оплата ${selectedAmount} билетов на сумму ${selectedAmount * 10} руб.`,
+                variant: 'destructive',
+            });
+        }
     };
 
-    const handleWatchAd = () => {
-        toast({
-            title: 'Реклама',
-            description: 'После просмотра рекламы вы получите 1 билет',
-            variant: 'default',
-        });
+    const handleWatchAd = async () => {
+        try {
+            const response = await request({
+                method: 'POST',
+                url: `/api/v1/balance/deposit`,
+                data: { amount: TOKEN_PARAMS.WATCH_AD_PRICE, type: 'WATCH_AD' },
+            });
+
+            if (response) {
+                await refreshUser();
+                await fetchTransactions();
+            }
+
+            toast({
+                title: 'Реклама',
+                description: 'За просмотр рекламы вы получили 1 билет',
+                variant: 'success',
+            });
+        } catch (error) {
+            toast({
+                title: 'Реклама',
+                description: `Ошибка при просмотре рекламы`,
+                variant: 'destructive',
+            });
+        }
     };
 
     return (
@@ -58,7 +116,6 @@ const Balance = () => {
                     {/* Balance summary */}
                     <div className="lg:col-span-1">
                         <BalanceSummary
-                            currentBalance={currentBalance}
                             referralLink={referralLink}
                             handleShareReferral={handleShareReferral}
                             handleWatchAd={handleWatchAd}
@@ -91,11 +148,12 @@ const Balance = () => {
                                     selectedAmount={selectedAmount}
                                     setSelectedAmount={setSelectedAmount}
                                     handlePurchase={handlePurchase}
+                                    isLoading={loading}
                                 />
                             </TabsContent>
 
                             <TabsContent value="history">
-                                <HistoryTab transactions={mockTransactions} />
+                                <HistoryTab transactions={transaction} />
                             </TabsContent>
 
                             <TabsContent value="usage">

@@ -1,9 +1,11 @@
-import { Dialog } from '@monorepo/types';
+import { BalanceTransactionType, Dialog } from '@monorepo/types';
 import { Message } from '@monorepo/types';
 import { DialogAndSubscriptions } from '@monorepo/types';
 import { CreateDialog } from '@monorepo/types';
 import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { BalanceService } from '@src/balance/balance.service';
 import { DIALOG_MESSAGES } from '@src/constants/api-messages.constants';
+import { TOKEN_PARAMS } from '@src/constants/tokens-params';
 import { logger } from '@src/logger/winston.logger';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateDialogDto } from './dto/create-dialog.dto';
@@ -11,13 +13,16 @@ import { CreateMessageDto } from './dto/create-message.dto';
 
 @Injectable()
 export class DialogService {
-    constructor(private prisma: PrismaService) {}
+    constructor(
+        private readonly prisma: PrismaService,
+        private readonly balanceService: BalanceService,
+    ) {}
 
     // Создание диалога и отправка первого сообщения
     async createDialog(userId: string, dto: CreateDialogDto): Promise<CreateDialog> {
         try {
             return this.prisma.$transaction(async (tx) => {
-                // 1️⃣ проверяем подписку
+                // 1️ проверяем подписку
                 const subscription = await tx.subscription.findUnique({
                     where: {
                         subscriberId_representativeId: {
@@ -51,7 +56,15 @@ export class DialogService {
                     });
                 }
 
-                // 4️⃣ создаём сообщение
+                // 4️⃣ Списание токенов с баланса
+                await this.balanceService.withdrawBalanceTx(
+                    tx,
+                    userId,
+                    TOKEN_PARAMS.MESSAGE_CREATION_PRICE,
+                    BalanceTransactionType.MESSAGE_REPRESENTATIVE,
+                );
+
+                // 5️⃣ создаём сообщение
                 const message = await tx.message.create({
                     data: {
                         dialogId: dialog.id,
@@ -60,7 +73,7 @@ export class DialogService {
                     },
                 });
 
-                // 5️⃣ получаем диалог с include
+                // 6️⃣ получаем диалог с include
                 const fullDialog = await tx.dialog.findUniqueOrThrow({
                     where: { id: dialog.id },
                     include: {
@@ -189,6 +202,14 @@ export class DialogService {
                 if (!isParticipant) {
                     throw new ForbiddenException(DIALOG_MESSAGES.ACCESS_DENIED);
                 }
+
+                // Списание токенов с баланса
+                await this.balanceService.withdrawBalanceTx(
+                    tx,
+                    userId,
+                    TOKEN_PARAMS.MESSAGE_CREATION_PRICE,
+                    BalanceTransactionType.MESSAGE_REPRESENTATIVE,
+                );
 
                 const now = new Date();
 

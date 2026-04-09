@@ -1,11 +1,17 @@
 // subscriptions/subscriptions.service.ts
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BalanceTransactionType } from '@prisma/client';
+import { BalanceService } from '@src/balance/balance.service';
 import { SUBSCRIPTION_MESSAGES, USER_NOT_FOUND } from '@src/constants/api-messages.constants';
+import { TOKEN_PARAMS } from '@src/constants/tokens-params';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class SubscriptionsService {
-    constructor(private readonly prisma: PrismaService) {}
+    constructor(
+        private readonly prisma: PrismaService,
+        private readonly balanceService: BalanceService,
+    ) {}
 
     async subscribe(subscriberId: string, representativeId: string): Promise<{ message: string }> {
         if (subscriberId === representativeId) {
@@ -26,28 +32,39 @@ export class SubscriptionsService {
             throw new BadRequestException(SUBSCRIPTION_MESSAGES.INVALID_TARGET);
         }
 
-        // Проверка на существующую подписку
-        const existingSubscription = await this.prisma.subscription.findUnique({
-            where: {
-                subscriberId_representativeId: {
+        return this.prisma.$transaction(async (tx) => {
+            // Проверка на существующую подписку (уже внутри транзакции)
+            const existingSubscription = await tx.subscription.findUnique({
+                where: {
+                    subscriberId_representativeId: {
+                        subscriberId,
+                        representativeId,
+                    },
+                },
+            });
+
+            if (existingSubscription) {
+                throw new BadRequestException(SUBSCRIPTION_MESSAGES.ALREADY_SUBSCRIBED);
+            }
+
+            // Создаём подписку
+            await tx.subscription.create({
+                data: {
                     subscriberId,
                     representativeId,
                 },
-            },
-        });
+            });
 
-        if (existingSubscription) {
-            throw new BadRequestException(SUBSCRIPTION_MESSAGES.ALREADY_SUBSCRIBED);
-        }
-
-        await this.prisma.subscription.create({
-            data: {
+            // Начисляем бонусные билеты
+            await this.balanceService.depositBalanceTx(
+                tx,
                 subscriberId,
-                representativeId,
-            },
-        });
+                TOKEN_PARAMS.REPRESENTATIVE_SUBSCRIPTION_PRICE,
+                BalanceTransactionType.REPRESENTATIVE_SUBSCRIPTION,
+            );
 
-        return { message: SUBSCRIPTION_MESSAGES.CREATE_SUCCESS };
+            return { message: SUBSCRIPTION_MESSAGES.CREATE_SUCCESS };
+        });
     }
 
     // async getUserSubscriptions(userId: string) {

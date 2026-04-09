@@ -110,7 +110,7 @@ const MessagesTab = () => {
                         key={dialog.id}
                         className="p-4 bg-blue-50">
                         <div className="flex items-start">
-                            <Avatar className="h-10 w-10 mr-3 mt-1">
+                            <Avatar className="justify-center items-centerh-10 w-10 mr-3 mt-1">
                                 <User size={20} />
                             </Avatar>
 

@@ -57,7 +57,7 @@ const UserProfileSidebar = () => {
     return (
         <Card className="honor-card mb-6">
             <div className="flex flex-col items-center p-6">
-                <Avatar className="h-24 w-24 mb-4 bg-honor-blue text-white text-xl font-bold">
+                <Avatar className="justify-center items-center h-24 w-24 mb-4 bg-honor-blue text-white text-xl font-bold">
                     {user.name ? getUserInitials() : <User size={48} />}
                 </Avatar>
                 <h1 className="text-2xl font-bold">{user.name || 'Пользователь'}</h1>

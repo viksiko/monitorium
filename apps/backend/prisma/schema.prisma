@@ -61,9 +61,10 @@ model User {
   // Связь с комментариями
   comments Comment[]
 
-  voterDialogs          Dialog[]  @relation("VoterDialogs")
-  representativeDialogs Dialog[]  @relation("RepresentativeDialogs")
+  voterDialogs          Dialog[]             @relation("VoterDialogs")
+  representativeDialogs Dialog[]             @relation("RepresentativeDialogs")
   messages              Message[]
+  balanceTransactions   BalanceTransaction[]
 
   @@map("users")
 }
@@ -124,7 +125,7 @@ model VoterProfile {
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   // Здесь можно хранить дополнительные данные о пользователе
-  balance Int @default(0) // Баланс токенов
+  balance Int @default(0) // По умолчанию баланс 0, 10 начисляется автоматом при подтверждении регистрации
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -332,6 +333,36 @@ model Area {
   @@map("areas")
 }
 
+model BalanceTransaction {
+  id String @id @default(cuid())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Тип операции
+  type BalanceTransactionType
+
+  // Сколько изменилось
+  amount Int
+
+  // Баланс ПОСЛЕ операции (очень важно!)
+  balanceAfter Int
+
+  // Направление (можно не хранить отдельно, но удобно)
+  direction TransactionDirection
+
+  // Доп. описание (например: "Создание задания #123")
+  description String?
+
+  // Связь с сущностью (опционально, но ОЧЕНЬ полезно)
+  taskId    String?
+  messageId String?
+
+  createdAt DateTime @default(now())
+
+  @@map("balance_transactions")
+}
+
 enum Role {
   VOTER
   REPRESENTATIVE
@@ -349,4 +380,18 @@ enum TaskStatus {
   IN_PROGRESS // "В процессе"  
   COMPLETED // "Выполнено"
   REJECTED // "Отклонено"
+}
+
+enum BalanceTransactionType {
+  REGISTRATION_BONUS // начисление при регистрации  
+  WATCH_AD // пополнение при просомотре рекламы
+  REPRESENTATIVE_SUBSCRIPTION // пополнение за подписку на представителя власти
+  CREATE_TASK // списание при создании задания
+  MESSAGE_REPRESENTATIVE // списание при отправки сообщения
+  PURCHASE_TICKETS // пополнение при покупке билетов (начисление)
+}
+
+enum TransactionDirection {
+  CREDIT // пополнение
+  DEBIT // списание
 }

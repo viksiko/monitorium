@@ -18,7 +18,7 @@ const RepresentativeCard = ({ representative }: RepresentativeCardProps) => {
         <Link to={`/representative/profile/${representative.id}`}>
             <Card className="honor-card hover:shadow-lg transition-shadow">
                 <div className="flex items-start">
-                    <Avatar className="h-16 w-16 mr-4">
+                    <Avatar className="justify-center items-center items-centerh-16 w-16 mr-4">
                         <User size={32} />
                     </Avatar>
 
