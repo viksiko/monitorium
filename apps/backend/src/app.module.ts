@@ -6,6 +6,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { BalanceModule } from './balance/balance.module';
+import { CommentModule } from './comment/comment.module';
 import { DialogModule } from './dialog/dialog.module';
 import { DistrictModule } from './district/district.module';
 import { PostModule } from './post/post.module';
@@ -27,6 +28,7 @@ import { UserModule } from './user/user.module';
             },
         ]),
         TaskModule,
+        CommentModule,
         SubscriptionsModule,
         PostModule,
         DialogModule,

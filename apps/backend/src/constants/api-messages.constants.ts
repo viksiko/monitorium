@@ -27,6 +27,10 @@ export const DISTRICT_NOT_FOUND = 'Округ не найден';
 export const NOT_ENOUGH_FUNDS = 'Недостаточно средств';
 export const VOTER_PROFILE_NOT_FOUND = 'Профиль избирателя не найден';
 
+export const COMMENT_MESSAGES = {
+    DELETE_SUCCESS: 'Комментарий успешно удален',
+} as const;
+
 export const TASK_MESSAGES = {
     // Успешные операции
     DELETE_SUCCESS: 'Задание успешно удалено',

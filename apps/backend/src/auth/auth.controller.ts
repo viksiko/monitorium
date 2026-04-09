@@ -30,7 +30,7 @@ import {
 import { User } from '@src/types/user';
 import { Request, Response } from 'express';
 import { AuthService } from './auth.service';
-import { СonfirmRegistration } from './dto/confirmRegistration';
+import { ConfirmRegistration } from './dto/confirmRegistration';
 import { ForgotPasswordDto } from './dto/forgotPassword.dto';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
@@ -66,7 +66,7 @@ export class AuthController {
     @ApiResponse(REGISTRATION_CONFIRMED_RESPONSE)
     @ApiResponse(INVALID_VERIFICATION_CODE_RESPONSE)
     @ApiResponse(DATABASE_ERROR_RESPONSE)
-    async confirmRegistration(@Body() dto: СonfirmRegistration): Promise<{ message: string }> {
+    async confirmRegistration(@Body() dto: ConfirmRegistration): Promise<{ message: string }> {
         return await this.authService.confirmRegistration(dto);
     }
 

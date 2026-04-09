@@ -11,41 +11,15 @@ import { Badge } from '@/components/ui/badge';
 import { useAuthorizedFetch } from '@/hooks/useAuthorizedFetch';
 import { TaskStatusBadge } from '@/components/ui/task-status-badge';
 import DashboardBackButton from '@/components/ui/dashboardBackButton';
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { TaskCommentsSection } from '@/components/comment/TaskCommentsSection';
 
 const TaskDetails = () => {
-    // const [showModifications, setShowModifications] = useState<number | null>(
-    //     null,
-    // );
-
-    // const getStatusColor = (status: string) => {
-    //     switch (status) {
-    //         case 'completed':
-    //             return 'bg-green-100 text-green-800';
-    //         case 'in-progress':
-    //             return 'bg-blue-100 text-blue-800';
-    //         case 'planned':
-    //             return 'bg-orange-100 text-orange-800';
-    //         default:
-    //             return 'bg-gray-100 text-gray-800';
-    //     }
-    // };
-
-    // const getStatusText = (status: string) => {
-    //     switch (status) {
-    //         case 'completed':
-    //             return 'Выполнено';
-    //         case 'in-progress':
-    //             return 'В процессе';
-    //         case 'planned':
-    //             return 'Запланировано';
-    //         default:
-    //             return 'Неизвестно';
-    //     }
-    // };
-
     const accessToken = useAuthStore((state) => state.accessToken);
     const { taskId } = useParams<{ taskId: string }>();
     const { data: task, loading, error } = useAuthorizedFetch<Task>(`/api/v1/tasks/${taskId}`, accessToken);
+    const [commentsVisible, setDisplayComments] = useState(false);
 
     if (loading) {
         return (
@@ -104,54 +78,6 @@ const TaskDetails = () => {
                                                 <TaskStatusBadge status={task.status} />
                                             </div>
                                         </div>
-
-                                        {/* {showModifications === task.id &&
-                                            task.modificationHistory.length >
-                                                0 && (
-                                                <div className="mb-4 bg-gray-50 p-3 rounded-lg text-sm">
-                                                    <h3 className="font-semibold mb-2">
-                                                        История изменений:
-                                                    </h3>
-                                                    <ul className="space-y-2">
-                                                        {task.modificationHistory.map(
-                                                            (mod, idx) => (
-                                                                <li
-                                                                    key={idx}
-                                                                    className="text-honor-darkGray">
-                                                                    <span className="font-medium">
-                                                                        {new Date(
-                                                                            mod.date,
-                                                                        ).toLocaleDateString(
-                                                                            'ru-RU',
-                                                                        )}
-                                                                    </span>{' '}
-                                                                    - Поле "
-                                                                    <span className="italic">
-                                                                        {
-                                                                            mod.field
-                                                                        }
-                                                                    </span>
-                                                                    " изменено с
-                                                                    "
-                                                                    <span className="line-through">
-                                                                        {
-                                                                            mod.oldValue
-                                                                        }
-                                                                    </span>
-                                                                    " на "
-                                                                    <span className="font-medium">
-                                                                        {
-                                                                            mod.newValue
-                                                                        }
-                                                                    </span>
-                                                                    "
-                                                                </li>
-                                                            ),
-                                                        )}
-                                                    </ul>
-                                                </div>
-                                            )} */}
-
                                         <div className="flex items-center text-honor-darkGray text-sm mb-4">
                                             <div className="flex items-center">
                                                 <User
@@ -223,22 +149,21 @@ const TaskDetails = () => {
                                                     <ThumbsUp size={18} />
                                                     <span>{task.likesCount}</span>
                                                 </div>
-                                                <div className="flex items-center space-x-1 text-honor-darkGray">
-                                                    <MessageSquare size={18} />
-                                                    <span>{task.comments}</span>
-                                                </div>
+                                                <Button
+                                                    type="button"
+                                                    variant="ghost"
+                                                    className={`flex items-center group ${commentsVisible ? 'bg-slate-100' : 'bg-white'} hover:bg-slate-100`}
+                                                    onClick={() => setDisplayComments(!commentsVisible)}>
+                                                    <MessageSquare
+                                                        size={18}
+                                                        className="text-honor-darkGray group-hover:text-honor-blue"
+                                                    />
+                                                </Button>
                                                 <div className="flex items-center space-x-1 text-honor-darkGray">
                                                     <Eye size={18} />
                                                     <span>{task.viewsCount}</span>
                                                 </div>
                                             </div>
-                                            {/* <span className="text-sm text-honor-darkGray">
-                                                <Clock
-                                                    size={16}
-                                                    className="inline mr-1"
-                                                />
-                                                Обновлено 2 дня назад
-                                            </span> */}
                                             <div className="flex flex-col items-end">
                                                 <span className="text-sm text-honor-darkGray">
                                                     <Clock
@@ -249,6 +174,13 @@ const TaskDetails = () => {
                                                 </span>
                                             </div>
                                         </div>
+                                        {commentsVisible && (
+                                            <TaskCommentsSection
+                                                key={task.id}
+                                                taskId={task.id}
+                                                className="mt-4"
+                                            />
+                                        )}
                                     </Card>
                                 </TabsContent>
                             </Tabs>

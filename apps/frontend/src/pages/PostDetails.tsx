@@ -13,13 +13,20 @@ import { TaskStatusBadge } from '@/components/ui/task-status-badge';
 import RepresantiveProfileSidebar from '@/components/representative/RepresantiveProfileSidebar';
 import { Avatar } from '@/components/ui/avatar';
 import DashboardBackButton from '@/components/ui/dashboardBackButton';
+import { useGetPostById } from '@/lib/query/post.query';
+import { Author, AuthorRoleIcon } from '@/components/common/Author';
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { PostCommentsSection } from '@/components/comment/PostCommentsSection';
 
 const PostDetails = () => {
     const accessToken = useAuthStore((state) => state.accessToken);
     const { postId } = useParams<{ postId: string }>();
-    const { data: post, loading, error } = useAuthorizedFetch<Post>(`/api/v1/posts/${postId}`, accessToken);
+    const { data: post, isLoading, isPending, error } = useGetPostById(postId);
 
-    if (loading) {
+    const [commentsVisible, setDisplayComments] = useState(false);
+
+    if (isLoading || isPending) {
         return (
             <Layout>
                 <Loader />
@@ -31,18 +38,7 @@ const PostDetails = () => {
         return (
             <Layout>
                 <div className="honor-container py-12">
-                    <p className="text-red-500">{error}</p>
-                </div>
-            </Layout>
-        );
-    }
-
-    if (!postId) {
-        return (
-            <Layout>
-                <div className="honor-container py-12">
-                    <p>Статья не найдена</p>
-                    <Link to="/posts">← Вернуться к списку</Link>
+                    <p className="text-red-500">{error.message}</p>
                 </div>
             </Layout>
         );
@@ -57,9 +53,7 @@ const PostDetails = () => {
             <div className="honor-container py-12">
                 <h1 className="text-3xl font-bold  text-honor-darkGray mb-8">Статья «{post.title}»</h1>
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    <div className="relative lg:col-span-1">
-                        <RepresantiveProfileSidebar />
-                    </div>
+                    <div className="relative lg:col-span-1">{/* <RepresantiveProfileSidebar /> */}</div>
                     <div className="relative lg:col-span-2 ">
                         <DashboardBackButton />
                         <div>
@@ -69,16 +63,16 @@ const PostDetails = () => {
                                     className="space-y-6 mt-0">
                                     <Card className="honor-card">
                                         <div className="flex items-center mb-4">
-                                            <Avatar className="justify-center items-center h-10 w-10 mr-3">
-                                                <User size={20} />
-                                            </Avatar>
-                                            <div>
-                                                <p className="font-medium">{post.author.name}</p>
+                                            <Author size="large">
+                                                <Author.Name name={post.author.name}>
+                                                    <AuthorRoleIcon role={'REPRESENTATIVE'} />
+                                                </Author.Name>
                                                 <p className="text-xs text-honor-darkGray">
                                                     {post.author.representativeProfile.position}
                                                 </p>
-                                            </div>
-                                            <div className="ml-auto text-sm text-honor-darkGray">
+                                            </Author>
+
+                                            <div className="ml-auto text-sm flex items-center text-honor-darkGray">
                                                 <Calendar
                                                     size={14}
                                                     className="inline mr-1"
@@ -89,33 +83,36 @@ const PostDetails = () => {
 
                                         <h1 className="text-2xl font-bold mb-4">{post.title}</h1>
 
-                                        {/* // !!! не безопасно */}
-                                        <div
-                                            className="prose max-w-none mb-6"
-                                            dangerouslySetInnerHTML={{
-                                                __html: post.content,
-                                            }}
-                                        />
+                                        <p className="max-w-none mb-6">{post.content}</p>
 
-                                        <div className="flex justify-between items-center pt-4 border-t">
-                                            <div className="flex space-x-4">
-                                                <button
-                                                    className="flex items-center space-x-1 text-honor-darkGray hover:text-honor-blue"
-                                                    onClick={handleLike}>
-                                                    <ThumbsUp size={18} />
-                                                    <span>{post.likesCount}</span>
-                                                </button>
-                                                <div className="flex items-center space-x-1 text-honor-darkGray">
-                                                    <MessageSquare size={18} />
-                                                    {/* <span>{post.comments}</span> */}
-                                                </div>
-                                            </div>
-                                            {/* <button
-                                                    className="text-honor-darkGray hover:text-honor-blue"
-                                                    onClick={handleShare}>
-                                                    <Share2 size={18} />
-                                                </button> */}
+                                        <div className="flex space-x-4 items-center pt-4 border-t">
+                                            <Button
+                                                className="flex items-center group bg-white hover:bg-slate-100"
+                                                onClick={handleLike}>
+                                                <ThumbsUp
+                                                    size={20}
+                                                    className="text-honor-darkGray group-hover:text-honor-blue"
+                                                />
+                                                <span className="text-honor-darkGray group-hover:text-honor-blue">
+                                                    {post.likesCount}
+                                                </span>
+                                            </Button>
+                                            <Button
+                                                className={`flex items-center group ${commentsVisible ? 'bg-slate-100' : 'bg-white'} hover:bg-slate-100`}
+                                                onClick={() => setDisplayComments(!commentsVisible)}>
+                                                <MessageSquare
+                                                    size={20}
+                                                    className="text-honor-darkGray group-hover:text-honor-blue"
+                                                />
+                                            </Button>
                                         </div>
+                                        {commentsVisible && (
+                                            <PostCommentsSection
+                                                key={post.id}
+                                                postId={post.id}
+                                                className="mt-4"
+                                            />
+                                        )}
                                     </Card>
                                 </TabsContent>
                             </Tabs>

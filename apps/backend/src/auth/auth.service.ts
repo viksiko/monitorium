@@ -28,7 +28,7 @@ import * as bcrypt from 'bcryptjs';
 import { Request, Response } from 'express';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { v4 as uuidv4 } from 'uuid';
-import { СonfirmRegistration } from './dto/confirmRegistration';
+import { ConfirmRegistration } from './dto/confirmRegistration';
 import { ForgotPasswordDto } from './dto/forgotPassword.dto';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
@@ -265,7 +265,7 @@ export class AuthService {
         return { message: 'Пароль успешно изменен' };
     }
 
-    async confirmRegistration(dto: СonfirmRegistration): Promise<{
+    async confirmRegistration(dto: ConfirmRegistration): Promise<{
         message: string;
     }> {
         const { userId, code } = dto;
