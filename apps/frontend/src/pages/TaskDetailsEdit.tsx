@@ -36,6 +36,7 @@ import { TaskStatus, TaskStage } from '@monorepo/types';
 import { Button } from '@/components/ui/button';
 import { STATUS_CONFIG } from '@/constants/task-status.config';
 import DashboardBackButton from '@/components/ui/dashboardBackButton';
+import { TaskCommentsSection } from '@/components/comment/TaskCommentsSection';
 
 const TaskDetailsEdit = () => {
     const { taskId } = useParams<{ taskId: string }>();
@@ -50,6 +51,7 @@ const TaskDetailsEdit = () => {
     const [editingStageDateId, setEditingStageDateId] = useState<string | null>(null);
     const [deletedStageIds, setDeletedStageIds] = useState<string[]>([]);
     const [isSaving, setIsSaving] = useState(false);
+    const [commentsVisible, setDisplayComments] = useState(false);
 
     const [editedTask, setEditedTask] = useState({
         possibleSolutions: '',
@@ -618,10 +620,16 @@ const TaskDetailsEdit = () => {
                                                     <ThumbsUp size={18} />
                                                     <span>{task.likesCount}</span>
                                                 </div>
-                                                <div className="flex items-center space-x-1 text-honor-darkGray">
-                                                    <MessageSquare size={18} />
-                                                    <span>{task.comments.length}</span>
-                                                </div>
+                                                <Button
+                                                    type="button"
+                                                    variant="ghost"
+                                                    className={`flex items-center group ${commentsVisible ? 'bg-slate-100' : 'bg-white'} hover:bg-slate-100`}
+                                                    onClick={() => setDisplayComments(!commentsVisible)}>
+                                                    <MessageSquare
+                                                        size={18}
+                                                        className="text-honor-darkGray group-hover:text-honor-blue"
+                                                    />
+                                                </Button>
                                                 <div className="flex items-center space-x-1 text-honor-darkGray">
                                                     <Eye size={18} />
                                                     <span>{task.viewsCount}</span>
@@ -644,6 +652,13 @@ const TaskDetailsEdit = () => {
                                                 </span>
                                             </div>
                                         </div>
+                                        {commentsVisible && (
+                                            <TaskCommentsSection
+                                                key={task.id}
+                                                taskId={task.id}
+                                                className="mt-4"
+                                            />
+                                        )}
                                     </Card>
                                 </TabsContent>
                             </Tabs>

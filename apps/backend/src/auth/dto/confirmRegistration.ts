@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsString, Length } from 'class-validator';
 
-export class СonfirmRegistration {
+export class ConfirmRegistration {
     @IsString({ message: 'ID пользователядолжно быть строкой' })
     @IsNotEmpty({ message: 'ID пользователя не может быть пустым' })
     @ApiProperty({

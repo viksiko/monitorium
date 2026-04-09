@@ -41,14 +41,3 @@ export interface RepresentativeProfile {
     // attendance: number;
     // lastActivity: Date | null;
 }
-
-export interface PostComment {
-    id: string;
-    text: string;
-    createdAt: Date;
-    userId: string;
-    user: {
-        id: string;
-        name: string;
-    };
-}

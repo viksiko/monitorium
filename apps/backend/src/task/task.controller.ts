@@ -84,7 +84,7 @@ export class TaskController {
     @ApiResponse(TASK_FILTER_LIST_SUCCESS_RESPONSE)
     @ApiResponse(TASK_BAD_REQUEST_RESPONSE)
     // @ApiResponse(USER_BAD_REQUEST_RESPONSE)
-    async getUsersByFilter(@Query() query: TasksFilterDto): Promise<Task[]> {
+    async getTasksByFilter(@Query() query: TasksFilterDto): Promise<Task[]> {
         return this.taskService.getTasksByFilter(query);
     }
 

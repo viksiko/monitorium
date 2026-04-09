@@ -25,6 +25,10 @@ export const POST_NOT_FOUND = 'Публикация не найдена';
 export const INVALID_ROLE = 'Недопустимая роль';
 export const DISTRICT_NOT_FOUND = 'Округ не найден';
 
+export const COMMENT_MESSAGES = {
+    DELETE_SUCCESS: 'Комментарий успешно удален',
+} as const;
+
 export const TASK_MESSAGES = {
     // Успешные операции
     DELETE_SUCCESS: 'Задание успешно удалено',
