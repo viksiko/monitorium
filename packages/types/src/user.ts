@@ -1,4 +1,4 @@
-import { District } from "./district";
+import { District } from './district';
 
 export interface Representative {
     id: string;
@@ -18,4 +18,10 @@ export interface Representative {
         attendance: number;
         lastActivity: string | null;
     };
+}
+
+export interface MonthlyTaskData {
+    name: string;
+    completed: number;
+    created: number;
 }

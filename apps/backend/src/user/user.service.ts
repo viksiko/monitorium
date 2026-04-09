@@ -1,4 +1,4 @@
-import { RegisterRoleEnum } from '@monorepo/types';
+import { MonthlyTaskData, RegisterRoleEnum } from '@monorepo/types';
 import {
     ConflictException,
     ForbiddenException,
@@ -24,6 +24,7 @@ import {
 import { logger } from '@src/logger/winston.logger';
 import { PrismaService } from '@src/prisma/prisma.service';
 import { User, UserResponse, UserWithRepresentativeProfileDto, UserWithVoterProfileDto } from '@src/types/user';
+import { fillMissingMonths } from '@src/utils/fillMissingMonths';
 import { generateVerificationCode } from '@src/utils/generateVerificationCode';
 import * as bcrypt from 'bcryptjs';
 
@@ -529,5 +530,32 @@ export class UserService {
         await this.prisma.$transaction([userUpdate, tokensDelete]);
 
         return { message: USER_DEACTIVATED_SUCCESS };
+    }
+
+    async getUserStatistics(userId: string): Promise<MonthlyTaskData[]> {
+        const raw = await this.prisma.$queryRaw<Array<{ month: Date; created: number; completed: number }>>`
+    SELECT 
+      DATE_TRUNC('month', "createdAt") as month,
+      COUNT(*) as created,
+      COUNT(*) FILTER (WHERE status = 'COMPLETED') as completed
+    FROM "tasks"
+    WHERE "assigneeId" = ${userId}
+    GROUP BY month
+    ORDER BY month ASC;
+  `;
+
+        const monthNames = ['Янв', 'Фев', 'Мар', 'Апр', 'Май', 'Июн', 'Июл', 'Авг', 'Сен', 'Окт', 'Ноя', 'Дек'];
+
+        const formatted = raw.map((item: { month: Date; created: number; completed: number }) => {
+            const date = new Date(item.month);
+
+            return {
+                name: monthNames[date.getMonth()],
+                completed: Number(item.completed),
+                created: Number(item.created),
+            };
+        });
+
+        return fillMissingMonths(formatted);
     }
 }
