@@ -53,7 +53,9 @@ const PostDetails = () => {
             <div className="honor-container py-12">
                 <h1 className="text-3xl font-bold  text-honor-darkGray mb-8">Статья «{post.title}»</h1>
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    <div className="relative lg:col-span-1">{/* <RepresantiveProfileSidebar /> */}</div>
+                    <div className="relative lg:col-span-1">
+                        <RepresantiveProfileSidebar />
+                    </div>
                     <div className="relative lg:col-span-2 ">
                         <DashboardBackButton />
                         <div>

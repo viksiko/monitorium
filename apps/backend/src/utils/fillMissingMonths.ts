@@ -1,17 +1,23 @@
-import { MonthlyTaskData } from '@monorepo/types';
+import { YearTasksData } from '@monorepo/types';
 
-export function fillMissingMonths(data: MonthlyTaskData[]): MonthlyTaskData[] {
-    const result: MonthlyTaskData[] = [];
-    const map = new Map(data.map((item) => [item.name, item]));
+export function fillMissingMonths(data: YearTasksData[]): YearTasksData[] {
+    const result: YearTasksData[] = [];
+    const map = new Map(data.map((item) => [item.month, item]));
     const monthNames = ['Янв', 'Фев', 'Мар', 'Апр', 'Май', 'Июн', 'Июл', 'Авг', 'Сен', 'Окт', 'Ноя', 'Дек'];
 
     for (let i = 0; i < 12; i++) {
-        const name = monthNames[i];
+        const month = monthNames[i];
 
         result.push({
-            name,
-            completed: map.get(name)?.completed || 0,
-            created: map.get(name)?.created || 0,
+            year: data[0]?.year || new Date().getFullYear(), // Если данных нет, используем текущий год
+            month,
+            created: map.get(month)?.created || 0,
+            planned: map.get(month)?.planned || 0,
+            completed: map.get(month)?.completed || 0,
+            inprogress: map.get(month)?.inprogress || 0,
+            rejected: map.get(month)?.rejected || 0,
+            comments: map.get(month)?.comments || 0,
+            likes: map.get(month)?.likes || 0,
         });
     }
 

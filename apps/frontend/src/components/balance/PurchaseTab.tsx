@@ -76,7 +76,7 @@ const PurchaseTab: React.FC<PurchaseTabProps> = ({ selectedAmount, setSelectedAm
                             onChange={(e) => handleAmountChange(e.target.value)}
                             value={selectedAmount ?? ''}
                         />
-                        <div className="flex justify-center ml-4 py-2 px-4 bg-gray-100 rounded-xl flex items-center w-[130px]">
+                        <div className="flex justify-center ml-4 py-2 px-4 bg-gray-100 rounded-xl items-center w-[130px]">
                             <span className="text-honor-darkGray font-bold">
                                 {selectedAmount ? selectedAmount * 10 : 0} ₽
                             </span>

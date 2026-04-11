@@ -11,6 +11,7 @@ import type {
     UserWithVoterProfileDtoModel,
     UsersFilterDtoModel,
 } from './models/index';
+import type { YearTasksData } from '@monorepo/types';
 
 export const user = {
     getAllUsers: async () => {
@@ -29,6 +30,12 @@ export const user = {
     getUserProfile: async () => {
         return customInstance<UserResponseModel>({
             url: `/api/v1/users/profile`,
+            method: 'GET',
+        });
+    },
+    getUserStatistics: async () => {
+        return customInstance<YearTasksData[]>({
+            url: `/api/v1/users/statistics`,
             method: 'GET',
         });
     },

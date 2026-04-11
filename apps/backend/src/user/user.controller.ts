@@ -1,4 +1,4 @@
-import { MonthlyTaskData } from '@monorepo/types';
+import { YearTasksData } from '@monorepo/types';
 import { Controller, Get, Param, Patch, Query, Req, UseGuards } from '@nestjs/common';
 import { ApiHeader, ApiOperation, ApiParam, ApiQuery, ApiResponse } from '@nestjs/swagger';
 import { AdminGuard } from '@src/auth/guards/admin.guard';
@@ -18,6 +18,7 @@ import {
     USER_FILTER_LIST_SUCCESS_RESPONSE,
     USER_LIST_SUCCESS_RESPONSE,
     USER_NOT_FOUND_RESPONSE,
+    USER_STATISTICS_RESPONSE,
 } from '@src/constants/swagger/user-responses.swagger';
 import { User, UserResponse, UserWithRepresentativeProfileDto, UserWithVoterProfileDto } from '@src/types/user';
 import { UsersFilterDto } from './dto/users-filter.dto';
@@ -88,7 +89,8 @@ export class UserController {
     // Получить статистику пользователя
     @Get('statistics')
     @ApiOperation({ summary: 'Получить статистику пользователя' })
-    async getUserStatistics(@Req() req: Request & { user: { id: string } }): Promise<MonthlyTaskData[]> {
+    @ApiResponse(USER_STATISTICS_RESPONSE)
+    async getUserStatistics(@Req() req: Request & { user: { id: string } }): Promise<YearTasksData[]> {
         return this.userService.getUserStatistics(req.user.id);
     }
 

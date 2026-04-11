@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import RepresentativeCard from './RepresentativeCard';
 import { api } from '@/lib/api';
 import Loader from '../ui/loader';
-import { Representative } from '@monorepo/types';
+import { User } from '@monorepo/types';
 
 const RepresentativesList = ({ representatives }) => {
     if (representatives.length === 0) {
@@ -15,7 +15,7 @@ const RepresentativesList = ({ representatives }) => {
 
     return (
         <div className="space-y-4">
-            {representatives.map((rep: Representative) => (
+            {representatives.map((rep: User) => (
                 <div key={rep.id}>
                     <RepresentativeCard representative={rep} />
                 </div>

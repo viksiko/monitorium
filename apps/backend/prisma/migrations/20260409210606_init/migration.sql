@@ -8,7 +8,7 @@ CREATE TYPE "TokenType" AS ENUM ('REFRESH', 'VERIFY_EMAIL', 'RESET_PASSWORD');
 CREATE TYPE "TaskStatus" AS ENUM ('PLANNED', 'IN_PROGRESS', 'COMPLETED', 'REJECTED');
 
 -- CreateEnum
-CREATE TYPE "BalanceTransactionType" AS ENUM ('REGISTRATION_BONUS', 'WATCH_AD', 'CREATE_TASK', 'MESSAGE_REPRESENTATIVE', 'PURCHASE_TICKETS', 'REPRESENTATIVE_SUBSCRIPTION');
+CREATE TYPE "BalanceTransactionType" AS ENUM ('REGISTRATION_BONUS', 'WATCH_AD', 'REPRESENTATIVE_SUBSCRIPTION', 'CREATE_TASK', 'MESSAGE_REPRESENTATIVE', 'PURCHASE_TICKETS');
 
 -- CreateEnum
 CREATE TYPE "TransactionDirection" AS ENUM ('CREDIT', 'DEBIT');
@@ -135,17 +135,6 @@ CREATE TABLE "task_files" (
 );
 
 -- CreateTable
-CREATE TABLE "task_comments" (
-    "id" TEXT NOT NULL,
-    "taskId" TEXT NOT NULL,
-    "userId" TEXT NOT NULL,
-    "text" TEXT NOT NULL,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
-    CONSTRAINT "task_comments_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
 CREATE TABLE "posts" (
     "id" TEXT NOT NULL,
     "title" TEXT NOT NULL,
@@ -161,17 +150,6 @@ CREATE TABLE "posts" (
 );
 
 -- CreateTable
-CREATE TABLE "post_comments" (
-    "id" TEXT NOT NULL,
-    "taskId" TEXT NOT NULL,
-    "userId" TEXT NOT NULL,
-    "text" TEXT NOT NULL,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
-    CONSTRAINT "post_comments_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
 CREATE TABLE "post_files" (
     "id" TEXT NOT NULL,
     "postId" TEXT NOT NULL,
@@ -182,6 +160,19 @@ CREATE TABLE "post_files" (
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "post_files_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "comments" (
+    "id" TEXT NOT NULL,
+    "content" TEXT NOT NULL,
+    "authorId" TEXT NOT NULL,
+    "postId" TEXT,
+    "taskId" TEXT,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "comments_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -273,6 +264,12 @@ CREATE UNIQUE INDEX "subscriptions_subscriberId_representativeId_key" ON "subscr
 CREATE UNIQUE INDEX "tokens_hashedToken_key" ON "tokens"("hashedToken");
 
 -- CreateIndex
+CREATE INDEX "comments_postId_idx" ON "comments"("postId");
+
+-- CreateIndex
+CREATE INDEX "comments_taskId_idx" ON "comments"("taskId");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "dialogs_voterId_representativeId_key" ON "dialogs"("voterId", "representativeId");
 
 -- CreateIndex
@@ -321,22 +318,19 @@ ALTER TABLE "tokens" ADD CONSTRAINT "tokens_userId_fkey" FOREIGN KEY ("userId") 
 ALTER TABLE "task_files" ADD CONSTRAINT "task_files_taskId_fkey" FOREIGN KEY ("taskId") REFERENCES "tasks"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "task_comments" ADD CONSTRAINT "task_comments_taskId_fkey" FOREIGN KEY ("taskId") REFERENCES "tasks"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "task_comments" ADD CONSTRAINT "task_comments_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
 ALTER TABLE "posts" ADD CONSTRAINT "posts_authorId_fkey" FOREIGN KEY ("authorId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "post_comments" ADD CONSTRAINT "post_comments_taskId_fkey" FOREIGN KEY ("taskId") REFERENCES "posts"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "post_comments" ADD CONSTRAINT "post_comments_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
 ALTER TABLE "post_files" ADD CONSTRAINT "post_files_postId_fkey" FOREIGN KEY ("postId") REFERENCES "posts"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "comments" ADD CONSTRAINT "comments_authorId_fkey" FOREIGN KEY ("authorId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "comments" ADD CONSTRAINT "comments_postId_fkey" FOREIGN KEY ("postId") REFERENCES "posts"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "comments" ADD CONSTRAINT "comments_taskId_fkey" FOREIGN KEY ("taskId") REFERENCES "tasks"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "dialogs" ADD CONSTRAINT "dialogs_voterId_fkey" FOREIGN KEY ("voterId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;

@@ -42,6 +42,8 @@ const Dashboard = () => {
         return null; // Будет редирект
     }
 
+    console.log('Dashboard - User:', user);
+
     return (
         <Layout>
             <div className="honor-container py-12">

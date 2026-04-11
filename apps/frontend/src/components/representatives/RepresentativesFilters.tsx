@@ -34,7 +34,7 @@ const RepresentativesFilters = ({
                             key={district.id}
                             onClick={() => handleDistrictFilter(district.id)}
                             className={`flex items-center w-full text-left px-3 py-2 rounded-lg text-sm ${
-                                selectedDistrict === district.id
+                                selectedDistrict === district?.id
                                     ? 'bg-honor-blue text-white'
                                     : 'hover:bg-honor-gray text-honor-darkGray'
                             }`}>
@@ -42,7 +42,7 @@ const RepresentativesFilters = ({
                                 size={16}
                                 className="mr-2"
                             />
-                            {district.name}
+                            {district?.name}
                         </button>
                     ))}
                 </div>

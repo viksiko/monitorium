@@ -17,29 +17,31 @@ const RepresantiveProfileSidebar = () => {
                     <User size={48} />
                 </Avatar>
                 <h1 className="text-2xl font-bold">{user.name}</h1>
-                <p className="text-honor-darkGray">{user.representativeProfile.position}</p>
+                <p className="text-honor-darkGray">{user.representativeProfile?.position}</p>
                 <div className="flex items-center mt-2">
                     <MapPin
                         size={16}
                         className="text-honor-blue mr-1"
                     />
-                    <span className="text-sm">Округ №1</span>
+                    <span className="text-sm">{user.district?.name}</span>
                 </div>
-                <Badge className="mt-2 bg-honor-blue">{formatPartyName(user.representativeProfile.party)}</Badge>
+                <Badge className="mt-2 bg-honor-blue">{formatPartyName(user.representativeProfile?.party)}</Badge>
             </div>
 
             <div className="border-t border-b py-4 mb-4">
                 <div className="grid grid-cols-3 text-center">
                     <div>
-                        <p className="text-2xl font-bold text-honor-blue">15</p>
+                        <p className="text-2xl font-bold text-honor-blue">{user.representativeProfile?.tasksTotal}</p>
                         <p className="text-xs text-honor-darkGray">Задач</p>
                     </div>
                     <div>
-                        <p className="text-2xl font-bold text-honor-blue">8</p>
+                        <p className="text-2xl font-bold text-honor-blue">
+                            {user.representativeProfile?.tasksCompleted}
+                        </p>
                         <p className="text-xs text-honor-darkGray">Выполнено</p>
                     </div>
                     <div>
-                        <p className="text-2xl font-bold text-honor-blue">4.7</p>
+                        <p className="text-2xl font-bold text-honor-blue">{user.representativeProfile?.rating}</p>
                         <p className="text-xs text-honor-darkGray">Рейтинг</p>
                     </div>
                 </div>
@@ -65,7 +67,7 @@ const RepresantiveProfileSidebar = () => {
                             />
                             Центр сообщений
                             {/* Display badge if there are unread messages */}
-                            {2 > 0 && <Badge className="ml-2 bg-honor-blue">2</Badge>}
+                            {/* {2 > 0 && <Badge className="ml-2 bg-honor-blue">2</Badge>} */}
                         </Button>
                     </Link>
                     <Link to="/settings">

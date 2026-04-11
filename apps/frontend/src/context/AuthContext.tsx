@@ -1,6 +1,6 @@
 import { createContext, useContext, ReactNode, useEffect } from 'react';
 import { useUser, useLogin, useRegister, useLogout, useOAuthLogin, useRefreshToken } from '@/hooks/useAuth';
-import { User, RegisterData, LoginData, OAuthData } from '@/types/auth';
+import { User, RegisterData, LoginData, OAuthData } from '@monorepo/types';
 import { useToast } from '@/components/ui/use-toast';
 import { useQueryClient } from '@tanstack/react-query';
 import { RegisterRoleEnum } from '@monorepo/types';

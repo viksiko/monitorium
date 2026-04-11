@@ -1,5 +1,5 @@
 import { useAuthStore } from '@/shared/stores/auth.store';
-import { AuthResponse } from '@/types/auth';
+import { AuthResponse } from '@monorepo/types';
 import axios, { AxiosError, AxiosResponse } from 'axios';
 
 export const api = axios.create({

@@ -3,13 +3,13 @@ import Layout from '@/components/layout/Layout';
 import { RepresentativesSearch, RepresentativesFilters, RepresentativesList } from '@/components/representatives';
 import { api } from '@/lib/api';
 import Loader from '@/components/ui/loader';
-import { Representative } from '@monorepo/types';
+import { User } from '@monorepo/types';
 
 const Representatives = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedDistrict, setSelectedDistrict] = useState('');
     const [selectedParty, setSelectedParty] = useState('');
-    const [representatives, setRepresentatives] = useState<Representative[]>([]);
+    const [representatives, setRepresentatives] = useState<User[]>([]);
     const [loading, setLoading] = useState(true);
 
     const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
