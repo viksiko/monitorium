@@ -1,0 +1,42 @@
+# Нормализация окончаний строк: LF в репозитории и в рабочей копии для исходников
+# (снижает шум от client-generator / Node и расхождения с core.autocrlf на Windows)
+
+* text=auto
+
+*.ts   text eol=lf
+*.tsx  text eol=lf
+*.mts  text eol=lf
+*.cts  text eol=lf
+*.js   text eol=lf
+*.jsx  text eol=lf
+*.mjs  text eol=lf
+*.cjs  text eol=lf
+*.json text eol=lf
+*.css  text eol=lf
+*.scss text eol=lf
+*.html text eol=lf
+*.md   text eol=lf
+*.yml  text eol=lf
+*.yaml text eol=lf
+*.toml text eol=lf
+
+*.prisma text eol=lf
+*.sql    text eol=lf
+
+*.sh text eol=lf
+
+Dockerfile* text eol=lf
+.husky/*   text eol=lf
+
+# Явно бинарные типы (не трогать как текст)
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.gif  binary
+*.webp binary
+*.ico  binary
+*.woff  binary
+*.woff2 binary
+*.ttf   binary
+*.eot   binary
+*.pdf   binary
