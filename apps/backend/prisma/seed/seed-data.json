@@ -1,0 +1,71 @@
+{
+  "users": [
+    {
+      "name": "Главный Администратор",
+      "email": "admin@monitorium.ru",
+      "password": "Admin1234!",
+      "role": "ADMIN"
+    },
+    {
+      "name": "Кирилл Гасанов",
+      "email": "repsbro@gmail.com",
+      "password": "mon22Zelda!",
+      "role": "VOTER",
+      "subscribeTo": ["cimelexe@mailinator.com", "deputy1@monitorium.ru"]
+    },
+    {
+      "name": "Андрей Заолотин",
+      "email": "cimelexe@mailinator.com",
+      "password": "mon22Zelda!",
+      "role": "REPRESENTATIVE",
+      "districtName": "Округ №1",
+      "position": "Депутат городской думы",
+      "party": "Единая Россия",
+      "bio": "Депутат городской думы с 2018 года. Специализируется на вопросах благоустройства и ЖКХ."
+    },
+    {
+      "name": "Всеволод Кубаков",
+      "email": "fubijad@mailinator.com",
+      "password": "mon22Zelda!",
+      "role": "REPRESENTATIVE",
+      "districtName": "Округ №1",
+      "position": "Депутат городской думы",
+      "party": "Единая Россия",
+      "bio": "Депутат городской думы с 2018 года. Специализируется на вопросах благоустройства и ЖКХ."
+    },
+    {
+      "name": "Иван Петрович Соколов",
+      "email": "deputy1@monitorium.ru",
+      "password": "Deputy1234!",
+      "role": "REPRESENTATIVE",
+      "districtName": "Округ №1",
+      "position": "Депутат городской думы",
+      "party": "Единая Россия",
+      "bio": "Депутат городской думы с 2018 года. Специализируется на вопросах благоустройства и ЖКХ."
+    },
+    {
+      "name": "Ольга Николаевна Власова",
+      "email": "deputy2@monitorium.ru",
+      "password": "Deputy2234!",
+      "role": "REPRESENTATIVE",
+      "districtName": "Округ №2",
+      "position": "Глава района",
+      "party": "ЛДПР",
+      "bio": "Глава района с 2020 года. Активно занимается вопросами образования и молодёжной политики."
+    },
+    {
+      "name": "Мария Андреевна Иванова",
+      "email": "voter1@monitorium.ru",
+      "password": "Voter1234!",
+      "role": "VOTER",
+      "subscribeTo": ["deputy1@monitorium.ru", "deputy2@monitorium.ru"]
+    },
+    {
+      "name": "Алексей Сергеевич Кузнецов",
+      "email": "voter2@monitorium.ru",
+      "password": "Voter2234!",
+      "role": "VOTER",
+      "subscribeTo": ["fubijad@mailinator.com"]
+    }
+  ]
+}
