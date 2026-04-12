@@ -8,6 +8,22 @@
       "isBackground": true,
       "problemMatcher": "$tsc-watch",
       "presentation": { "panel": "dedicated", "reveal": "silent" }
+    },
+    {
+      "label": "vite:dev",
+      "type": "shell",
+      "command": "node -r ${workspaceFolder}/.vscode/dotenv-loader.js ${workspaceFolder}/node_modules/vite/bin/vite.js",
+      "options": { "cwd": "${workspaceFolder}/apps/frontend" },
+      "isBackground": true,
+      "problemMatcher": {
+        "pattern": { "regexp": "^$" },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": ".",
+          "endsPattern": "Local:\\s+http"
+        }
+      },
+      "presentation": { "panel": "dedicated", "reveal": "silent" }
     }
   ]
 }
