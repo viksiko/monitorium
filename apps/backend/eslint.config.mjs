@@ -6,7 +6,7 @@ import ts from 'typescript-eslint';
 
 export default ts.config(
     {
-        ignores: ['dist/**', 'node_modules/**', 'eslint.config.js'],
+        ignores: ['dist/**', 'node_modules/**', 'eslint.config.js', 'prisma/seed/**/*.ts'],
     },
     js.configs.recommended,
     ...ts.configs.recommended,
