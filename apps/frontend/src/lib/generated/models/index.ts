@@ -1,5 +1,6 @@
 /** @generated */
 
+export * from './BalanceTransactionType';
 export * from './ConfirmRegistrationModel';
 export * from './CreateCommentDtoModel';
 export * from './CreateDialogDtoModel';
@@ -8,6 +9,7 @@ export * from './CreatePostDtoModel';
 export * from './CreateTaskDtoModel';
 export * from './CreateTaskStageDtoModel';
 export * from './DeleteCommentDtoModel';
+export * from './DepositBalanceDtoModel';
 export * from './DistrictModel';
 export * from './EditCommentDtoModel';
 export * from './ForgotPasswordDtoModel';
@@ -39,3 +41,4 @@ export * from './UserWithVoterProfileDtoModel';
 export * from './UsersFilterDtoModel';
 export * from './VoterProfileDtoModel';
 export * from './VoterProfileModel';
+export * from './WithdrawBalanceDtoModel';

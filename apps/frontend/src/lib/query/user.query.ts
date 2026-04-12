@@ -7,3 +7,10 @@ export function useGetUser(id: string) {
         queryFn: () => user.getUserById(id),
     });
 }
+
+export function useGetUserStatistics() {
+    return useQuery({
+        queryKey: ['userStatistics'],
+        queryFn: () => user.getUserStatistics(),
+    });
+}

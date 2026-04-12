@@ -1,4 +1,4 @@
-import { RegisterRoleEnum } from '@monorepo/types';
+import { RegisterRoleEnum, TASK_STATUSES, YearTasksData } from '@monorepo/types';
 import {
     ConflictException,
     ForbiddenException,
@@ -24,6 +24,7 @@ import {
 import { logger } from '@src/logger/winston.logger';
 import { PrismaService } from '@src/prisma/prisma.service';
 import { User, UserResponse, UserWithRepresentativeProfileDto, UserWithVoterProfileDto } from '@src/types/user';
+import { fillMissingMonths } from '@src/utils/fillMissingMonths';
 import { generateVerificationCode } from '@src/utils/generateVerificationCode';
 import * as bcrypt from 'bcryptjs';
 
@@ -529,5 +530,98 @@ export class UserService {
         await this.prisma.$transaction([userUpdate, tokensDelete]);
 
         return { message: USER_DEACTIVATED_SUCCESS };
+    }
+
+    async getUserStatistics(userId: string): Promise<YearTasksData[]> {
+        const raw = await this.prisma.$queryRaw<
+            Array<{
+                month: Date;
+                created: number;
+                planned: number;
+                inprogress: number;
+                completed: number;
+                rejected: number;
+                comments: number;
+                likes: number;
+            }>
+        >`
+            WITH task_stats AS (
+            SELECT 
+                DATE_TRUNC('month', t."createdAt") as month,
+                COUNT(DISTINCT t.id) as created,
+                COUNT(DISTINCT t.id) FILTER (WHERE t.status = ${TASK_STATUSES[0]}) as planned,
+                COUNT(DISTINCT t.id) FILTER (WHERE t.status = ${TASK_STATUSES[1]}) as inprogress,
+                COUNT(DISTINCT t.id) FILTER (WHERE t.status = ${TASK_STATUSES[2]}) as completed,
+                COUNT(DISTINCT t.id) FILTER (WHERE t.status = ${TASK_STATUSES[3]}) as rejected
+
+            FROM "tasks" t
+            WHERE t."assigneeId" = ${userId}
+            GROUP BY month
+            ),
+
+            comment_stats AS (
+            SELECT 
+                DATE_TRUNC('month', c."createdAt") as month,
+                COUNT(*) as comments
+            FROM "comments" c
+            LEFT JOIN "tasks" t ON c."taskId" = t.id
+            LEFT JOIN "posts" p ON c."postId" = p.id
+
+            WHERE 
+                (
+                t."assigneeId" = ${userId}
+                OR p."authorId" = ${userId}
+                )
+                AND c."authorId" != ${userId}
+
+            GROUP BY month
+            )
+
+            SELECT 
+            COALESCE(ts.month, cs.month) as month,
+            COALESCE(ts.created, 0) as created,
+            COALESCE(ts.planned, 0) as planned,
+            COALESCE(ts.inprogress, 0) as inprogress,
+            COALESCE(ts.completed, 0) as completed,
+            COALESCE(ts.rejected, 0) as rejected,
+            COALESCE(cs.comments, 0) as comments
+
+            FROM task_stats ts
+            FULL OUTER JOIN comment_stats cs 
+            ON ts.month = cs.month
+
+            ORDER BY month ASC;
+        `;
+
+        const monthNames = ['Янв', 'Фев', 'Мар', 'Апр', 'Май', 'Июн', 'Июл', 'Авг', 'Сен', 'Окт', 'Ноя', 'Дек'];
+
+        const formatted = raw.map(
+            (item: {
+                month: Date;
+                created: number;
+                planned: number;
+                completed: number;
+                inprogress: number;
+                rejected: number;
+                comments: number;
+                likes: number;
+            }) => {
+                const date = new Date(item.month);
+
+                return {
+                    year: date.getFullYear(),
+                    month: monthNames[date.getMonth()],
+                    created: Number(item.created),
+                    planned: Number(item.planned),
+                    completed: Number(item.completed),
+                    inprogress: Number(item.inprogress),
+                    rejected: Number(item.rejected),
+                    comments: Number(item.comments),
+                    likes: Number(item.likes),
+                };
+            },
+        );
+
+        return fillMissingMonths(formatted);
     }
 }

@@ -2,6 +2,7 @@
 
 export { app } from './app.client';
 export { auth } from './auth.client';
+export { balance } from './balance.client';
 export { comment } from './comment.client';
 export { dialog } from './dialog.client';
 export { district } from './district.client';

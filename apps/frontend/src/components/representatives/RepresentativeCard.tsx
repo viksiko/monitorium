@@ -4,13 +4,13 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { User, MapPin, ThumbsUp, CheckCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { Representative } from '@monorepo/types';
+import { User as IUser } from '@monorepo/types';
 import { PARTIES } from '@/constants/parties';
 import { PartyLabel } from '../ui/partyLabel';
 import { formatPartyName } from '@/utils/formatPartyName';
 
 interface RepresentativeCardProps {
-    representative: Representative;
+    representative: IUser;
 }
 
 const RepresentativeCard = ({ representative }: RepresentativeCardProps) => {

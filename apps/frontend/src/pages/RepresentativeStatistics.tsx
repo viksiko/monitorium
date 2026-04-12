@@ -1,69 +1,91 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Layout from '@/components/layout/Layout';
 import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import {
-    BarChart,
-    Bar,
-    XAxis,
-    YAxis,
-    CartesianGrid,
-    Tooltip,
-    Legend,
-    ResponsiveContainer,
-} from 'recharts';
-
-// Моковые данные для статистики
-const taskStatistics = [
-    { name: 'Янв', выполнено: 4, создано: 6 },
-    { name: 'Фев', выполнено: 3, создано: 4 },
-    { name: 'Мар', выполнено: 5, создано: 7 },
-    { name: 'Апр', выполнено: 7, создано: 8 },
-    { name: 'Май', выполнено: 6, создано: 10 },
-    { name: 'Июн', выполнено: 8, создано: 9 },
-];
-
-const engagementStatistics = [
-    { name: 'Янв', лайки: 24, комментарии: 12 },
-    { name: 'Фев', лайки: 18, комментарии: 9 },
-    { name: 'Мар', лайки: 30, комментарии: 20 },
-    { name: 'Апр', лайки: 38, комментарии: 25 },
-    { name: 'Май', лайки: 40, комментарии: 30 },
-    { name: 'Июн', лайки: 50, комментарии: 35 },
-];
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { useApi } from '@/hooks/useApi';
+import { toast } from 'sonner';
+import { generateUserReportPDF } from '@/utils/generateUserReportPDF';
+import { useAuth } from '@/context/AuthContext';
+import { useGetUserStatistics } from '@/lib/query/user.query';
+import { TasksSummary } from '@/types/Interfaces';
+import Loader from '@/components/ui/loader';
+import DataLoadingError from '@/components/ui/dataLoadingError';
+import { useUserStatistics } from '@/hooks/useUserStatistics';
 
 const RepresentativeStatistics = () => {
+    const { user } = useAuth();
+    const { data, isLoading, isPending, isError } = useGetUserStatistics();
+    const { selectedYear, setSelectedYear, years, filteredData, summaryByYears } = useUserStatistics(data);
+
+    if (isError) {
+        return (
+            <Layout>
+                <DataLoadingError message="Не удалось загрузить статистику пользователя." />
+            </Layout>
+        );
+    }
+
+    if (isLoading || isPending) {
+        return (
+            <>
+                <Layout>
+                    <Loader />
+                </Layout>
+            </>
+        );
+    }
+
     return (
         <Layout>
             <div className="honor-container py-12">
                 <div className="max-w-5xl mx-auto">
-                    <h1 className="text-3xl font-bold mb-6">
-                        Статистика и отчеты
-                    </h1>
+                    <div className="flex justify-between">
+                        <h1 className="text-3xl font-bold">Статистика и отчеты</h1>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                        <select
+                            value={selectedYear ?? ''}
+                            onChange={(e) => setSelectedYear(Number(e.target.value))}
+                            className="border rounded-md px-3 py-1 text-sm hover:cursor-pointer">
+                            {years.map((year) => (
+                                <option
+                                    key={year}
+                                    value={year}>
+                                    {year}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-5 gap-6 mt-6 mb-8">
                         <Card className="p-6 text-center">
-                            <h3 className="text-honor-darkGray mb-2">
-                                Всего задач
-                            </h3>
+                            <h3 className="text-honor-darkGray mb-2">Всего задач</h3>
                             <p className="text-4xl font-bold text-honor-blue">
-                                42
+                                {summaryByYears[selectedYear]?.created || 0}
                             </p>
                         </Card>
                         <Card className="p-6 text-center">
-                            <h3 className="text-honor-darkGray mb-2">
-                                Выполнено
-                            </h3>
-                            <p className="text-4xl font-bold text-green-600">
-                                28
+                            <h3 className="text-honor-darkGray mb-2">Выполнено</h3>
+                            <p className="text-4xl font-bold text-green-500">
+                                {summaryByYears[selectedYear]?.completed || 0}
                             </p>
                         </Card>
                         <Card className="p-6 text-center">
-                            <h3 className="text-honor-darkGray mb-2">
-                                В процессе
-                            </h3>
-                            <p className="text-4xl font-bold text-amber-500">
-                                14
+                            <h3 className="text-honor-darkGray mb-2">Запланировано</h3>
+                            <p className="text-4xl font-bold text-orange-500">
+                                {summaryByYears[selectedYear]?.planned || 0}
+                            </p>
+                        </Card>
+                        <Card className="p-6 text-center">
+                            <h3 className="text-honor-darkGray mb-2">В процессе</h3>
+                            <p className="text-4xl font-bold text-blue-500">
+                                {summaryByYears[selectedYear]?.inprogress || 0}
+                            </p>
+                        </Card>
+                        <Card className="p-6 text-center">
+                            <h3 className="text-honor-darkGray mb-2">Отклонено</h3>
+                            <p className="text-4xl font-bold text-red-500">
+                                {summaryByYears[selectedYear]?.rejected || 0}
                             </p>
                         </Card>
                     </div>
@@ -89,15 +111,13 @@ const RepresentativeStatistics = () => {
 
                         <TabsContent value="tasks">
                             <Card className="p-6">
-                                <h2 className="text-xl font-bold mb-4">
-                                    Динамика задач по месяцам
-                                </h2>
+                                <h2 className="text-xl font-bold mb-2">Динамика задач по месяцам</h2>
                                 <div className="h-80">
                                     <ResponsiveContainer
                                         width="100%"
                                         height="100%">
                                         <BarChart
-                                            data={taskStatistics}
+                                            data={filteredData}
                                             margin={{
                                                 top: 20,
                                                 right: 30,
@@ -105,16 +125,18 @@ const RepresentativeStatistics = () => {
                                                 bottom: 5,
                                             }}>
                                             <CartesianGrid strokeDasharray="3 3" />
-                                            <XAxis dataKey="name" />
+                                            <XAxis dataKey="month" />
                                             <YAxis />
                                             <Tooltip />
                                             <Legend />
                                             <Bar
-                                                dataKey="создано"
+                                                dataKey="created"
+                                                name="Создано"
                                                 fill="#3b82f6"
                                             />
                                             <Bar
-                                                dataKey="выполнено"
+                                                dataKey="completed"
+                                                name="Выполнено"
                                                 fill="#10b981"
                                             />
                                         </BarChart>
@@ -125,15 +147,13 @@ const RepresentativeStatistics = () => {
 
                         <TabsContent value="engagement">
                             <Card className="p-6">
-                                <h2 className="text-xl font-bold mb-4">
-                                    Активность избирателей
-                                </h2>
+                                <h2 className="text-xl font-bold mb-2">Активность избирателей по месяцам</h2>
                                 <div className="h-80">
                                     <ResponsiveContainer
                                         width="100%"
                                         height="100%">
                                         <BarChart
-                                            data={engagementStatistics}
+                                            data={data}
                                             margin={{
                                                 top: 20,
                                                 right: 30,
@@ -146,11 +166,13 @@ const RepresentativeStatistics = () => {
                                             <Tooltip />
                                             <Legend />
                                             <Bar
-                                                dataKey="лайки"
+                                                dataKey="likes"
+                                                name="Лайки"
                                                 fill="#8884d8"
                                             />
                                             <Bar
-                                                dataKey="комментарии"
+                                                dataKey="comments"
+                                                name="Комментарии"
                                                 fill="#82ca9d"
                                             />
                                         </BarChart>
@@ -161,43 +183,28 @@ const RepresentativeStatistics = () => {
 
                         <TabsContent value="reports">
                             <Card className="p-6">
-                                <h2 className="text-xl font-bold mb-4">
-                                    Отчеты о деятельности
-                                </h2>
-                                <p className="text-honor-darkGray mb-4">
-                                    Доступные отчеты:
-                                </p>
+                                <h2 className="text-xl font-bold mb-4">Отчеты о деятельности</h2>
+                                <p className="text-honor-darkGray mb-4">Доступные отчеты:</p>
                                 <ul className="space-y-2">
-                                    <li className="p-3 bg-honor-gray rounded-lg hover:bg-honor-gray/80 cursor-pointer">
-                                        <div className="flex justify-between items-center">
-                                            <span>
-                                                Ежемесячный отчет за май 2025
-                                            </span>
-                                            <span className="text-honor-blue">
-                                                Скачать PDF
-                                            </span>
-                                        </div>
-                                    </li>
-                                    <li className="p-3 bg-honor-gray rounded-lg hover:bg-honor-gray/80 cursor-pointer">
-                                        <div className="flex justify-between items-center">
-                                            <span>
-                                                Ежемесячный отчет за апрель 2025
-                                            </span>
-                                            <span className="text-honor-blue">
-                                                Скачать PDF
-                                            </span>
-                                        </div>
-                                    </li>
-                                    <li className="p-3 bg-honor-gray rounded-lg hover:bg-honor-gray/80 cursor-pointer">
-                                        <div className="flex justify-between items-center">
-                                            <span>
-                                                Квартальный отчет (Янв-Мар 2025)
-                                            </span>
-                                            <span className="text-honor-blue">
-                                                Скачать PDF
-                                            </span>
-                                        </div>
-                                    </li>
+                                    {years.map((year) => (
+                                        <li
+                                            key={year}
+                                            className="p-3 bg-honor-gray rounded-lg hover:bg-honor-gray/80">
+                                            <div className="flex justify-between items-center">
+                                                <span>Годовой отчет за {year} год</span>
+                                                <span
+                                                    onClick={() => {
+                                                        const yearData = data.filter((item) => item.year === year);
+                                                        const summary = summaryByYears[year];
+
+                                                        generateUserReportPDF(yearData, summary, user.name);
+                                                    }}
+                                                    className="text-honor-blue hover:cursor-pointer">
+                                                    Скачать PDF
+                                                </span>
+                                            </div>
+                                        </li>
+                                    ))}
                                 </ul>
                             </Card>
                         </TabsContent>

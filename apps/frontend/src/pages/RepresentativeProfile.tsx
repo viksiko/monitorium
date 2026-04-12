@@ -11,13 +11,11 @@ import { useToast } from '@/components/ui/use-toast';
 import { api } from '@/lib/api';
 import Loader from '@/components/ui/loader';
 import { useAuth } from '@/context/AuthContext';
-import { Task, Post } from '@monorepo/types';
-import { User as IUser } from '@/types/auth';
+import { User as IUser, Task, Post } from '@monorepo/types';
 import { TasksTab } from '@/components/dashboard';
 import TasksTabProfile from '@/components/representative/TasksTabProfile';
 import BlogTabProfile from '@/components/representative/BlogTabProfile';
 import { formatPartyName } from '@/utils/formatPartyName';
-import { Representative } from '@monorepo/types';
 
 const RepresentativeProfile = () => {
     const { id } = useParams();
@@ -26,7 +24,7 @@ const RepresentativeProfile = () => {
     const [liked, setLiked] = useState<Record<string, boolean>>({});
     const [showModifications, setShowModifications] = useState<number | null>(null);
 
-    const [representative, setRepresentative] = useState<Representative | null>(null);
+    const [representative, setRepresentative] = useState<IUser | null>(null);
     const [tasks, setTasks] = useState<Task[]>([]);
     const [posts, setPosts] = useState<Post[]>([]);
     const [loading, setLoading] = useState(true);

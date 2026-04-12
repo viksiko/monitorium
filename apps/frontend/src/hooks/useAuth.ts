@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api, refreshTokenPair } from '@/lib/api';
-import { RegisterData, LoginData, AuthResponse, User, OAuthData } from '@/types/auth';
+import { RegisterData, LoginData, AuthResponse, User, OAuthData } from '@monorepo/types';
 import { useAuthStore } from '@/shared/stores/auth.store';
 import { RegisterRoleEnum } from '@monorepo/types';
 

@@ -270,6 +270,41 @@ export const GET_CURRENT_USER_RESPONSE: ApiResponseOptions = {
     },
 };
 
+export const USER_STATISTICS_RESPONSE: ApiResponseOptions = {
+    status: 200,
+    description: 'Статистика пользователя',
+    schema: {
+        example: {
+            success: true,
+            statusCode: 200,
+            data: [
+                {
+                    year: 2026,
+                    month: 'Янв',
+                    created: 3,
+                    planned: 0,
+                    completed: 0,
+                    inprogress: 1,
+                    rejected: 0,
+                    comments: 0,
+                    likes: 0,
+                },
+                {
+                    year: 2026,
+                    month: 'Фев',
+                    created: 0,
+                    planned: 8,
+                    completed: 4,
+                    inprogress: 0,
+                    rejected: 0,
+                    comments: 4,
+                    likes: 0,
+                },
+            ],
+        },
+    },
+};
+
 // export const USER_BAD_REQUEST_RESPONSE: ApiResponseOptions = {
 //     status: 400,
 //     description: 'Неверный параметр запроса',

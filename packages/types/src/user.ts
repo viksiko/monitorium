@@ -1,21 +1,121 @@
-import { District } from "./district";
+import { District } from './district';
+import { RegisterRoleEnum } from '@monorepo/types';
 
-export interface Representative {
+export interface User {
     id: string;
     name: string;
     email: string;
-    role: 'REPRESENTATIVE';
+    phone: string | null;
+    role: 'VOTER' | 'REPRESENTATIVE' | 'ADMIN';
     isRepresentative: boolean;
     isVerified: boolean;
-    district: District;
-    representativeProfile: {
+    isActive: boolean;
+    district: District | null;
+    representativeProfile?: RepresentativeProfile | null;
+    voterProfile?: VoterProfile | null;
+    subscriptions: Array<{
         id: string;
-        position: string;
-        party: string;
-        rating: number;
-        tasksTotal: number;
-        tasksCompleted: number;
-        attendance: number;
-        lastActivity: string | null;
-    };
+        createdAt: Date;
+        representative: {
+            id: string;
+            name: string;
+            representativeProfile: {
+                id: string;
+                position: string;
+                party: string | null;
+                rating: number;
+            } | null;
+        };
+    }>;
+}
+
+export interface VoterProfile {
+    id: string;
+    balance: number;
+}
+
+export interface RepresentativeProfile {
+    id: string;
+    position: string;
+    party: string | null;
+    bio?: string | null;
+    rating: number;
+    tasksTotal: number;
+    tasksCompleted: number;
+    attendance: number;
+    lastActivity: Date | null;
+}
+
+// export interface Representative {
+//     id: string;
+//     name: string;
+//     email: string;
+//     role: 'REPRESENTATIVE';
+//     isRepresentative: boolean;
+//     isVerified: boolean;
+//     district: District;
+//     representativeProfile: {
+//         id: string;
+//         position: string;
+//         party: string;
+//         rating: number;
+//         tasksTotal: number;
+//         tasksCompleted: number;
+//         attendance: number;
+//         lastActivity: string | null;
+//     };
+// }
+
+export interface Subscription {
+    id: string;
+    subscriber: string;
+    representative: string;
+    createdAt: Date;
+
+    // Отношения
+    voterProfile?: VoterProfile;
+    representativeProfile?: RepresentativeProfile;
+}
+
+export interface RegisterData {
+    email: string;
+    password: string;
+    name: string;
+    phone?: string;
+    district?: string;
+    isRepresentative?: boolean;
+    position?: string;
+    party?: string;
+    role: RegisterRoleEnum;
+}
+
+export interface LoginData {
+    email: string;
+    password: string;
+}
+
+export interface AuthResponse {
+    userProfile: User;
+    accessToken: string;
+}
+
+export interface OAuthData {
+    provider: 'gosuslugi' | 'sber' | 'tinkoff';
+    providerId: string;
+    email: string;
+    name?: string;
+    phone?: string;
+    verified?: boolean;
+}
+
+export interface YearTasksData {
+    year: number;
+    month: string;
+    created: number;
+    planned: number;
+    completed: number;
+    inprogress: number;
+    rejected: number;
+    comments: number;
+    likes: number;
 }
