@@ -32,7 +32,7 @@ export interface PostAuthor {
     representativeProfile?: RepresentativeProfile | null;
 }
 
-export interface RepresentativeProfile {
+interface RepresentativeProfile {
     // id: string;
     position: string;
     // party: string | null;
