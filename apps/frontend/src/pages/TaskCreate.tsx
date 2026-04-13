@@ -26,12 +26,15 @@ import { add } from 'date-fns';
 import { useAuth } from '@/context/AuthContext';
 import { api } from '@/lib/api';
 import { TOKEN_PARAMS } from '@/constants/tokens-params';
+import { useCreateTaskMutation } from '@/lib/query/task.query';
+import { CreateTaskDtoModel } from '@/lib/generated/models';
 
 const TaskCreate = () => {
     const accessToken = useAuthStore((state) => state.accessToken);
     const { toast } = useToast();
     const [stages, setStages] = useState([{ title: '', date: '' }]);
     const { user, refreshUser } = useAuth();
+    const { mutate } = useCreateTaskMutation();
 
     const {
         register,
@@ -79,48 +82,40 @@ const TaskCreate = () => {
             return;
         }
 
-        const payload = {
-            assigneeId: data.assigneeId,
+        const createTaskDto: CreateTaskDtoModel = {
             title: data.title,
             address: data.address,
+            assigneeId: data.assigneeId,
             problemDescription: data.description,
             possibleSolutions: data.solution,
-            desiredResolutionDate: new Date(data.endDate).toISOString(),
+            desiredResolutionDate: new Date(data.endDate),
             stages:
-                data.stages?.map((stage) => ({
+                stages?.map((stage) => ({
                     title: stage.title,
                     date: new Date(stage.date).toISOString(),
                 })) || [],
         };
 
-        try {
-            await api.post('/api/v1/tasks', payload);
+        mutate(createTaskDto, {
+            onSuccess: async () => {
+                await refreshUser();
+                toast({
+                    title: 'Задание создано',
+                    description: 'Ваше задание успешно отправлено',
+                    variant: 'success',
+                });
 
-            // для оновления баланса
-            await refreshUser();
-
-            toast({
-                title: 'Задание создано',
-                description: 'Ваше задание успешно отправлено',
-                variant: 'success',
-            });
-
-            // очистка формы
-            reset();
-            setStages([{ title: '', date: '' }]);
-        } catch (error) {
-            toast({
-                title: 'Ошибка',
-                description: 'Не удалось создать задание',
-                variant: 'destructive',
-            });
-        }
-
-        // toast({
-        //     title: 'Требуется оплата',
-        //     description: 'Для создания задания требуется 10 билетов',
-        //     variant: 'default',
-        // });
+                reset();
+                setStages([{ title: '', date: '' }]);
+            },
+            onError: (error) => {
+                toast({
+                    title: 'Ошибка',
+                    description: error.message,
+                    variant: 'destructive',
+                });
+            },
+        });
     };
 
     return (

@@ -27,10 +27,9 @@ export interface PostFile {
 
 export interface PostAuthor {
     name: string;
-    representativeProfile: RepresentativeProfile | null;
+    representativeProfile: PostRepresentativeProfile | null;
 }
-
-export interface RepresentativeProfile {
+export interface PostRepresentativeProfile {
     // id: string;
     position: string;
     // party: string | null;

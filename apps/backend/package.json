@@ -7,15 +7,12 @@
   "license": "UNLICENSED",
   "scripts": {
     "build": "nest build",
-
     "start:dev": "nest start --watch",
     "start:prod": "node dist/main",
-
     "prisma:generate": "dotenv -e ../../.env -- prisma generate",
     "prisma:migrate": "dotenv -e ../../.env -- npx prisma migrate dev",
     "prisma:deploy": "dotenv -e ../../.env -- npx prisma migrate deploy",
     "prisma:studio": "dotenv -e ../../.env -- prisma studio",
-
     "prisma:db-push": "prisma db push",
     "prisma:db-pull": "prisma db pull",
     "prisma:migrate-reset": "dotenv -e ../../.env -- npx prisma migrate reset",
@@ -26,15 +23,17 @@
     "prisma:reset-db": "dotenv -e ../../.env -- npx prisma migrate reset",
     "prisma:delete-migrations": "dotenv -e ../../.env -- rm -rf prisma/migrations",
     "prisma:init-migration": "dotenv -e ../../.env -- npx prisma migrate dev --name init",
-
     "lint": "eslint \"{src,libs,test}/**/*.{ts,js}\" --fix",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\" \"libs/**/*.ts\"",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json"
-
+    "test:e2e": "jest --config ./test/jest-e2e.json",
+    "prisma:seed": "dotenv -e ../../.env -- ts-node --project tsconfig.json -r tsconfig-paths/register prisma/seed/seed.ts"
+  },
+  "prisma": {
+    "seed": "dotenv -e ../../.env -- ts-node --project tsconfig.json -r tsconfig-paths/register prisma/seed/seed.ts"
   },
   "dependencies": {
     "@monorepo/types": "1.0.0",
@@ -69,12 +68,14 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",
     "@eslint/js": "^9.18.0",
+    "@faker-js/faker": "^10.4.0",
     "@nestjs/cli": "^11.0.0",
     "@nestjs/jwt": "^11.0.0",
     "@nestjs/schematics": "^11.0.0",
     "@nestjs/testing": "^11.0.1",
     "@swc/cli": "^0.6.0",
     "@swc/core": "^1.10.7",
+    "@types/bcryptjs": "^2.4.6",
     "@types/express": "^5.0.0",
     "@types/jest": "^29.5.14",
     "@types/node": "^22.10.7",

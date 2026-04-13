@@ -28,6 +28,26 @@ const logFormat = winston.format.combine(
     }),
 );
 
+/** Читаемый вывод в консоль (файлы остаются в JSON). */
+const consoleLogFormat = winston.format.combine(
+    winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
+    winston.format.errors({ stack: true }),
+    winston.format.colorize({ all: false, level: true }),
+    winston.format.printf((info) => {
+        const ts = String(info.timestamp ?? '');
+        const level = String(info.level ?? '');
+        const cat = info.category != null && String(info.category) !== '' ? `[${info.category}]` : '';
+        const op = info.operation != null && String(info.operation) !== '' ? `[${info.operation}]` : '';
+        const msg = info.message != null ? String(info.message) : '';
+        const meta = [cat, op].filter(Boolean).join(' ');
+        let line = meta ? `${ts} ${level} ${meta} ${msg}` : `${ts} ${level} ${msg}`;
+        if (info.stack) {
+            line += `\n${info.stack}`;
+        }
+        return line;
+    }),
+);
+
 // Создаем логгер
 export const logger = winston.createLogger({
     level: process.env.LOG_LEVEL || 'info',
@@ -36,26 +56,35 @@ export const logger = winston.createLogger({
     transports: [
         new winston.transports.Console({
             level: 'error',
-            format: winston.format((error) => {
-                if (error.level !== 'error') return false;
-                return error;
-            })(),
+            format: winston.format.combine(
+                winston.format((error) => {
+                    if (error.level !== 'error') return false;
+                    return error;
+                })(),
+                consoleLogFormat,
+            ),
         }),
 
         new winston.transports.Console({
             level: 'warn',
-            format: winston.format((warn) => {
-                if (warn.level !== 'warn') return false;
-                return warn;
-            })(),
+            format: winston.format.combine(
+                winston.format((warn) => {
+                    if (warn.level !== 'warn') return false;
+                    return warn;
+                })(),
+                consoleLogFormat,
+            ),
         }),
 
         new winston.transports.Console({
             level: 'info', // транспорт ловит info и выше (но фильтр ниже)
-            format: winston.format((info) => {
-                if (info.level !== 'info') return false; // пропускаем всё кроме info
-                return info;
-            })(),
+            format: winston.format.combine(
+                winston.format((info) => {
+                    if (info.level !== 'info') return false; // пропускаем всё кроме info
+                    return info;
+                })(),
+                consoleLogFormat,
+            ),
         }),
 
         new winston.transports.File({
@@ -87,18 +116,6 @@ export const logger = winston.createLogger({
         }),
     ],
 });
-
-// // В development режиме также выводим в консоль
-// if (process.env.NODE_ENV !== 'production') {
-//     logger.add(
-//         new winston.transports.Console({
-//             format: winston.format.combine(
-//                 winston.format.colorize(),
-//                 winston.format.simple(),
-//             ),
-//         }),
-//     );
-// }
 
 // Level	Приоритет (0 = highest)
 // error	0	Критическая ошибка, нужно вмешательство

@@ -17,6 +17,7 @@
     "dev:front": "concurrently \"npm run types:watch\" \"dotenv -e ./.env -- npm run dev --workspace=front\"",
     
     "db:recreate": "cd apps/backend && dotenv -e ../../.env -- npx prisma validate && node -e \"require('fs').rmSync('prisma/migrations',{recursive:true,force:true})\" && dotenv -e ../../.env -- npx prisma migrate reset --force && dotenv -e ../../.env -- npx prisma migrate dev --name init && dotenv -e ../../.env -- npx prisma generate",
+    "db:seed": "npm run prisma:seed --workspace=back",
     
     "types:build": "npm run build --workspace=@monorepo/types",
     "types:watch": "npm run watch --workspace=@monorepo/types",
