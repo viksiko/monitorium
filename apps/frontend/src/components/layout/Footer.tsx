@@ -2,11 +2,24 @@ import { Link } from 'react-router-dom';
 import { HelpCircle } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { RegisterRoleEnum } from '@monorepo/types';
+import { useMemo } from 'react';
 
 const Footer = () => {
     const { user } = useAuth();
 
-    const isRepresentative = user?.role === RegisterRoleEnum.REPRESENTATIVE;
+    const { enableVoterBlock, enableRepresentativeBlock } = useMemo(() => {
+        if (!user) {
+            return {
+                enableVoterBlock: true,
+                enableRepresentativeBlock: true,
+            };
+        } else {
+            return {
+                enableVoterBlock: user?.role === RegisterRoleEnum.VOTER,
+                enableRepresentativeBlock: user?.role === RegisterRoleEnum.REPRESENTATIVE,
+            };
+        }
+    }, [user]);
 
     return (
         <footer className="bg-honor-gray mt-auto">
@@ -19,41 +32,42 @@ const Footer = () => {
                         </p>
                     </div>
 
-                    <div>
-                        <h3 className="text-lg font-bold mb-4">Для избирателей</h3>
-                        <ul className="space-y-2">
-                            <li>
-                                <Link
-                                    to="/register"
-                                    className="text-honor-darkGray hover:text-honor-blue">
-                                    Регистрация
-                                </Link>
-                            </li>
-                            <li>
-                                <Link
-                                    to="/map"
-                                    className="text-honor-darkGray hover:text-honor-blue">
-                                    Карта округов
-                                </Link>
-                            </li>
-                            <li>
-                                <Link
-                                    to="/tasks/create"
-                                    className="text-honor-darkGray hover:text-honor-blue">
-                                    Создать задание
-                                </Link>
-                            </li>
-                            <li>
-                                <Link
-                                    to="/blog"
-                                    className="text-honor-darkGray hover:text-honor-blue">
-                                    Новости округов
-                                </Link>
-                            </li>
-                        </ul>
-                    </div>
-
-                    {isRepresentative && (
+                    {enableVoterBlock && (
+                        <div>
+                            <h3 className="text-lg font-bold mb-4">Для избирателей</h3>
+                            <ul className="space-y-2">
+                                <li>
+                                    <Link
+                                        to="/register"
+                                        className="text-honor-darkGray hover:text-honor-blue">
+                                        Регистрация
+                                    </Link>
+                                </li>
+                                <li>
+                                    <Link
+                                        to="/map"
+                                        className="text-honor-darkGray hover:text-honor-blue">
+                                        Карта округов
+                                    </Link>
+                                </li>
+                                <li>
+                                    <Link
+                                        to="/tasks/create"
+                                        className="text-honor-darkGray hover:text-honor-blue">
+                                        Создать задание
+                                    </Link>
+                                </li>
+                                <li>
+                                    <Link
+                                        to="/blog"
+                                        className="text-honor-darkGray hover:text-honor-blue">
+                                        Новости округов
+                                    </Link>
+                                </li>
+                            </ul>
+                        </div>
+                    )}
+                    {enableRepresentativeBlock && (
                         <div>
                             <h3 className="text-lg font-bold mb-4">Для представителей</h3>
                             <ul className="space-y-2">
