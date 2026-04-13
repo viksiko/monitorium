@@ -2,6 +2,7 @@ export interface Task {
     id: string;
     title: string;
     address: string;
+    district: District;
     problemDescription: string;
     possibleSolutions?: string | null;
     desiredResolutionDate?: Date | string | null; // или Date, если будет преобразование
@@ -26,6 +27,11 @@ interface Assignee {
     name: string;
 }
 
+interface District {
+    id: string;
+    name: string;
+}
+
 export const TASK_STATUSES = ['PLANNED', 'IN_PROGRESS', 'COMPLETED', 'REJECTED'] as const;
 
 export type TaskStatus = (typeof TASK_STATUSES)[number];
@@ -45,6 +51,7 @@ export type TaskListItem = Pick<
     | 'id'
     | 'title'
     | 'address'
+    | 'district'
     | 'desiredResolutionDate'
     | 'status'
     | 'createdAt'

@@ -59,9 +59,9 @@ const Footer = () => {
                                 </li>
                                 <li>
                                     <Link
-                                        to="/blog"
+                                        to="/posts"
                                         className="text-honor-darkGray hover:text-honor-blue">
-                                        Новости округов
+                                        Публикации и статьи
                                     </Link>
                                 </li>
                             </ul>

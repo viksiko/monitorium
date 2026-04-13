@@ -5,24 +5,31 @@
 
 import { customInstance } from '@/lib/mutator';
 import type { CreatePostDtoModel } from './models/index';
-import type { Post as IPost, PostWithoutAuthor } from '@monorepo/types';
+import type { Post as IPost } from '@monorepo/types';
 
 export const post = {
     createPost: async (dto: CreatePostDtoModel) => {
-        return customInstance<PostWithoutAuthor>({
+        return customInstance<IPost>({
             url: `/api/v1/posts`,
             method: 'POST',
             data: dto,
         });
     },
-    getAllPosts: async () => {
-        return customInstance<PostWithoutAuthor[] | null>({
+    getPosts: async (limit?: string) => {
+        return customInstance<IPost[] | null>({
             url: `/api/v1/posts`,
+            method: 'GET',
+            params: { ...(limit != null ? { limit: limit } : {}) },
+        });
+    },
+    getLatestPosts: async () => {
+        return customInstance<IPost[] | null>({
+            url: `/api/v1/posts/latest`,
             method: 'GET',
         });
     },
     getPostsByUserId: async (id: string) => {
-        return customInstance<PostWithoutAuthor[] | null>({
+        return customInstance<IPost[] | null>({
             url: `/api/v1/posts/user/${encodeURIComponent(String(id))}`,
             method: 'GET',
         });

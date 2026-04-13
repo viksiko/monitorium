@@ -21,6 +21,7 @@ export const mapTaskListItemToDto = (task: Task): TaskListItem => ({
     id: task.id,
     title: task.title,
     address: task.address,
+    district: task.district,
     desiredResolutionDate: task.desiredResolutionDate ? task.desiredResolutionDate : undefined,
     likesCount: task.likesCount,
     viewsCount: task.viewsCount,

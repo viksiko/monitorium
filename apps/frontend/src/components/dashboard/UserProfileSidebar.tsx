@@ -76,7 +76,7 @@ const UserProfileSidebar = () => {
                             size={16}
                             className="text-honor-blue mr-1"
                         />
-                        {/* <span className="text-sm">{user.district}</span> */}
+                        <span className="text-sm">{user.district.name}</span>
                     </div>
                 )}
                 {user.isVerified && <Badge className="mt-2 bg-green-500">Верифицирован</Badge>}
@@ -97,10 +97,17 @@ const UserProfileSidebar = () => {
                         <p className="text-2xl font-bold text-honor-blue">0</p>
                         <p className="text-xs text-honor-darkGray">Реакций</p>
                     </div>
-                    {user.voterProfile && (
+                    {user.voterProfile ? (
                         <div>
                             <p className="text-2xl font-bold text-honor-blue">{user.voterProfile.balance}</p>
                             <p className="text-xs text-honor-darkGray">Токенов</p>
+                        </div>
+                    ) : (
+                        <div>
+                            <p className="text-2xl font-bold text-honor-blue">
+                                {user.representativeProfile?.rating || 0}
+                            </p>
+                            <p className="text-xs text-honor-darkGray">Рейтинг</p>
                         </div>
                     )}
                 </div>

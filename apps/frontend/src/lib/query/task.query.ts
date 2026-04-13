@@ -1,6 +1,21 @@
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { task } from '../generated';
 import { CreateTaskDtoModel } from '../generated/models';
-import { useMutation } from '@tanstack/react-query';
-import { task } from '../generated/task.client';
+
+export const useGetTasks = () => {
+    return useQuery({
+        queryKey: ['tasks'],
+        queryFn: () => task.getTasks(),
+    });
+};
+
+export const useGetLatestTasks = () => {
+    return useQuery({
+        queryKey: ['tasks', 'latest'],
+        queryFn: () => task.getLatestTasks(),
+    });
+};
+
 
 export const useCreateTaskMutation = () => {
     return useMutation({

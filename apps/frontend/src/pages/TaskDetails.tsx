@@ -4,7 +4,18 @@ import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuthStore } from '@/shared/stores/auth.store';
 import { Task } from '@monorepo/types';
-import { Calendar, Check, CircleChevronLeft, Clock, Eye, MapPin, MessageSquare, ThumbsUp, User } from 'lucide-react';
+import {
+    Calendar,
+    Check,
+    CircleChevronLeft,
+    Clock,
+    Eye,
+    MapPin,
+    MessageSquare,
+    ThumbsUp,
+    User,
+    UserStar,
+} from 'lucide-react';
 import { Link, useParams } from 'react-router-dom';
 import Loader from '@/components/ui/loader';
 import { Badge } from '@/components/ui/badge';
@@ -80,11 +91,19 @@ const TaskDetails = () => {
                                         </div>
                                         <div className="flex items-center text-honor-darkGray text-sm mb-4">
                                             <div className="flex items-center">
-                                                <User
+                                                <UserStar
                                                     size={16}
                                                     className="mr-1"
                                                 />
                                                 <span>{task.assignee.name}</span>
+                                            </div>
+                                            <span className="mx-2">•</span>
+                                            <div className="flex items-center">
+                                                <User
+                                                    size={16}
+                                                    className="mr-1"
+                                                />
+                                                <span>{task.author.name}</span>
                                             </div>
                                             <span className="mx-2">•</span>
                                             <MapPin

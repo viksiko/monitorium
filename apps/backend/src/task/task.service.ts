@@ -94,6 +94,7 @@ export class TaskService {
                     include: {
                         author: { select: { id: true, name: true } },
                         assignee: assigneeId ? { select: { id: true, name: true } } : false,
+                        district: true,
                         stages: true,
                     },
                 });
@@ -120,12 +121,17 @@ export class TaskService {
         }
     }
 
-    async getAllTasks(): Promise<TaskListItem[]> {
+    async getTasks(limit?: number): Promise<TaskListItem[]> {
         try {
             const tasks = await this.prisma.task.findMany({
+                take: limit,
+                orderBy: {
+                    createdAt: 'desc',
+                },
                 include: {
                     author: { select: { id: true, name: true } },
                     assignee: { select: { id: true, name: true } },
+                    district: { select: { id: true, name: true } },
                     stages: true,
                     comments: true,
                     taskFiles: true,
@@ -144,6 +150,10 @@ export class TaskService {
         }
     }
 
+    async getLatestTasks(): Promise<TaskListItem[]> {
+        return this.getTasks(3);
+    }
+
     async getTasksByUser(user: User): Promise<TaskListItem[]> {
         const where = user.isRepresentative ? { assigneeId: user.id } : { authorId: user.id };
 
@@ -153,6 +163,7 @@ export class TaskService {
                 include: {
                     author: { select: { id: true, name: true } },
                     assignee: { select: { id: true, name: true } },
+                    district: true,
                 },
                 orderBy: { createdAt: 'desc' },
             });
@@ -186,6 +197,7 @@ export class TaskService {
                 include: {
                     author: { select: { id: true, name: true } },
                     assignee: { select: { id: true, name: true } },
+                    district: true,
                 },
                 orderBy: { createdAt: 'desc' },
             });
@@ -211,6 +223,7 @@ export class TaskService {
                 include: {
                     author: { select: { id: true, name: true } },
                     assignee: { select: { id: true, name: true } },
+                    district: true,
                     stages: {
                         orderBy: {
                             date: 'asc', // сортировка по возрастанию
@@ -246,6 +259,7 @@ export class TaskService {
                 include: {
                     author: { select: { id: true, name: true } },
                     assignee: { select: { id: true, name: true } },
+                    district: true,
                     stages: {
                         orderBy: {
                             date: 'asc',
@@ -424,6 +438,7 @@ export class TaskService {
             include: {
                 author: { select: { id: true, name: true } },
                 assignee: { select: { id: true, name: true } },
+                district: true,
                 stages: {
                     orderBy: {
                         date: 'asc',
