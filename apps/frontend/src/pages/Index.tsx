@@ -303,7 +303,7 @@ const Index: React.FC = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <Card className="p-6 pb-16">
                             <h3 className="text-xl font-bold mb-4">Последние задачи</h3>
-                            {tasksLoading ? (
+                            {tasksLoading || tasksError ? (
                                 <div className="text-center">
                                     <Loader />
                                 </div>
@@ -352,7 +352,7 @@ const Index: React.FC = () => {
 
                         <Card className="p-6 pb-16">
                             <h3 className="text-xl font-bold mb-4">Последние публикации</h3>
-                            {postsLoading ? (
+                            {postsLoading || postsError ? (
                                 <div className="text-center">
                                     <Loader />
                                 </div>

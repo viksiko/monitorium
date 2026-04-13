@@ -1,3 +1,4 @@
+import { HealthCheckResponse } from '@monorepo/types';
 import { Controller, Get } from '@nestjs/common';
 import { ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { AppService } from './app.service';
@@ -12,10 +13,7 @@ export class AppController {
     @Get('health')
     @ApiOperation({ summary: 'Проверки соединения к API сервису' })
     @ApiResponse(HEALTH_CHECK_API)
-    healthCheck(): {
-        status: string;
-        service: string;
-    } {
+    healthCheck(): HealthCheckResponse {
         return {
             status: 'ok',
             service: 'Monitorium Backend',

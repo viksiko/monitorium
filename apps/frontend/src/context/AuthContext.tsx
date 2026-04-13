@@ -5,12 +5,14 @@ import { useToast } from '@/components/ui/use-toast';
 import { useQueryClient } from '@tanstack/react-query';
 import { RegisterRoleEnum } from '@monorepo/types';
 import { useAuthStore } from '@/shared/stores/auth.store';
+import { useGetHealth } from '@/lib/query/app.query';
+import { AxiosError } from 'axios';
 
 interface AuthContextType {
     user: User | null | undefined;
     loading: boolean;
     login: (email: string, password: string) => Promise<void>;
-    register: (data: RegisterData) => Promise<any>;
+    register: (data: RegisterData) => Promise<unknown>;
     logout: () => void;
     loginWithGosuslugi: () => void;
     loginWithSber: () => void;
@@ -22,6 +24,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+    const { data: health, isLoading: healthLoading, error: healthError } = useGetHealth();
     const refreshTokenMutation = useRefreshToken();
     const { status } = useAuthStore();
     const { data: user, isLoading: loading } = useUser();
@@ -72,14 +75,16 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 variant: 'success',
             });
             return result;
-        } catch (error: any) {
-            console.error('Ошибка регистрации:', error);
-            toast({
-                title: 'Ошибка регистрации',
-                description: error.response?.data?.data.message || 'Произошла ошибка при регистрации.',
-                variant: 'destructive',
-            });
-            throw error;
+        } catch (error: unknown) {
+            if (error instanceof AxiosError) {
+                console.error('Ошибка регистрации:', error);
+                toast({
+                    title: 'Ошибка регистрации',
+                    description: error.response?.data?.data.message || 'Произошла ошибка при регистрации.',
+                    variant: 'destructive',
+                });
+                throw error;
+            }
         }
     };
 
@@ -129,6 +134,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             queryKey: ['user'],
         });
     };
+
+    if (healthLoading) {
+        return <div>Loading...</div>;
+    }
+    if (healthError) {
+        return <div>Error: {healthError.message}</div>;
+    }
 
     return (
         <AuthContext.Provider

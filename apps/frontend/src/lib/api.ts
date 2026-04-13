@@ -21,6 +21,16 @@ api.interceptors.request.use((config) => {
     return config;
 });
 
+/// BACKEND UNHEALTHY INTERCEPTOR
+api.interceptors.response.use(
+    (response) => response,
+    (error: AxiosError) => {
+        if (error.response?.status === 500) {
+            return Promise.reject(new Error('Backend is unavailable. Please try again later.'));
+        }
+        return Promise.reject(error);
+    },
+);
 /// REFRESH TOKEN INTERCEPTOR
 
 // Этот promise используется для запуска refreshTokenPair в единственном экземпляре.

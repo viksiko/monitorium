@@ -90,7 +90,7 @@ const PostDetails = () => {
                                         <div className="flex space-x-4 items-center pt-4 border-t">
                                             <Button
                                                 className="flex items-center group bg-white hover:bg-slate-100"
-                                                onClick={handleLike}>
+                                                onClick={() => handleLike(post.id, post.id)}>
                                                 <ThumbsUp
                                                     size={20}
                                                     className="text-honor-darkGray group-hover:text-honor-blue"
