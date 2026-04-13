@@ -23,6 +23,10 @@ export class TaskService {
         try {
             const { stages, assigneeId, ...taskData } = dto;
 
+            if (!assigneeId) {
+                throw new Error(TASK_MESSAGES.ASSIGNEE_NOT_FOUND);
+            }
+
             return await this.prisma.$transaction(async (tx) => {
                 // Списание билеты у пользователя
                 await this.balanceService.withdrawBalanceTx(
@@ -97,12 +101,21 @@ export class TaskService {
 
                 return task;
             });
-        } catch (error) {
-            logger.error('Failed create task', {
-                category: 'TaskService',
-                operation: 'createTask',
-                error: error instanceof Error ? error.message : error,
-            });
+        } catch (error: unknown) {
+            logger.error(
+                'Failed create task' +
+                    '\nauthorId: ' +
+                    authorId +
+                    '\ndto: ' +
+                    JSON.stringify(dto) +
+                    '\nerror: ' +
+                    (error instanceof Error ? error.message : error),
+                {
+                    category: 'TaskService',
+                    operation: 'createTask',
+                    error: error instanceof Error ? error.message : error,
+                },
+            );
 
             throw error;
         }

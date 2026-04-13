@@ -1,7 +1,16 @@
+import { useEffect, useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { CheckCircle } from 'lucide-react';
+
+const RESEND_COOLDOWN_SEC = 60;
+
+function formatMmSs(totalSeconds: number): string {
+    const m = Math.floor(totalSeconds / 60);
+    const s = totalSeconds % 60;
+    return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+}
 
 interface VerificationStepProps {
     verificationCode: string;
@@ -9,6 +18,7 @@ interface VerificationStepProps {
     handleSubmit: (e: React.FormEvent) => void;
     goBack: () => void;
     hasNextStep?: boolean;
+    onResendCode?: () => void;
 }
 
 const VerificationStep = ({
@@ -17,7 +27,26 @@ const VerificationStep = ({
     handleSubmit,
     goBack,
     hasNextStep,
+    onResendCode,
 }: VerificationStepProps) => {
+    const [secondsLeft, setSecondsLeft] = useState(RESEND_COOLDOWN_SEC);
+
+    useEffect(() => {
+        const id = window.setInterval(() => {
+            setSecondsLeft((prev) => (prev <= 0 ? 0 : prev - 1));
+        }, 1000);
+
+        return () => window.clearInterval(id);
+    }, []);
+
+    const canResend = secondsLeft === 0;
+
+    const handleResendClick = () => {
+        if (!canResend) return;
+        onResendCode?.();
+        setSecondsLeft(RESEND_COOLDOWN_SEC);
+    };
+
     return (
         <form
             onSubmit={handleSubmit}
@@ -27,12 +56,9 @@ const VerificationStep = ({
                     className="mx-auto text-honor-blue"
                     size={48}
                 />
-                <h2 className="text-xl font-bold mt-4 mb-2">
-                    Подтвердите регистрацию
-                </h2>
+                <h2 className="text-xl font-bold mt-4 mb-2">Подтвердите регистрацию</h2>
                 <p className="text-honor-darkGray">
-                    Мы отправили код подтверждения на указанную вами электронную
-                    почту
+                    Мы отправили код подтверждения на указанную вами электронную почту
                 </p>
             </div>
 
@@ -55,10 +81,14 @@ const VerificationStep = ({
                 <div className="flex justify-between mt-2 text-sm">
                     <button
                         type="button"
-                        className="text-honor-blue hover:underline">
+                        onClick={handleResendClick}
+                        disabled={!canResend}
+                        className={
+                            canResend ? 'text-honor-blue hover:underline' : 'text-honor-darkGray cursor-not-allowed'
+                        }>
                         Отправить код повторно
                     </button>
-                    <span className="text-honor-darkGray">00:59</span>
+                    <span className="text-honor-darkGray">{formatMmSs(secondsLeft)}</span>
                 </div>
             </div>
 
