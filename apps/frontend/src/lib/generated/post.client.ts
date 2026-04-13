@@ -15,9 +15,16 @@ export const post = {
             data: dto,
         });
     },
-    getAllPosts: async () => {
-        return customInstance<PostWithoutAuthor[] | null>({
+    getPosts: async (limit?: string) => {
+        return customInstance<IPost[] | null>({
             url: `/api/v1/posts`,
+            method: 'GET',
+            params: { ...(limit != null ? { limit: limit } : {}) },
+        });
+    },
+    getLatestPosts: async () => {
+        return customInstance<IPost[] | null>({
+            url: `/api/v1/posts/latest`,
             method: 'GET',
         });
     },

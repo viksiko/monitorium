@@ -3,7 +3,7 @@ import { Task, TaskStage } from '@monorepo/types';
 import { Body, Controller, Delete, Get, Param, Patch, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { ApiHeader, ApiOperation, ApiParam, ApiQuery, ApiResponse } from '@nestjs/swagger';
 import { User } from '@prisma/client';
-import { AdminGuard } from '@src/auth/guards/admin.guard';
+import { Public } from '@src/auth/decorator/public.decorator';
 import { JwtAuthGuard } from '@src/auth/guards/jwt-auth.guard';
 import { HEADERS_AUTHORIZATION } from '@src/constants/swagger/api-headers.swagger';
 import { PARAM_TASK_ID, PARAM_TASK_ID_STAGE, PARAM_TASK_USER_ID } from '@src/constants/swagger/api-param.swagger';
@@ -54,16 +54,15 @@ export class TaskController {
         return await this.taskService.createTask(req.user.id, dto);
     }
 
-    // Получение всех задач (для администраторов)
-    @UseGuards(AdminGuard)
     @Get()
     @ApiOperation({
-        summary: 'Получить все задания (требуются права администратора)',
+        summary: 'Получить все задания',
     })
     @ApiResponse(GET_ALL_TASKS_SUCCESS_RESPONSE)
     @ApiResponse(FORBIDDEN_RESOURCE_RESPONSE)
-    getAllTasks(): Promise<TaskListItem[] | null> {
-        return this.taskService.getAllTasks();
+    getTasks(@Query('limit') limit?: string): Promise<TaskListItem[] | null> {
+        const parsedLimit = Number(limit);
+        return this.taskService.getTasks(!isNaN(parsedLimit) ? parsedLimit : undefined);
     }
 
     // Получение всех задач текущего пользователя
@@ -86,6 +85,13 @@ export class TaskController {
     // @ApiResponse(USER_BAD_REQUEST_RESPONSE)
     async getTasksByFilter(@Query() query: TasksFilterDto): Promise<Task[]> {
         return this.taskService.getTasksByFilter(query);
+    }
+
+    @Get('latest')
+    @Public()
+    @ApiOperation({ summary: 'Получить последние 3 задачи (публичный доступ)' })
+    getLatestTasks(): Promise<TaskListItem[]> {
+        return this.taskService.getLatestTasks();
     }
 
     // Получение всех задач по userid

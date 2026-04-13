@@ -13,7 +13,7 @@ export interface Post {
     // comments: PostComment[];
 }
 
-export type PostWithoutAuthor  = Omit<Post, 'author'>;
+export type PostWithoutAuthor = Omit<Post, 'author'>;
 
 export interface PostFile {
     id: string;
@@ -27,7 +27,10 @@ export interface PostFile {
 
 export interface PostAuthor {
     name: string;
-    representativeProfile: RepresentativeProfile | null;
+    district: {
+        name: string;
+    } | null;
+    representativeProfile?: RepresentativeProfile | null;
 }
 
 export interface RepresentativeProfile {

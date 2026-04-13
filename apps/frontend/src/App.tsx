@@ -42,6 +42,7 @@ import { RoleRoute } from './guards/RoleRoute';
 import TaskDetailsEdit from './pages/TaskDetailsEdit';
 import PostCreate from './components/representative/PostCreate';
 import PostDetails from './pages/PostDetails';
+import Posts from './pages/Posts';
 
 const queryClient = new QueryClient();
 
@@ -151,6 +152,10 @@ const App = () => (
                                     <Route
                                         path="/representative/profile/:id"
                                         element={<RepresentativeProfile />}
+                                    />
+                                    <Route
+                                        path="/posts"
+                                        element={<Posts />}
                                     />
                                     <Route
                                         path="/posts/create"

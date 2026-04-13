@@ -13,21 +13,23 @@ import { TaskStatusBadge } from '@/components/ui/task-status-badge';
 import TaskCard from '@/components/task/TaskCard';
 import { useFilters } from '@/hooks/useFilters';
 import { useShowMore } from '@/hooks/useShowMore';
+import PostCard from '@/components/post/PostCard';
+import { useGetPosts } from '@/lib/query/post.query';
 
-const Tasks = () => {
-    const { data: tasksData, isLoading, isPending, isError } = useGetTasks();
+const Posts = () => {
+    const { data: postsData, isLoading, isPending, isError } = useGetPosts();
     const {
-        filteredData: filteredTasks,
+        filteredData: filteredPosts,
         districts,
         selectedDistrict,
         searchTerm,
         handleDistrictFilter,
         handleSearch,
         resetFilters,
-    } = useFilters(tasksData ?? []);
+    } = useFilters(postsData ?? []);
 
     const { displayedItems, shouldShowButton, showAll, remainingCount, handleShowAll, handleCollapse } = useShowMore(
-        filteredTasks,
+        filteredPosts,
         { defaultItemsCount: 5 },
     );
 
@@ -44,22 +46,9 @@ const Tasks = () => {
             <div className="honor-container py-12">
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
                     <div>
-                        <h1 className="text-3xl font-bold mb-2">Задачи и обращения</h1>
-                        <p className="text-honor-darkGray mb-8">
-                            Список всех публичных задач и обращений от избирателей
-                        </p>
+                        <h1 className="text-3xl font-bold mb-2">Публикации и статьи</h1>
+                        <p className="text-honor-darkGray mb-8">Список всех публикаций представителей власти</p>
                     </div>
-                    <Link
-                        to="/tasks/create"
-                        className="mt-4 md:mt-0">
-                        <Button className="honor-button-primary flex items-center">
-                            <Plus
-                                size={18}
-                                className="mr-2"
-                            />
-                            Создать задачу
-                        </Button>
-                    </Link>
                 </div>
                 <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
                     <div className="lg:col-span-1">
@@ -113,16 +102,16 @@ const Tasks = () => {
                         </div>
                         <div className="max-w-5xl mx-auto">
                             <div className="max-w-5xl mx-auto">
-                                {filteredTasks.length === 0 ? (
+                                {filteredPosts.length === 0 ? (
                                     <p className="text-honor-darkGray text-center py-6">
                                         По вашему запросу ничего не найдено
                                     </p>
                                 ) : (
                                     <>
-                                        {displayedItems.map((task) => (
-                                            <TaskCard
-                                                key={task.id}
-                                                task={task}
+                                        {displayedItems.map((post) => (
+                                            <PostCard
+                                                key={post.id}
+                                                post={post}
                                             />
                                         ))}
 
@@ -156,4 +145,4 @@ const Tasks = () => {
     );
 };
 
-export default Tasks;
+export default Posts;

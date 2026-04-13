@@ -34,11 +34,20 @@ export class PostService {
         }
     }
 
-    async getAllPosts(): Promise<PostWithoutAuthor[]> {
+    async getPosts(limit?: number): Promise<Post[]> {
         try {
             const posts = await this.prisma.post.findMany({
-                orderBy: { publishedAt: 'desc' },
+                take: limit,
+                orderBy: {
+                    createdAt: 'desc',
+                },
                 include: {
+                    author: {
+                        select: {
+                            name: true,
+                            district: { select: { name: true } },
+                        },
+                    },
                     files: true,
                 },
             });
@@ -53,6 +62,10 @@ export class PostService {
 
             throw error;
         }
+    }
+
+    async getLatestPosts(): Promise<Post[]> {
+        return this.getPosts(3);
     }
 
     async getPostsByUserId(userId: string): Promise<PostWithoutAuthor[]> {
@@ -100,6 +113,7 @@ export class PostService {
                     author: {
                         select: {
                             name: true,
+                            district: { select: { name: true } },
                             representativeProfile: {
                                 select: {
                                     position: true,

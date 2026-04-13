@@ -22,10 +22,11 @@ export const task = {
             data: dto,
         });
     },
-    getAllTasks: async () => {
+    getTasks: async (limit?: string) => {
         return customInstance<TaskListItem[] | null>({
             url: `/api/v1/tasks`,
             method: 'GET',
+            params: { ...(limit != null ? { limit: limit } : {}) },
         });
     },
     getTasksByUser: async () => {
@@ -39,6 +40,12 @@ export const task = {
             url: `/api/v1/tasks/filter`,
             method: 'GET',
             params: query,
+        });
+    },
+    getLatestTasks: async () => {
+        return customInstance<TaskListItem[]>({
+            url: `/api/v1/tasks/latest`,
+            method: 'GET',
         });
     },
     getTasksByUserId: async (id: string) => {

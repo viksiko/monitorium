@@ -1,8 +1,8 @@
 import { Post as IPost, PostWithoutAuthor } from '@monorepo/types';
-import { Body, Controller, Get, Param, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { ApiHeader, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
 import { User } from '@prisma/client';
-import { AdminGuard } from '@src/auth/guards/admin.guard';
+import { Public } from '@src/auth/decorator/public.decorator';
 import { JwtAuthGuard } from '@src/auth/guards/jwt-auth.guard';
 import { RepresentativeGuard } from '@src/auth/guards/representative.guard';
 import { HEADERS_AUTHORIZATION } from '@src/constants/swagger/api-headers.swagger';
@@ -47,15 +47,23 @@ export class PostController {
     }
 
     // Все публикации (только для администраторов)
-    @UseGuards(AdminGuard)
+    // @UseGuards(AdminGuard)
     @Get()
     @ApiOperation({
-        summary: 'Получить все публикации (требуются права администратора)',
+        summary: 'Получить все публикации',
     })
     @ApiResponse(GET_ALL_POSTS_SUCCESS_RESPONSE)
     @ApiResponse(FORBIDDEN_RESOURCE_RESPONSE)
-    getAllPosts(): Promise<PostWithoutAuthor[] | null> {
-        return this.postService.getAllPosts();
+    getPosts(@Query('limit') limit?: string): Promise<IPost[] | null> {
+        const parsedLimit = Number(limit);
+        return this.postService.getPosts(!isNaN(parsedLimit) ? parsedLimit : undefined);
+    }
+
+    @Get('latest')
+    @Public()
+    @ApiOperation({ summary: 'Получить последние 3 публикации (публичный доступ)' })
+    getLatestPosts(): Promise<IPost[] | null> {
+        return this.postService.getLatestPosts();
     }
 
     // Все публикации одного пользователя (доступно всем авторизованным пользователям)
