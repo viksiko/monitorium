@@ -3,7 +3,7 @@
 import { Link } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { MapPin, Calendar, Clock, ThumbsUp, MessageSquare, User } from 'lucide-react';
+import { MapPin, Calendar, Clock, ThumbsUp, MessageSquare, UserStar } from 'lucide-react';
 import { TaskListItem } from '@monorepo/types';
 import { TaskStatusBadge } from '../ui/task-status-badge';
 
@@ -23,7 +23,7 @@ const TaskCard = ({ task }: Props) => {
                 <div className="flex justify-between items-start">
                     <div className="flex items-center text-honor-darkGray text-sm mb-4">
                         <div className="flex items-center">
-                            <User
+                            <UserStar
                                 size={16}
                                 className="mr-1"
                             />

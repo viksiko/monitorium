@@ -1,4 +1,4 @@
-import { Post, PostWithoutAuthor } from '@monorepo/types';
+import { Post } from '@monorepo/types';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { POST_NOT_FOUND, USER_NOT_FOUND } from '@src/constants/api-messages.constants';
 import { logger } from '@src/logger/winston.logger';
@@ -10,7 +10,7 @@ import { CreatePostDto } from './dto/create-post.dto';
 export class PostService {
     constructor(private prisma: PrismaService) {}
 
-    async createPost(authorId: string, dto: CreatePostDto): Promise<PostWithoutAuthor> {
+    async createPost(authorId: string, dto: CreatePostDto): Promise<Post> {
         try {
             return this.prisma.post.create({
                 data: {
@@ -20,6 +20,12 @@ export class PostService {
                     authorId,
                 },
                 include: {
+                    author: {
+                        select: {
+                            name: true,
+                            district: { select: { id: true, name: true } },
+                        },
+                    },
                     files: true,
                 },
             });
@@ -45,7 +51,7 @@ export class PostService {
                     author: {
                         select: {
                             name: true,
-                            district: { select: { name: true } },
+                            district: { select: { id: true, name: true } },
                         },
                     },
                     files: true,
@@ -68,7 +74,7 @@ export class PostService {
         return this.getPosts(3);
     }
 
-    async getPostsByUserId(userId: string): Promise<PostWithoutAuthor[]> {
+    async getPostsByUserId(userId: string): Promise<Post[]> {
         try {
             const user = await this.prisma.user.findUnique({
                 where: { id: userId },
@@ -83,13 +89,13 @@ export class PostService {
                 where: { authorId: userId },
                 orderBy: { publishedAt: 'desc' },
                 include: {
+                    author: {
+                        select: {
+                            name: true,
+                            district: { select: { id: true, name: true } },
+                        },
+                    },
                     files: true,
-                    // author: {
-                    //     select: {
-                    //         id: true,
-                    //         name: true,
-                    //     },
-                    // },
                 },
             });
 
@@ -113,7 +119,7 @@ export class PostService {
                     author: {
                         select: {
                             name: true,
-                            district: { select: { name: true } },
+                            district: { select: { id: true, name: true } },
                             representativeProfile: {
                                 select: {
                                     position: true,

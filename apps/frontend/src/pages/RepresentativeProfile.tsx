@@ -6,7 +6,7 @@ import { Avatar } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ThumbsUp, MessageSquare, MapPin, Building, Calendar, Clock, User, Mail, Phone, Eye } from 'lucide-react';
+import { ThumbsUp, MessageSquare, MapPin, Building, Calendar, Clock, UserStar, Mail, Phone, Eye } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { api } from '@/lib/api';
 import Loader from '@/components/ui/loader';
@@ -123,7 +123,7 @@ const RepresentativeProfile = () => {
                         <div className="honor-card mb-6">
                             <div className="flex flex-col items-center mb-6">
                                 <Avatar className="justify-center items-centerh-24 w-24 mb-4">
-                                    <User size={48} />
+                                    <UserStar size={48} />
                                 </Avatar>
                                 <h1 className="text-2xl font-bold text-center">{representative.name}</h1>
                                 <p className="text-honor-darkGray">{representative.representativeProfile.position}</p>

@@ -1,4 +1,4 @@
-import { Post as IPost, PostWithoutAuthor } from '@monorepo/types';
+import { Post as IPost } from '@monorepo/types';
 import { Body, Controller, Get, Param, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { ApiHeader, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
 import { User } from '@prisma/client';
@@ -41,7 +41,7 @@ export class PostController {
     @ApiOperation({ summary: 'Создать новую публикацию в блоге' })
     @ApiResponse(CREATE_POST_SUCCESS_RESPONSE)
     @ApiResponse(CREATE_POST_VALIDATION_ERROR_RESPONSE)
-    createPost(@Body() dto: CreatePostDto, @Req() req: Request & { user: User }): Promise<PostWithoutAuthor> {
+    createPost(@Body() dto: CreatePostDto, @Req() req: Request & { user: User }): Promise<IPost> {
         const authorId = req.user.id; // из JWT
         return this.postService.createPost(authorId, dto);
     }
@@ -74,7 +74,7 @@ export class PostController {
     @ApiParam(PARAM_POST_USER_ID)
     @ApiResponse(USER_NOT_FOUND_RESPONSE)
     @ApiResponse(GET_ALL_POST_BY_USER)
-    getPostsByUserId(@Param('id') id: string): Promise<PostWithoutAuthor[] | null> {
+    getPostsByUserId(@Param('id') id: string): Promise<IPost[] | null> {
         return this.postService.getPostsByUserId(id);
     }
 

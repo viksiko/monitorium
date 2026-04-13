@@ -93,7 +93,7 @@ const TasksTab = () => {
                                         size={16}
                                         className="mr-1"
                                     />
-                                    <span>{task.assignee.name}</span>
+                                    <span>{task.author.name}</span>
                                 </div>
                                 <span className="mx-2">•</span>
                                 <MapPin

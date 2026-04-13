@@ -11,7 +11,7 @@ import Loader from '@/components/ui/loader';
 import { TaskListItem } from '@monorepo/types';
 import { TaskStatusBadge } from '@/components/ui/task-status-badge';
 import TaskCard from '@/components/task/TaskCard';
-import { useFilters } from '@/hooks/useFilters';
+import { usePostsFilters } from '@/hooks/usePostsFilters';
 import { useShowMore } from '@/hooks/useShowMore';
 import PostCard from '@/components/post/PostCard';
 import { useGetPosts } from '@/lib/query/post.query';
@@ -26,7 +26,7 @@ const Posts = () => {
         handleDistrictFilter,
         handleSearch,
         resetFilters,
-    } = useFilters(postsData ?? []);
+    } = usePostsFilters(postsData ?? []);
 
     const { displayedItems, shouldShowButton, showAll, remainingCount, handleShowAll, handleCollapse } = useShowMore(
         filteredPosts,

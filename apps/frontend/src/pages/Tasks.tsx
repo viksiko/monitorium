@@ -11,7 +11,7 @@ import Loader from '@/components/ui/loader';
 import { TaskListItem } from '@monorepo/types';
 import { TaskStatusBadge } from '@/components/ui/task-status-badge';
 import TaskCard from '@/components/task/TaskCard';
-import { useFilters } from '@/hooks/useFilters';
+import { useTasksFilters } from '@/hooks/useTasksFilters';
 import { useShowMore } from '@/hooks/useShowMore';
 
 const Tasks = () => {
@@ -24,7 +24,7 @@ const Tasks = () => {
         handleDistrictFilter,
         handleSearch,
         resetFilters,
-    } = useFilters(tasksData ?? []);
+    } = useTasksFilters(tasksData ?? []);
 
     const { displayedItems, shouldShowButton, showAll, remainingCount, handleShowAll, handleCollapse } = useShowMore(
         filteredTasks,

@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { User, MapPin, Plus, LogIn, Bell, Ticket } from 'lucide-react';
+import { UserStar, MapPin, Plus, LogIn, Bell, Ticket } from 'lucide-react';
 import {
     Dialog,
     DialogContent,
@@ -57,7 +57,7 @@ const Header = () => {
                                 <Link
                                     to="/representatives"
                                     className="flex items-center space-x-1 text-honor-text hover:text-honor-blue transition-colors">
-                                    <User size={20} />
+                                    <UserStar size={20} />
                                     <span>Представители</span>
                                 </Link>
                             </>

@@ -1,45 +1,25 @@
+// useFilters.ts
+
 import { useState, useMemo } from 'react';
+import { TaskListItem } from '@monorepo/types';
 
-// type WithDistrict = {
-//     district?: {
-//         id: string;
-//         name?: string;
-//     };
-//     author?: {
-//         district?: {
-//             id: string;
-//             name?: string;
-//         };
-//     };
-// };
-
-// type WithTitle = {
-//     title?: string;
-// };
-
-import { Post } from '@monorepo/types';
-import { Task } from '@monorepo/types';
-
-export const useFilters = <T extends Task & Post>(data: T[] = []) => {
+export const useTasksFilters = (
+    data: TaskListItem[] = [],
+): {
+    selectedDistrict: string | null;
+    searchTerm: string;
+    districts: TaskListItem['district'][];
+    filteredData: TaskListItem[];
+    handleDistrictFilter: (districtId: string) => void;
+    handleSearch: (value: string) => void;
+    resetFilters: () => void;
+} => {
     const [selectedDistrict, setSelectedDistrict] = useState<string | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
 
     // уникальные округа
-
-    // Было так. Но в некоторых местах нет поля district, а есть только author.district. Поэтому добавил проверку на оба варианта.
-    //  const districts = useMemo(() => {
-    //     return Array.from(new Map(data.map((item) => [item.district?.id, item.district])).values()).filter(Boolean);
-    // }, [data]);
     const districts = useMemo(() => {
-        return Array.from(
-            new Map(
-                data.map((item) => {
-                    const district = item.district ?? item.author?.district;
-
-                    return [district?.id, district];
-                }),
-            ).values(),
-        ).filter(Boolean);
+        return Array.from(new Map(data.map((item) => [item.district?.id, item.district])).values()).filter(Boolean);
     }, [data]);
 
     // фильтрация

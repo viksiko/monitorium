@@ -3,7 +3,7 @@
 import { Link } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ThumbsUp, MessageSquare, Clock } from 'lucide-react';
+import { ThumbsUp, MessageSquare, Clock, MapPin, UserStar } from 'lucide-react';
 import { Post } from '@monorepo/types'; // поправь тип если нужно
 
 type Props = {
@@ -19,8 +19,22 @@ const PostCard = ({ post }: Props) => {
                         <h3 className="text-xl font-bold mb-4">{post.title}</h3>
                         {/* {task.hasEscalation && <Badge className="ml-2 bg-red-100 text-red-800">Эскалация</Badge>} */}
                         <div className="flex justify-between items-center w-full">
-                            <div>{post.content?.length > 200 ? post.content.slice(0, 200) + '...' : post.content}</div>
-
+                            {/* <div>{post.content?.length > 200 ? post.content.slice(0, 200) + '...' : post.content}</div> */}
+                            <div className="flex items-center text-honor-darkGray text-sm mb-4">
+                                <div className="flex items-center">
+                                    <UserStar
+                                        size={16}
+                                        className="mr-1"
+                                    />
+                                    <span>{post.author.name}</span>
+                                </div>
+                                <span className="mx-2">•</span>
+                                <MapPin
+                                    size={16}
+                                    className="mr-1"
+                                />
+                                <span>{post.author.district.name}</span>
+                            </div>
                             <Button
                                 variant="link"
                                 className="p-0 h-auto text-honor-blue">

@@ -7,19 +7,14 @@ const Footer = () => {
             <div className="honor-container py-8">
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
                     <div>
-                        <h3 className="text-lg font-bold mb-4">
-                            Платформа «Мониториум»
-                        </h3>
+                        <h3 className="text-lg font-bold mb-4">Платформа «Мониториум»</h3>
                         <p className="text-honor-darkGray">
-                            Цифровая платформа взаимодействия между гражданами и
-                            представителями власти
+                            Цифровая платформа взаимодействия между гражданами и представителями власти
                         </p>
                     </div>
 
                     <div>
-                        <h3 className="text-lg font-bold mb-4">
-                            Для избирателей
-                        </h3>
+                        <h3 className="text-lg font-bold mb-4">Для избирателей</h3>
                         <ul className="space-y-2">
                             <li>
                                 <Link
@@ -44,18 +39,16 @@ const Footer = () => {
                             </li>
                             <li>
                                 <Link
-                                    to="/blog"
+                                    to="/posts"
                                     className="text-honor-darkGray hover:text-honor-blue">
-                                    Новости округов
+                                    Публикации и статьи
                                 </Link>
                             </li>
                         </ul>
                     </div>
 
                     <div>
-                        <h3 className="text-lg font-bold mb-4">
-                            Для представителей
-                        </h3>
+                        <h3 className="text-lg font-bold mb-4">Для представителей</h3>
                         <ul className="space-y-2">
                             <li>
                                 <Link
@@ -91,9 +84,7 @@ const Footer = () => {
                     <div>
                         <h3 className="text-lg font-bold mb-4">Контакты</h3>
                         <p className="text-honor-darkGray">support@chest.ru</p>
-                        <p className="text-honor-darkGray">
-                            +7 (800) 123-45-67
-                        </p>
+                        <p className="text-honor-darkGray">+7 (800) 123-45-67</p>
                         <div className="mt-4 flex flex-col gap-2">
                             <Link
                                 to="/messages"
