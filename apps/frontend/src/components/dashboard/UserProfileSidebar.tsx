@@ -5,6 +5,7 @@ import { Avatar } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { User, MapPin, Plus, Crown } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
+import { TaskCreateButton } from '../ui/taskCreateButton';
 
 const UserProfileSidebar = () => {
     const { user } = useAuth();
@@ -191,17 +192,7 @@ const UserProfileSidebar = () => {
 
                 <h3 className="text-lg font-semibold mt-6 mb-4">Быстрые действия</h3>
                 <div className="flex flex-col space-y-3">
-                    {!user.isRepresentative && (
-                        <Link to="/tasks/create">
-                            <Button className="w-full honor-button-primary flex items-center justify-center">
-                                <Plus
-                                    size={18}
-                                    className="mr-2"
-                                />
-                                Создать задание
-                            </Button>
-                        </Link>
-                    )}
+                    {!user.isRepresentative && <TaskCreateButton />}
                     <Link to="/map">
                         <Button className="w-full honor-button-secondary flex items-center justify-center">
                             <MapPin

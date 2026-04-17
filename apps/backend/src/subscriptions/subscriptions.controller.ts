@@ -8,15 +8,15 @@ import {
 } from '@src/constants/swagger/subscriptions-responses.swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { SubscribeDto } from '../subscriptions/dto/subscribe.dto';
-import { SubscriptionsService } from './subscriptions.service';
+import { SubscriptionService } from './subscriptions.service';
 
 @Controller({
     path: 'subscriptions',
     version: '1',
 })
 @UseGuards(JwtAuthGuard)
-export class SubscriptionsController {
-    constructor(private readonly subscriptionsService: SubscriptionsService) {}
+export class SubscriptionController {
+    constructor(private readonly subscriptionsService: SubscriptionService) {}
 
     @Post()
     @ApiOperation({ summary: 'Подписка на представителя власти' })

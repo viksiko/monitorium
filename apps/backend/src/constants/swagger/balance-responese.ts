@@ -105,13 +105,13 @@ export const DEPOSIT_BALANCE_VALIDATION_ERROR_RESPONSE: ApiResponseOptions = {
 
 export const WITHDRAW_BALANCE_INSUFFICIENT_FUNDS_RESPONSE: ApiResponseOptions = {
     status: 400,
-    description: 'Недостаточно средств для выполнения операции',
+    description: 'Недостаточно билетов для выполнения операции',
     schema: {
         example: {
             success: false,
             statusCode: 400,
             data: {
-                message: 'Недостаточно средств',
+                message: 'Недостаточно билетов',
             },
         },
     },

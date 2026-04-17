@@ -65,6 +65,7 @@ model User {
   representativeDialogs Dialog[]             @relation("RepresentativeDialogs")
   messages              Message[]
   balanceTransactions   BalanceTransaction[]
+  notifications         Notification[]
 
   @@map("users")
 }
@@ -93,14 +94,15 @@ model Task {
   stages TaskStage[] // Этапы решения
   status TaskStatus  @default(PLANNED) // Статус задания
 
-  likesCount Int       @default(0) // Количество лайков
-  viewsCount Int       @default(0) // Количество просмотров
+  likesCount Int @default(0) // Количество лайков
+  viewsCount Int @default(0) // Количество просмотров
 
-  comments   Comment[] //  комментарии
+  comments Comment[] //  комментарии
 
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
-  taskFiles TaskFile[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  taskFiles     TaskFile[]
+  notifications Notification[]
 
   @@map("tasks")
 }
@@ -156,14 +158,16 @@ model RepresentativeProfile {
 
 // Таблица для подписок
 model Subscription {
-  id        String   @id @default(cuid())
-  createdAt DateTime @default(now())
+  id String @id @default(cuid())
 
   subscriberId String
   subscriber   User   @relation("UserSubscriptions", fields: [subscriberId], references: [id], onDelete: Cascade)
 
   representativeId String
   representative   User   @relation("UserSubscribers", fields: [representativeId], references: [id], onDelete: Cascade)
+
+  createdAt     DateTime       @default(now())
+  notifications Notification[]
 
   @@unique([subscriberId, representativeId])
   @@map("subscriptions")
@@ -219,8 +223,9 @@ model Post {
   viewsCount Int       @default(0) // Количество просмотров
   comments   Comment[]
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  notifications Notification[]
 
   @@map("posts")
 }
@@ -256,7 +261,6 @@ model Comment {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
 
   @@index([postId])
   @@index([taskId])
@@ -363,6 +367,45 @@ model BalanceTransaction {
   @@map("balance_transactions")
 }
 
+model Notification {
+  id String @id @default(cuid())
+
+  // Кому пришло уведомление
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Тип уведомления
+  type NotificationType
+
+  // Прочитано / нет
+  isRead Boolean @default(false)
+
+  // Доп. данные (универсально)
+  title   String?
+  message String?
+
+  // связь с подписками
+  subscriptionId String?
+  subscription   Subscription? @relation(fields: [subscriptionId], references: [id])
+
+  // связь с заданиями
+  taskId String?
+  task   Task?   @relation(fields: [taskId], references: [id])
+
+  // связь с постами
+  postId String?
+  post   Post?   @relation(fields: [postId], references: [id])
+
+  // Связи с сущностями (опциональные)
+  commentId String?
+  messageId String?
+
+  createdAt DateTime @default(now())
+
+  @@index([userId, isRead])
+  @@map("notifications")
+}
+
 enum Role {
   VOTER
   REPRESENTATIVE
@@ -394,4 +437,13 @@ enum BalanceTransactionType {
 enum TransactionDirection {
   CREDIT // пополнение
   DEBIT // списание
+}
+
+enum NotificationType {
+  NEW_SUBSCRIBER // Новый подписчик (представителю → кто-то подписался)
+  NEW_TASK_ASSIGNED // Назначено задание (представителю → новая задача)
+  TASK_STATUS_CHANGED // Статус задания изменён (избирателю → обновление по задаче)
+  NEW_POST // Новая публикация (избирателю → обновление по публикациям)
+  NEW_COMMENT // Новый комментарий (автору публикации → кто-то прокомментировал)
+  NEW_MESSAGE // Новое сообщение (пользователю → личное сообщение в чате)
 }

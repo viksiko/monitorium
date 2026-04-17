@@ -1,5 +1,5 @@
 import { District } from './district';
-import { RegisterRoleEnum } from '@monorepo/types';
+import { RegisterRoleEnum } from './auth';
 
 export interface User {
     id: string;

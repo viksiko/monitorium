@@ -5,7 +5,18 @@ import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
-import { MapPin, Calendar, Clock, Plus, ThumbsUp, MessageSquare, AlertTriangle, BookType, User } from 'lucide-react';
+import {
+    MapPin,
+    Calendar,
+    Clock,
+    Plus,
+    ThumbsUp,
+    MessageSquare,
+    AlertTriangle,
+    BookType,
+    User,
+    RefreshCw,
+} from 'lucide-react';
 import EscalateTask from './EscalateTask';
 import { useAuthStore } from '@/shared/stores/auth.store';
 import { Task } from '@monorepo/types';
@@ -13,13 +24,13 @@ import Layout from '@/components/layout/Layout';
 import Loader from '@/components/ui/loader';
 import { useAuthorizedFetch } from '@/hooks/useAuthorizedFetch';
 import { TaskStatusBadge } from '../ui/task-status-badge';
-import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/components/ui/use-toast';
 import { api } from '@/lib/api';
 import TaskCard from '../task/TaskCard';
+import { useShowMore } from '@/hooks/useShowMore';
+import { TaskCreateButton } from '../ui/taskCreateButton';
 
 const TasksTab = () => {
-    const { user } = useAuth();
     const { toast } = useToast();
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
@@ -32,41 +43,30 @@ const TasksTab = () => {
 
     const needsEscalation = (days: number) => days > 7;
 
+    const { displayedItems, shouldShowButton, showAll, remainingCount, handleShowAll, handleCollapse } = useShowMore(
+        tasks,
+        { defaultItemsCount: 5 },
+    );
+
+    const fetchGetTasksRepresentative = async () => {
+        try {
+            const response = await api.get('/api/v1/tasks/user-tasks');
+
+            setTasks(response.data.data);
+        } catch (error) {
+            console.error('Ошибка загрузки заданий избирателя:', error);
+            setTasks([]);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     useEffect(() => {
-        const fetchGetTasksRepresentative = async () => {
-            try {
-                const response = await api.get('/api/v1/tasks/user-tasks');
-
-                setTasks(response.data.data);
-            } catch (error) {
-                console.error('Ошибка загрузки заданий избирателя:', error);
-                setTasks([]);
-            } finally {
-                setLoading(false);
-            }
-        };
-
         fetchGetTasksRepresentative();
     }, []);
 
-    const handleCreateTaskClick = (e: React.MouseEvent) => {
-        // Проверяем наличие подписок
-        const hasSubscriptions = user.subscriptions && user.subscriptions.length > 0;
-
-        if (!user?.isRepresentative && !hasSubscriptions) {
-            // e.preventDefault(); // Останавливаем переход, если это ссылка
-
-            toast({
-                title: 'Ошибка создания',
-                description:
-                    'У вас нет активных подписок на представителей. Пожалуйста, подпишитесь, чтобы создавать задания.',
-                variant: 'destructive',
-            });
-            return;
-        }
-
-        // Если все ок — отправляем на страницу создания
-        navigate('/tasks/create');
+    const handleRefresh = () => {
+        fetchGetTasksRepresentative();
     };
 
     if (loading) {
@@ -81,16 +81,17 @@ const TasksTab = () => {
         <div className="space-y-6">
             <div className="flex justify-between items-center mb-4">
                 <h2 className="text-2xl font-bold">Мои задания</h2>
-
-                <Button
-                    className="honor-button-primary flex items-center"
-                    onClick={handleCreateTaskClick}>
-                    <Plus
-                        size={18}
-                        className="mr-2"
-                    />
-                    Создать задание
-                </Button>
+                <div className="flex gap-2">
+                    {tasks.length > 0 && (
+                        <Button
+                            className="honor-button-primary flex items-center"
+                            onClick={handleRefresh}
+                            disabled={loading}>
+                            <RefreshCw size={18} />
+                        </Button>
+                    )}
+                    <TaskCreateButton />
+                </div>
             </div>
 
             <Dialog
@@ -105,22 +106,49 @@ const TasksTab = () => {
                 </DialogContent>
             </Dialog>
 
-            {tasks.map((task) => (
-                <TaskCard
-                    key={task.id}
-                    task={task}
-                />
-            ))}
+            <div className="max-w-5xl mx-auto">
+                <div className="max-w-5xl mx-auto">
+                    {tasks.length === 0 ? (
+                        <div className="text-center py-10">
+                            <BookType
+                                className="mx-auto mb-4 text-honor-darkGray/90"
+                                size={64}
+                            />
+                            <p className="text-honor-darkGray mb-4">У вас пока нет отправленных заданий</p>
+                        </div>
+                    ) : (
+                        <>
+                            {displayedItems.map((task) => (
+                                <TaskCard
+                                    key={task.id}
+                                    task={task}
+                                    isEdit={false}
+                                />
+                            ))}
 
-            {tasks.length === 0 && (
-                <div className="text-center py-10">
-                    <BookType
-                        className="mx-auto mb-4 text-honor-darkGray/90"
-                        size={64}
-                    />
-                    <p className="text-honor-darkGray mb-4">У вас пока нет отправленных заданий</p>
+                            {shouldShowButton && !showAll && (
+                                <div className="text-center mt-6">
+                                    <button
+                                        onClick={handleShowAll}
+                                        className="px-6 py-2 text-sm font-medium text-honor-blue border border-honor-blue rounded-lg hover:bg-honor-blue hover:text-white transition-colors">
+                                        Показать все ({remainingCount} осталось)
+                                    </button>
+                                </div>
+                            )}
+
+                            {showAll && shouldShowButton && (
+                                <div className="text-center mt-6">
+                                    <button
+                                        onClick={handleCollapse}
+                                        className="px-6 py-2 text-sm font-medium text-honor-darkGray border border-honor-darkGray rounded-lg hover:bg-honor-darkGray hover:text-white transition-colors">
+                                        Свернуть
+                                    </button>
+                                </div>
+                            )}
+                        </>
+                    )}
                 </div>
-            )}
+            </div>
         </div>
     );
 };

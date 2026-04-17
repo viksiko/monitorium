@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { UserStar, MapPin, Plus, LogIn, Bell, Ticket } from 'lucide-react';
+import { UserStar, MapPin, Plus, LogIn, Bell, Ticket, Trash2, CircleX, X } from 'lucide-react';
 import {
     Dialog,
     DialogContent,
@@ -13,6 +13,11 @@ import { TestApiButton } from '../ui/testApiButton';
 import { useAuth } from '@/context/AuthContext';
 import { useLogout } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
+import { useGetNotification, useReadNotification } from '@/lib/query/notificateion.query';
+import { useMutation } from '@tanstack/react-query';
+import Loader from '../ui/loader';
+import NotificationsDialog from '../notification/NotificationsDialog';
+import { TaskCreateLink } from '../ui/taskCreateLink';
 
 const Header = () => {
     const navigate = useNavigate();
@@ -39,15 +44,7 @@ const Header = () => {
                     <nav className="hidden md:flex items-center space-x-6">
                         {user && (
                             <>
-                                {!user.isRepresentative && (
-                                    <Link
-                                        to="/tasks/create"
-                                        className="flex items-center space-x-1 text-honor-text hover:text-honor-blue transition-colors">
-                                        <Plus size={20} />
-                                        <span>Создать задание</span>
-                                    </Link>
-                                )}
-
+                                <TaskCreateLink isShowIcon={true} />
                                 <Link
                                     to="/map"
                                     className="flex items-center space-x-1 text-honor-text hover:text-honor-blue transition-colors">
@@ -83,70 +80,7 @@ const Header = () => {
                                         <span className="text-xs text-honor-darkGray"></span>
                                     </Link>
                                 )}
-
-                                <Dialog>
-                                    <DialogTrigger asChild>
-                                        <Button
-                                            variant="ghost"
-                                            size="icon"
-                                            className="relative">
-                                            <Bell size={20} />
-                                            <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full"></span>
-                                        </Button>
-                                    </DialogTrigger>
-                                    <DialogContent>
-                                        <DialogHeader>
-                                            <DialogTitle>Подписки и уведомления</DialogTitle>
-                                            <DialogDescription>
-                                                Управляйте подписками и просматривайте последние уведомления
-                                            </DialogDescription>
-                                        </DialogHeader>
-                                        <div className="py-4">
-                                            <div className="space-y-4">
-                                                <div>
-                                                    <h3 className="text-sm font-medium">
-                                                        Вы подписаны на следующие округа:
-                                                    </h3>
-                                                    <div className="mt-2 space-y-2">
-                                                        <div className="flex justify-between items-center p-2 bg-honor-gray rounded">
-                                                            <div className="flex items-center">
-                                                                <MapPin
-                                                                    size={16}
-                                                                    className="text-honor-blue mr-2"
-                                                                />
-                                                                <span>Округ №3</span>
-                                                            </div>
-                                                            <Button
-                                                                variant="ghost"
-                                                                size="sm">
-                                                                Отписаться
-                                                            </Button>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div>
-                                                    <h3 className="text-sm font-medium">Последние уведомления:</h3>
-                                                    <div className="mt-2 space-y-2">
-                                                        <div className="p-2 bg-honor-gray rounded">
-                                                            <p className="text-sm font-medium">
-                                                                Новое задание в Округе №3
-                                                            </p>
-                                                            <p className="text-xs text-honor-darkGray">
-                                                                15 минут назад
-                                                            </p>
-                                                        </div>
-                                                        <div className="p-2 bg-honor-gray rounded">
-                                                            <p className="text-sm font-medium">
-                                                                Встреча с жителями перенесена
-                                                            </p>
-                                                            <p className="text-xs text-honor-darkGray">2 часа назад</p>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </DialogContent>
-                                </Dialog>
+                                <NotificationsDialog />
                             </>
                         )}
                         {!user ? (

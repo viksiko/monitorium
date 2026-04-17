@@ -1,16 +1,17 @@
-// subscriptions/subscriptions.service.ts
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { BalanceTransactionType } from '@prisma/client';
 import { BalanceService } from '@src/balance/balance.service';
 import { SUBSCRIPTION_MESSAGES, USER_NOT_FOUND } from '@src/constants/api-messages.constants';
 import { TOKEN_PARAMS } from '@src/constants/tokens-params';
+import { NotificationService } from '@src/notification/notification.service';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
-export class SubscriptionsService {
+export class SubscriptionService {
     constructor(
         private readonly prisma: PrismaService,
         private readonly balanceService: BalanceService,
+        private readonly notificationService: NotificationService,
     ) {}
 
     async subscribe(subscriberId: string, representativeId: string): Promise<{ message: string }> {
@@ -32,7 +33,7 @@ export class SubscriptionsService {
             throw new BadRequestException(SUBSCRIPTION_MESSAGES.INVALID_TARGET);
         }
 
-        return this.prisma.$transaction(async (tx) => {
+        const subscription = await this.prisma.$transaction(async (tx) => {
             // Проверка на существующую подписку (уже внутри транзакции)
             const existingSubscription = await tx.subscription.findUnique({
                 where: {
@@ -48,7 +49,7 @@ export class SubscriptionsService {
             }
 
             // Создаём подписку
-            await tx.subscription.create({
+            const subscription = await tx.subscription.create({
                 data: {
                     subscriberId,
                     representativeId,
@@ -63,8 +64,19 @@ export class SubscriptionsService {
                 BalanceTransactionType.REPRESENTATIVE_SUBSCRIPTION,
             );
 
-            return { message: SUBSCRIPTION_MESSAGES.CREATE_SUCCESS };
+            return subscription;
         });
+
+        // создаём уведомление представителю по websocket
+        await this.notificationService.createAndSendNotification({
+            userId: representativeId,
+            type: 'NEW_SUBSCRIBER',
+            title: 'Новый подписчик',
+            message: 'На вас подписался новый пользователь',
+            subscriptionId: subscription.id,
+        });
+
+        return { message: SUBSCRIPTION_MESSAGES.CREATE_SUCCESS };
     }
 
     // async getUserSubscriptions(userId: string) {

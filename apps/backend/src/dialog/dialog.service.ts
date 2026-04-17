@@ -4,7 +4,7 @@ import { DialogAndSubscriptions } from '@monorepo/types';
 import { CreateDialog } from '@monorepo/types';
 import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { BalanceService } from '@src/balance/balance.service';
-import { DIALOG_MESSAGES } from '@src/constants/api-messages.constants';
+import { DIALOG_MESSAGES, USER_NOT_FOUND } from '@src/constants/api-messages.constants';
 import { TOKEN_PARAMS } from '@src/constants/tokens-params';
 import { logger } from '@src/logger/winston.logger';
 import { PrismaService } from '../prisma/prisma.service';
@@ -203,13 +203,30 @@ export class DialogService {
                     throw new ForbiddenException(DIALOG_MESSAGES.ACCESS_DENIED);
                 }
 
+                const user = await tx.user.findUnique({
+                    where: { id: userId },
+                    include: {
+                        voterProfile: true,
+                        representativeProfile: true,
+                    },
+                });
+
+                if (!user) {
+                    throw new NotFoundException(USER_NOT_FOUND);
+                }
+
                 // Списание токенов с баланса
-                await this.balanceService.withdrawBalanceTx(
-                    tx,
-                    userId,
-                    TOKEN_PARAMS.MESSAGE_CREATION_PRICE,
-                    BalanceTransactionType.MESSAGE_REPRESENTATIVE,
-                );
+                if (user.voterProfile) {
+                    await this.balanceService.withdrawBalanceTx(
+                        tx,
+                        userId,
+                        TOKEN_PARAMS.MESSAGE_CREATION_PRICE,
+                        BalanceTransactionType.MESSAGE_REPRESENTATIVE,
+                    );
+                }
+
+                console.log(userId, 'userId');
+                console.log(dto, 'dto');
 
                 const now = new Date();
 

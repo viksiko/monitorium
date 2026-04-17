@@ -4,6 +4,8 @@ import { Link } from 'react-router-dom';
 import { MapPin, Plus, AlertTriangle, BarChart, TrendingUp } from 'lucide-react';
 import { useApi } from '@/hooks/useApi';
 import { useToggleShowShortStats } from '@/shared/stores/toggleShowShortStats.store';
+import { useAuth } from '@/context/AuthContext';
+import { TaskCreateButton } from '../ui/taskCreateButton';
 
 interface DistrictsShortStats {
     id: number;
@@ -35,6 +37,7 @@ const MapVisualization = ({
     onSelectDistrict,
 }: MapVisualizationProps) => {
     // const selectedDistrictData = districts.find((d) => d.id === selectedDistrict);
+    const { user } = useAuth();
 
     const [districtsShortStats, setDistrictsShortStats] = useState([]);
     const { request } = useApi<DistrictsShortStats[]>();
@@ -364,12 +367,8 @@ const MapVisualization = ({
 
             {/* Управление картой */}
             <div className="absolute bottom-4 right-4 flex flex-col gap-2">
-                <Link to="/tasks/create">
-                    <Button className="honor-button-primary flex items-center space-x-2 w-full justify-start">
-                        <Plus size={18} />
-                        <span>Создать задание</span>
-                    </Button>
-                </Link>
+                <TaskCreateButton />
+
                 {/* <Button
                     variant="outline"
                     className="bg-white w-full justify-start"

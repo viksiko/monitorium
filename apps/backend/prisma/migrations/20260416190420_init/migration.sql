@@ -13,6 +13,9 @@ CREATE TYPE "BalanceTransactionType" AS ENUM ('REGISTRATION_BONUS', 'WATCH_AD', 
 -- CreateEnum
 CREATE TYPE "TransactionDirection" AS ENUM ('CREDIT', 'DEBIT');
 
+-- CreateEnum
+CREATE TYPE "NotificationType" AS ENUM ('NEW_SUBSCRIBER', 'NEW_TASK_ASSIGNED', 'TASK_STATUS_CHANGED', 'NEW_POST', 'NEW_COMMENT', 'NEW_MESSAGE');
+
 -- CreateTable
 CREATE TABLE "users" (
     "id" TEXT NOT NULL,
@@ -99,9 +102,9 @@ CREATE TABLE "representative_profiles" (
 -- CreateTable
 CREATE TABLE "subscriptions" (
     "id" TEXT NOT NULL,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "subscriberId" TEXT NOT NULL,
     "representativeId" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "subscriptions_pkey" PRIMARY KEY ("id")
 );
@@ -236,6 +239,24 @@ CREATE TABLE "balance_transactions" (
     CONSTRAINT "balance_transactions_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateTable
+CREATE TABLE "notifications" (
+    "id" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
+    "type" "NotificationType" NOT NULL,
+    "isRead" BOOLEAN NOT NULL DEFAULT false,
+    "title" TEXT,
+    "message" TEXT,
+    "subscriptionId" TEXT,
+    "taskId" TEXT,
+    "postId" TEXT,
+    "commentId" TEXT,
+    "messageId" TEXT,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "notifications_pkey" PRIMARY KEY ("id")
+);
+
 -- CreateIndex
 CREATE UNIQUE INDEX "users_email_key" ON "users"("email");
 
@@ -283,6 +304,9 @@ CREATE UNIQUE INDEX "districts_mapId_key" ON "districts"("mapId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "areas_name_districtId_key" ON "areas"("name", "districtId");
+
+-- CreateIndex
+CREATE INDEX "notifications_userId_isRead_idx" ON "notifications"("userId", "isRead");
 
 -- AddForeignKey
 ALTER TABLE "users" ADD CONSTRAINT "users_districtId_fkey" FOREIGN KEY ("districtId") REFERENCES "districts"("id") ON DELETE SET NULL ON UPDATE CASCADE;
@@ -349,3 +373,15 @@ ALTER TABLE "areas" ADD CONSTRAINT "areas_districtId_fkey" FOREIGN KEY ("distric
 
 -- AddForeignKey
 ALTER TABLE "balance_transactions" ADD CONSTRAINT "balance_transactions_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "notifications" ADD CONSTRAINT "notifications_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "notifications" ADD CONSTRAINT "notifications_subscriptionId_fkey" FOREIGN KEY ("subscriptionId") REFERENCES "subscriptions"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "notifications" ADD CONSTRAINT "notifications_taskId_fkey" FOREIGN KEY ("taskId") REFERENCES "tasks"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "notifications" ADD CONSTRAINT "notifications_postId_fkey" FOREIGN KEY ("postId") REFERENCES "posts"("id") ON DELETE SET NULL ON UPDATE CASCADE;

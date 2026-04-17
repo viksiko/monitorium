@@ -3,6 +3,7 @@ import { HelpCircle } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { RegisterRoleEnum } from '@monorepo/types';
 import { useMemo } from 'react';
+import { TaskCreateLink } from '../ui/taskCreateLink';
 
 const Footer = () => {
     const { user } = useAuth();
@@ -24,7 +25,12 @@ const Footer = () => {
     return (
         <footer className="bg-honor-gray mt-auto">
             <div className="honor-container py-8">
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div
+                    className={`grid grid-cols-1 gap-8 ${
+                        !enableVoterBlock || !enableRepresentativeBlock
+                            ? 'md:grid-cols-3 md:gap-20'
+                            : 'md:grid-cols-4 gap-8'
+                    }`}>
                     <div>
                         <h3 className="text-lg font-bold mb-4">Платформа «Мониториум»</h3>
                         <p className="text-honor-darkGray">
@@ -51,11 +57,10 @@ const Footer = () => {
                                     </Link>
                                 </li>
                                 <li>
-                                    <Link
-                                        to="/tasks/create"
-                                        className="text-honor-darkGray hover:text-honor-blue">
-                                        Создать задание
-                                    </Link>
+                                    <TaskCreateLink
+                                        className={'text-honor-darkGray hover:text-honor-blue'}
+                                        isShowIcon={false}
+                                    />
                                 </li>
                                 <li>
                                     <Link

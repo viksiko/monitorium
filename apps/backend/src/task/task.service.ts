@@ -5,6 +5,7 @@ import { BalanceService } from '@src/balance/balance.service';
 import { TASK_MESSAGES, USER_NOT_FOUND } from '@src/constants/api-messages.constants';
 import { TOKEN_PARAMS } from '@src/constants/tokens-params';
 import { logger } from '@src/logger/winston.logger';
+import { NotificationService } from '@src/notification/notification.service';
 import { PrismaService } from '@src/prisma/prisma.service';
 import { UpdateTaskData } from '@src/types/task';
 import { CreateTaskStageDto } from './dto/create-task-stage.dto';
@@ -17,6 +18,7 @@ export class TaskService {
     constructor(
         private prisma: PrismaService,
         private balanceService: BalanceService,
+        private readonly notificationService: NotificationService,
     ) {}
 
     async createTask(authorId: string, dto: CreateTaskDto): Promise<Task> {
@@ -27,7 +29,7 @@ export class TaskService {
                 throw new Error(TASK_MESSAGES.ASSIGNEE_NOT_FOUND);
             }
 
-            return await this.prisma.$transaction(async (tx) => {
+            const task = await this.prisma.$transaction(async (tx) => {
                 // Списание билеты у пользователя
                 await this.balanceService.withdrawBalanceTx(
                     tx,
@@ -61,7 +63,7 @@ export class TaskService {
                 }
 
                 // Создание задачи с возможными этапами
-                const task = await tx.task.create({
+                const creatTask = await tx.task.create({
                     data: {
                         ...taskData,
 
@@ -99,8 +101,21 @@ export class TaskService {
                     },
                 });
 
-                return task;
+                return creatTask;
             });
+
+            // создаём уведомление представителю по websocket
+            if (task.assigneeId) {
+                await this.notificationService.createAndSendNotification({
+                    userId: task.assigneeId,
+                    type: 'NEW_TASK_ASSIGNED',
+                    title: 'Новое задание',
+                    message: 'Вам назначена новая задача',
+                    taskId: task.id,
+                });
+            }
+
+            return task;
         } catch (error: unknown) {
             logger.error(
                 'Failed create task' +
@@ -371,82 +386,94 @@ export class TaskService {
     }
 
     async updateTask(id: string, dto: UpdateTaskDto, user: User): Promise<Task> {
-        const task = await this.prisma.task.findUnique({
-            where: { id },
-            include: { stages: true },
-        });
-
-        if (!task) {
-            throw new NotFoundException(TASK_MESSAGES.NOT_FOUND);
-        }
-
-        if (task.assigneeId !== user.id) {
-            throw new ForbiddenException(TASK_MESSAGES.NO_ACCESS);
-        }
-
-        const data: UpdateTaskData = {
-            possibleSolutions: dto.possibleSolutions,
-            desiredResolutionDate: dto.desiredResolutionDate,
-            status: dto.status,
-        };
-
-        // удаление этапов
-        if (dto.deletedStageIds?.length) {
-            await this.prisma.taskStage.deleteMany({
-                where: {
-                    id: { in: dto.deletedStageIds },
-                    taskId: task.id,
-                },
+        const updatedTask = await this.prisma.$transaction(async (tx) => {
+            const task = await tx.task.findUnique({
+                where: { id },
+                include: { stages: true },
             });
-        }
 
-        // Обновление этапов
-        if (dto.stages) {
-            for (const stage of dto.stages) {
-                const isTempId = stage.id?.startsWith('temp');
-                if (!isTempId) {
-                    // Обновляем существующий этап
-                    await this.prisma.taskStage.updateMany({
-                        where: {
-                            id: stage.id,
-                            taskId: task.id,
-                        },
-                        data: {
-                            title: stage.title,
-                            date: new Date(stage.date),
-                            isCompleted: stage.isCompleted,
-                        },
-                    });
-                } else {
-                    // Создаем новый этап
-                    await this.prisma.taskStage.create({
-                        data: {
-                            title: stage.title,
-                            date: new Date(stage.date),
-                            taskId: task.id,
-                            isCompleted: stage.isCompleted,
-                        },
-                    });
+            if (!task) {
+                throw new NotFoundException(TASK_MESSAGES.NOT_FOUND);
+            }
+
+            if (task.assigneeId !== user.id) {
+                throw new ForbiddenException(TASK_MESSAGES.NO_ACCESS);
+            }
+
+            const data: UpdateTaskData = {
+                possibleSolutions: dto.possibleSolutions,
+                desiredResolutionDate: dto.desiredResolutionDate,
+                status: dto.status,
+            };
+
+            // удаление этапов
+            if (dto.deletedStageIds?.length) {
+                await tx.taskStage.deleteMany({
+                    where: {
+                        id: { in: dto.deletedStageIds },
+                        taskId: task.id,
+                    },
+                });
+            }
+
+            // обновление / создание этапов
+            if (dto.stages) {
+                for (const stage of dto.stages) {
+                    const isTempId = stage.id?.startsWith('temp');
+
+                    if (!isTempId) {
+                        await tx.taskStage.updateMany({
+                            where: {
+                                id: stage.id,
+                                taskId: task.id,
+                            },
+                            data: {
+                                title: stage.title,
+                                date: new Date(stage.date),
+                                isCompleted: stage.isCompleted,
+                            },
+                        });
+                    } else {
+                        await tx.taskStage.create({
+                            data: {
+                                title: stage.title,
+                                date: new Date(stage.date),
+                                taskId: task.id,
+                                isCompleted: stage.isCompleted,
+                            },
+                        });
+                    }
                 }
             }
-        }
 
-        // Обновляем саму задачу
-        return await this.prisma.task.update({
-            where: { id },
-            data,
-            include: {
-                author: { select: { id: true, name: true } },
-                assignee: { select: { id: true, name: true } },
-                district: true,
-                stages: {
-                    orderBy: {
-                        date: 'asc',
+            // обновляем задачу
+            const updatedTask = await tx.task.update({
+                where: { id },
+                data,
+                include: {
+                    author: { select: { id: true, name: true } },
+                    assignee: { select: { id: true, name: true } },
+                    district: true,
+                    stages: {
+                        orderBy: { date: 'asc' },
                     },
+                    comments: true,
+                    taskFiles: true,
                 },
-                comments: true,
-                taskFiles: true,
-            },
+            });
+
+            return updatedTask;
         });
+
+        // создаём уведомление избирателю по websocket
+        await this.notificationService.createAndSendNotification({
+            userId: updatedTask.author.id,
+            type: 'TASK_STATUS_CHANGED',
+            title: 'Изменения в задаче',
+            message: 'Задача была обновлена',
+            taskId: updatedTask.id,
+        });
+
+        return updatedTask;
     }
 }
