@@ -210,6 +210,78 @@ export const TASK_FILTER_LIST_SUCCESS_RESPONSE: ApiResponseOptions = {
     },
 };
 
+export const GET_LATEST_TASKS: ApiResponseOptions = {
+    status: 200,
+    description: 'Получить последние задания',
+    content: {
+        'application/json': {
+            examples: {
+                a: {
+                    summary: 'Список послдених заданий',
+                    value: {
+                        success: true,
+                        statusCode: 200,
+                        data: [
+                            {
+                                id: 'cmo2yd6sw003lb0jfkm6i2trf',
+                                title: 'Est ut similique te',
+                                address: 'Voluptates incidunt',
+                                district: {
+                                    id: 'bf8e0826-017d-4f86-99f2-2798ad449985',
+                                    name: 'Округ №28',
+                                },
+                                desiredResolutionDate: '2002-04-17T00:00:00.000Z',
+                                likesCount: 0,
+                                viewsCount: 0,
+                                status: 'PLANNED',
+                                createdAt: '2026-04-17T13:37:20.812Z',
+                                author: {
+                                    id: 'cmo1unnre0000o4jfjvdoebjs',
+                                    name: 'Palmer Glover',
+                                },
+                                assignee: {
+                                    id: 'cmo2u7c8k000cb0jfz617zt7p',
+                                    name: 'Raphael Romero',
+                                },
+                            },
+                            {
+                                id: 'cmo2xsibk0038b0jfsp9h4bmp',
+                                title: 'Iure labore aspernat',
+                                address: 'Commodo perferendis ',
+                                district: {
+                                    id: 'bf8e0826-017d-4f86-99f2-2798ad449985',
+                                    name: 'Округ №28',
+                                },
+                                desiredResolutionDate: '1998-07-23T00:00:00.000Z',
+                                likesCount: 0,
+                                viewsCount: 0,
+                                status: 'PLANNED',
+                                createdAt: '2026-04-17T13:21:15.965Z',
+                                author: {
+                                    id: 'cmo2ujroo000jb0jflhobub4d',
+                                    name: 'Ora Pope',
+                                },
+                                assignee: {
+                                    id: 'cmo2u7c8k000cb0jfz617zt7p',
+                                    name: 'Raphael Romero',
+                                },
+                            },
+                        ],
+                    },
+                },
+                b: {
+                    summary: 'Задания не найдены',
+                    value: {
+                        success: true,
+                        statusCode: 200,
+                        data: [],
+                    },
+                },
+            },
+        },
+    },
+};
+
 export const CREATE_TASK_SUCCESS_RESPONSE: ApiResponseOptions = {
     status: 201,
     description: 'Успешное создание задания',

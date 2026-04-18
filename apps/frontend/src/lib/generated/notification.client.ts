@@ -4,7 +4,7 @@
  */
 
 import { customInstance } from '@/lib/mutator';
-import type { Notification, NotificationItem } from '@monorepo/types';
+import type { NotificationItem } from '@monorepo/types';
 
 export const notification = {
     getNotifications: async () => {
@@ -14,13 +14,13 @@ export const notification = {
         });
     },
     readNotification: async (id: string) => {
-        return customInstance<Notification>({
+        return customInstance<{ message: string }>({
             url: `/api/v1/notifications/${encodeURIComponent(String(id))}/read`,
             method: 'PATCH',
         });
     },
     readAllNotifications: async () => {
-        return customInstance<void>({
+        return customInstance<{ message: string }>({
             url: `/api/v1/notifications/read-all`,
             method: 'PATCH',
         });

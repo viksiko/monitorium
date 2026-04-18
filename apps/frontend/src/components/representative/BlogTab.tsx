@@ -10,6 +10,7 @@ import { useAuth } from '@/context/AuthContext';
 import Loader from '../ui/loader';
 import { TaskStatusBadge } from '../ui/task-status-badge';
 import { Post, Task } from '@monorepo/types';
+import ItemCount from '../ui/itemCount';
 
 const BlogTab = () => {
     const [loading, setLoading] = useState(true);
@@ -50,7 +51,10 @@ const BlogTab = () => {
     return (
         <>
             <div className="flex justify-between items-center mb-4">
-                <h2 className="text-2xl font-bold">Мои статьи</h2>
+                <div className="flex gap-2 items-center">
+                    <h2 className="text-2xl font-bold">Мои статьи</h2>
+                    <ItemCount count={posts.length} />
+                </div>
                 <Link to="/posts/create">
                     <Button className="honor-button-primary flex items-center">
                         <Plus

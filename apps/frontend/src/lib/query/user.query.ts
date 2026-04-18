@@ -14,3 +14,17 @@ export function useGetUserStatistics() {
         queryFn: () => user.getUserStatistics(),
     });
 }
+
+export function useGetSubscribers() {
+    return useQuery({
+        queryKey: ['userSubscribers'],
+        queryFn: () => user.getSubscribers(),
+    });
+}
+
+export function useGetSubscriptions() {
+    return useQuery({
+        queryKey: ['userSubscriptions'],
+        queryFn: () => user.getSubscriptions(),
+    });
+}

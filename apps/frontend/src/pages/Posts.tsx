@@ -92,7 +92,7 @@ const Posts = () => {
                                         size={18}
                                     />
                                     <Input
-                                        placeholder="Поиск задач..."
+                                        placeholder="Поиск публикаций..."
                                         className="honor-input pl-10 text-base"
                                         value={searchTerm}
                                         onChange={(e) => handleSearch(e.target.value)}

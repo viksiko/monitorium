@@ -1,5 +1,6 @@
 import { Notification, NotificationItem, NotificationType } from '@monorepo/types';
 import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { logger } from '@src/logger/winston.logger';
 import { PrismaService } from '@src/prisma/prisma.service';
 import { NotificationsGateway } from './notifications.gateway';
 
@@ -20,94 +21,131 @@ export class NotificationService {
         taskId?: string;
         postId?: string;
     }): Promise<Notification> {
-        const notification = await this.prisma.notification.create({
-            data,
-        });
+        try {
+            const notification = await this.prisma.notification.create({
+                data,
+            });
 
-        // отправка уведомления в реальном времени
-        this.notificationsGateway.sendNotification(data.userId, {
-            id: notification.id,
-            type: notification.type,
-            title: notification.title,
-            message: notification.message,
-            createdAt: notification.createdAt,
-        });
+            // отправка уведомления в реальном времени
+            this.notificationsGateway.sendNotification(data.userId, {
+                id: notification.id,
+                type: notification.type,
+                title: notification.title,
+                message: notification.message,
+                createdAt: notification.createdAt,
+            });
 
-        return notification;
+            return notification;
+        } catch (error) {
+            logger.error('Failed creat and send notification', {
+                category: 'NotificationService',
+                operation: 'createAndSendNotification',
+                error: error instanceof Error ? error.message : error,
+            });
+
+            throw error;
+        }
     }
 
     // Получить все уведомления пользователя
     async getNotifications(userId: string): Promise<NotificationItem[]> {
-        return this.prisma.notification.findMany({
-            where: {
-                userId,
-                isRead: false,
-            },
-            orderBy: {
-                createdAt: 'desc',
-            },
-            include: {
-                subscription: {
-                    include: {
-                        subscriber: {
-                            select: {
-                                name: true,
+        try {
+            return this.prisma.notification.findMany({
+                where: {
+                    userId,
+                    isRead: false,
+                },
+                orderBy: {
+                    createdAt: 'desc',
+                },
+                include: {
+                    subscription: {
+                        include: {
+                            subscriber: {
+                                select: {
+                                    name: true,
+                                },
+                            },
+                        },
+                    },
+                    task: {
+                        select: {
+                            title: true,
+                        },
+                    },
+                    post: {
+                        select: {
+                            title: true,
+                            author: {
+                                select: {
+                                    name: true,
+                                },
                             },
                         },
                     },
                 },
-                task: {
-                    select: {
-                        title: true,
-                    },
-                },
-                post: {
-                    select: {
-                        title: true,
-                        author: {
-                            select: {
-                                name: true,
-                            },
-                        },
-                    },
-                },
-            },
-        });
+            });
+        } catch (error) {
+            logger.error('Failed get all notifications', {
+                category: 'NotificationService',
+                operation: 'getNotifications',
+                error: error instanceof Error ? error.message : error,
+            });
+
+            throw error;
+        }
     }
 
     // Отметить как прочитанное
-    async readNotification(notificationId: string, userId: string): Promise<Notification> {
-        const notification = await this.prisma.notification.findUnique({
-            where: { id: notificationId },
-        });
+    async readNotification(notificationId: string, userId: string): Promise<{ message: string }> {
+        try {
+            const notification = await this.prisma.notification.findUnique({
+                where: { id: notificationId },
+            });
 
-        if (!notification) {
-            throw new NotFoundException('Notification not found');
+            if (!notification) {
+                throw new NotFoundException('Уведомление не найдено');
+            }
+
+            // защита — нельзя читать чужие уведомления
+            if (notification.userId !== userId) {
+                throw new ForbiddenException('Нет доступа к уведомлению');
+            }
+
+            return { message: 'Уведомление прочитано' };
+        } catch (error) {
+            logger.error('Failed read notification', {
+                category: 'NotificationService',
+                operation: 'readNotification',
+                error: error instanceof Error ? error.message : error,
+            });
+
+            throw error;
         }
-
-        // защита — нельзя читать чужие уведомления
-        if (notification.userId !== userId) {
-            throw new ForbiddenException('Access denied');
-        }
-
-        return this.prisma.notification.update({
-            where: { id: notificationId },
-            data: {
-                isRead: true,
-            },
-        });
     }
 
     // прочитать все уведомления
-    async readAllNotifications(userId: string): Promise<void> {
-        await this.prisma.notification.updateMany({
-            where: {
-                userId,
-                isRead: false,
-            },
-            data: {
-                isRead: true,
-            },
-        });
+    async readAllNotifications(userId: string): Promise<{ message: string }> {
+        try {
+            await this.prisma.notification.updateMany({
+                where: {
+                    userId,
+                    isRead: false,
+                },
+                data: {
+                    isRead: true,
+                },
+            });
+
+            return { message: 'Все уведомления прочитаны' };
+        } catch (error) {
+            logger.error('Failed read all notifications', {
+                category: 'NotificationService',
+                operation: 'readAllNotifications',
+                error: error instanceof Error ? error.message : error,
+            });
+
+            throw error;
+        }
     }
 }

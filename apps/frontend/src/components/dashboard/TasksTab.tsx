@@ -29,6 +29,7 @@ import { api } from '@/lib/api';
 import TaskCard from '../task/TaskCard';
 import { useShowMore } from '@/hooks/useShowMore';
 import { TaskCreateButton } from '../ui/taskCreateButton';
+import ItemCount from '../ui/itemCount';
 
 const TasksTab = () => {
     const { toast } = useToast();
@@ -80,7 +81,10 @@ const TasksTab = () => {
     return (
         <div className="space-y-6">
             <div className="flex justify-between items-center mb-4">
-                <h2 className="text-2xl font-bold">Мои задания</h2>
+                <div className="flex gap-2 items-center">
+                    <h2 className="text-2xl font-bold">Мои задания</h2>
+                    <ItemCount count={tasks.length} />
+                </div>
                 <div className="flex gap-2">
                     {tasks.length > 0 && (
                         <Button

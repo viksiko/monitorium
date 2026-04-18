@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { HelpCircle } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
-import { RegisterRoleEnum } from '@monorepo/types';
+import { Role } from '@monorepo/types';
 import { useMemo } from 'react';
 import { TaskCreateLink } from '../ui/taskCreateLink';
 
@@ -16,8 +16,8 @@ const Footer = () => {
             };
         } else {
             return {
-                enableVoterBlock: user?.role === RegisterRoleEnum.VOTER,
-                enableRepresentativeBlock: user?.role === RegisterRoleEnum.REPRESENTATIVE,
+                enableVoterBlock: user?.role === Role.VOTER,
+                enableRepresentativeBlock: user?.role === Role.REPRESENTATIVE,
             };
         }
     }, [user]);
@@ -28,7 +28,7 @@ const Footer = () => {
                 <div
                     className={`grid grid-cols-1 gap-8 ${
                         !enableVoterBlock || !enableRepresentativeBlock
-                            ? 'md:grid-cols-3 md:gap-20'
+                            ? 'md:grid-cols-3 md:gap-20 justify-items-center'
                             : 'md:grid-cols-4 gap-8'
                     }`}>
                     <div>
@@ -131,7 +131,7 @@ const Footer = () => {
                 </div>
 
                 <div className="border-t border-gray-200 mt-8 pt-6 text-center text-honor-darkGray">
-                    <p>© 2025 Платформа «Честь». Все права защищены.</p>
+                    <p>© 2025 Платформа «Мониториум». Все права защищены.</p>
                 </div>
             </div>
         </footer>

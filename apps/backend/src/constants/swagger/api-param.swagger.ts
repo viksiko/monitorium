@@ -62,6 +62,14 @@ export const PARAM_DISTRICT_ID = {
     example: '/api/v1/districts/{districtId}',
 };
 
+export const PARAM_NOTIFICATION_ID_READ = {
+    name: 'id',
+    description: 'Обязательный параметр',
+    required: true,
+    type: String,
+    example: '/api/v1/notifinications/{notificationId}/read',
+};
+
 export const BAD_REQUEST_PARAM = {
     success: false,
     statusCode: 400,

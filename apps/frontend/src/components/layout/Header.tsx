@@ -37,7 +37,12 @@ const Header = () => {
                         <Link
                             to="/"
                             className="flex items-center">
-                            <span className="text-2xl font-bold text-honor-blue whitespace-nowrap">Мониториум</span>
+                            <div className="flex items-center gap-[2px] whitespace-nowrap group">
+                                <div className="bg-honor-blue text-white text-xl font-bold w-7 h-7 flex items-center justify-center rounded transition-transform group-hover:scale-110">
+                                    М
+                                </div>
+                                <span className="text-2xl font-bold text-honor-blue">ониториум</span>
+                            </div>
                         </Link>
                     </div>
 
@@ -62,7 +67,6 @@ const Header = () => {
                     </nav>
 
                     <div className="flex items-center space-x-4">
-                        {/* Ticket indicator */}
                         {user && (
                             <>
                                 {!user.isRepresentative && (
@@ -94,8 +98,13 @@ const Header = () => {
                             <div className="flex items-center space-x-3">
                                 <Link
                                     to="/dashboard"
-                                    className="text-sm font-medium text-gray-700 cursor-pointer hover:text-blue-600 hover:underline transition-all">
-                                    <span>{user.name}</span>
+                                    className="text-sm font-medium text-gray-700 cursor-pointer hover:underline transition-all">
+                                    <div className="flex flex-col gap-0">
+                                        <span className="text-[16px] font-bold text-gray-700 dark:text-gray-200">
+                                            {user.name}
+                                        </span>
+                                        <span className="text-xs text-gray-400 dark:text-gray-500">{user.email}</span>
+                                    </div>
                                 </Link>
 
                                 <Button

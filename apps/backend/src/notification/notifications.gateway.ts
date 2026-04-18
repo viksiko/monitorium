@@ -54,7 +54,7 @@ export class NotificationsGateway implements OnGatewayConnection, OnGatewayDisco
                     this.userSockets.delete(userId);
                 }
 
-                console.log(`User ${userId} disconnected: ${client.id}`);
+                console.log(`❌ User ${userId} disconnected: ${client.id}`);
                 break;
             }
         }

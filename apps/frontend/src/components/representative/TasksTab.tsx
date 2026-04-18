@@ -12,6 +12,7 @@ import { TaskStatusBadge } from '../ui/task-status-badge';
 import { Task } from '@monorepo/types';
 import { useShowMore } from '@/hooks/useShowMore';
 import TaskCard from '../task/TaskCard';
+import ItemCount from '../ui/itemCount';
 
 const TasksTab = () => {
     const [loading, setLoading] = useState(true);
@@ -60,7 +61,10 @@ const TasksTab = () => {
     return (
         <>
             <div className="flex justify-between items-center mb-4">
-                <h2 className="text-2xl font-bold">Мои задачи</h2>
+                <div className="flex gap-2 items-center">
+                    <h2 className="text-2xl font-bold">Мои задачи</h2>
+                    <ItemCount count={tasks.length} />
+                </div>
                 {/* <Link to="/tasks/create">
                     <Button className="honor-button-primary flex items-center">
                         <Plus

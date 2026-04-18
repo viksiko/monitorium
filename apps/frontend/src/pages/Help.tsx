@@ -1,11 +1,6 @@
 import React from 'react';
 import Layout from '@/components/layout/Layout';
-import {
-    Accordion,
-    AccordionContent,
-    AccordionItem,
-    AccordionTrigger,
-} from '@/components/ui/accordion';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Link } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -15,7 +10,7 @@ const Help: React.FC = () => {
     const faqItems = [
         {
             question: 'Как зарегистрироваться на платформе?',
-            answer: 'Для регистрации на платформе «Честь» перейдите на главную страницу и выберите тип учетной записи: «Для избирателей» или «Для представителей власти». Затем заполните регистрационную форму с указанием ваших контактных данных и следуйте инструкциям на экране.',
+            answer: 'Для регистрации на платформе «Мониториум» перейдите на главную страницу и выберите тип учетной записи: «Для избирателей» или «Для представителей власти». Затем заполните регистрационную форму с указанием ваших контактных данных и следуйте инструкциям на экране.',
         },
         {
             question: 'Как создать новое задание?',
@@ -30,8 +25,7 @@ const Help: React.FC = () => {
             answer: 'Для связи с представителем власти вы можете использовать встроенную систему сообщений платформы. Откройте профиль нужного представителя и нажмите на кнопку «Отправить сообщение». Также вы можете оставить комментарий к существующему заданию или создать новое задание, адресованное конкретному представителю.',
         },
         {
-            question:
-                'Что делать, если представитель не отвечает на мое задание?',
+            question: 'Что делать, если представитель не отвечает на мое задание?',
             answer: 'Если представитель власти не отвечает на ваше задание в течение длительного времени, вы можете использовать функцию «Эскалация». Для этого откройте задание и нажмите на кнопку «Эскалировать». После этого администрация платформы будет уведомлена о проблеме и примет необходимые меры.',
         },
         {
@@ -45,16 +39,13 @@ const Help: React.FC = () => {
             <div className="honor-container py-12">
                 <h1 className="text-3xl font-bold mb-2">Помощь и поддержка</h1>
                 <p className="text-honor-darkGray mb-8">
-                    Здесь вы найдете ответы на часто задаваемые вопросы и
-                    инструкции по работе с платформой «Честь»
+                    Здесь вы найдете ответы на часто задаваемые вопросы и инструкции по работе с платформой «Мониториум»
                 </p>
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     <div className="lg:col-span-2">
                         <Card className="p-6 mb-8">
-                            <h2 className="text-2xl font-bold mb-4">
-                                Часто задаваемые вопросы
-                            </h2>
+                            <h2 className="text-2xl font-bold mb-4">Часто задаваемые вопросы</h2>
                             <Accordion
                                 type="single"
                                 collapsible
@@ -63,21 +54,15 @@ const Help: React.FC = () => {
                                     <AccordionItem
                                         key={index}
                                         value={`item-${index}`}>
-                                        <AccordionTrigger className="text-left">
-                                            {item.question}
-                                        </AccordionTrigger>
-                                        <AccordionContent>
-                                            {item.answer}
-                                        </AccordionContent>
+                                        <AccordionTrigger className="text-left">{item.question}</AccordionTrigger>
+                                        <AccordionContent>{item.answer}</AccordionContent>
                                     </AccordionItem>
                                 ))}
                             </Accordion>
                         </Card>
 
                         <Card className="p-6">
-                            <h2 className="text-2xl font-bold mb-4">
-                                Видеоинструкции
-                            </h2>
+                            <h2 className="text-2xl font-bold mb-4">Видеоинструкции</h2>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="border border-gray-200 rounded-lg overflow-hidden">
                                     <div className="bg-gray-100 aspect-video flex items-center justify-center">
@@ -87,12 +72,9 @@ const Help: React.FC = () => {
                                         />
                                     </div>
                                     <div className="p-4">
-                                        <h3 className="font-bold mb-1">
-                                            Знакомство с платформой
-                                        </h3>
+                                        <h3 className="font-bold mb-1">Знакомство с платформой</h3>
                                         <p className="text-sm text-honor-darkGray">
-                                            Обзор основных функций и
-                                            возможностей
+                                            Обзор основных функций и возможностей
                                         </p>
                                     </div>
                                 </div>
@@ -104,12 +86,9 @@ const Help: React.FC = () => {
                                         />
                                     </div>
                                     <div className="p-4">
-                                        <h3 className="font-bold mb-1">
-                                            Создание заданий
-                                        </h3>
+                                        <h3 className="font-bold mb-1">Создание заданий</h3>
                                         <p className="text-sm text-honor-darkGray">
-                                            Пошаговая инструкция по созданию
-                                            заданий
+                                            Пошаговая инструкция по созданию заданий
                                         </p>
                                     </div>
                                 </div>
@@ -121,12 +100,8 @@ const Help: React.FC = () => {
                                         />
                                     </div>
                                     <div className="p-4">
-                                        <h3 className="font-bold mb-1">
-                                            Работа с картой округов
-                                        </h3>
-                                        <p className="text-sm text-honor-darkGray">
-                                            Поиск и фильтрация на карте
-                                        </p>
+                                        <h3 className="font-bold mb-1">Работа с картой округов</h3>
+                                        <p className="text-sm text-honor-darkGray">Поиск и фильтрация на карте</p>
                                     </div>
                                 </div>
                                 <div className="border border-gray-200 rounded-lg overflow-hidden">
@@ -137,12 +112,8 @@ const Help: React.FC = () => {
                                         />
                                     </div>
                                     <div className="p-4">
-                                        <h3 className="font-bold mb-1">
-                                            Система сообщений
-                                        </h3>
-                                        <p className="text-sm text-honor-darkGray">
-                                            Общение с представителями власти
-                                        </p>
+                                        <h3 className="font-bold mb-1">Система сообщений</h3>
+                                        <p className="text-sm text-honor-darkGray">Общение с представителями власти</p>
                                     </div>
                                 </div>
                             </div>
@@ -159,8 +130,7 @@ const Help: React.FC = () => {
                                 Нужна помощь?
                             </h3>
                             <p className="text-honor-darkGray mb-4">
-                                Если вы не нашли ответа на свой вопрос,
-                                свяжитесь с нашей службой поддержки
+                                Если вы не нашли ответа на свой вопрос, свяжитесь с нашей службой поддержки
                             </p>
                             <Link to="/messages">
                                 <Button className="w-full honor-button-primary mb-2 flex items-center justify-center">
@@ -190,9 +160,7 @@ const Help: React.FC = () => {
                                         to="#"
                                         className="flex justify-between items-center">
                                         <span>Руководство пользователя</span>
-                                        <span className="text-xs bg-honor-gray px-2 py-1 rounded">
-                                            PDF
-                                        </span>
+                                        <span className="text-xs bg-honor-gray px-2 py-1 rounded">PDF</span>
                                     </Link>
                                 </li>
                                 <li className="p-2 hover:bg-honor-gray rounded transition-colors">
@@ -200,9 +168,7 @@ const Help: React.FC = () => {
                                         to="#"
                                         className="flex justify-between items-center">
                                         <span>Правила платформы</span>
-                                        <span className="text-xs bg-honor-gray px-2 py-1 rounded">
-                                            PDF
-                                        </span>
+                                        <span className="text-xs bg-honor-gray px-2 py-1 rounded">PDF</span>
                                     </Link>
                                 </li>
                                 <li className="p-2 hover:bg-honor-gray rounded transition-colors">
@@ -210,21 +176,15 @@ const Help: React.FC = () => {
                                         to="#"
                                         className="flex justify-between items-center">
                                         <span>Политика конфиденциальности</span>
-                                        <span className="text-xs bg-honor-gray px-2 py-1 rounded">
-                                            PDF
-                                        </span>
+                                        <span className="text-xs bg-honor-gray px-2 py-1 rounded">PDF</span>
                                     </Link>
                                 </li>
                                 <li className="p-2 hover:bg-honor-gray rounded transition-colors">
                                     <Link
                                         to="#"
                                         className="flex justify-between items-center">
-                                        <span>
-                                            Инструкция для представителей
-                                        </span>
-                                        <span className="text-xs bg-honor-gray px-2 py-1 rounded">
-                                            PDF
-                                        </span>
+                                        <span>Инструкция для представителей</span>
+                                        <span className="text-xs bg-honor-gray px-2 py-1 rounded">PDF</span>
                                     </Link>
                                 </li>
                             </ul>

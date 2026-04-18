@@ -63,4 +63,5 @@ export const NotificationTypeMap = {
     NEW_MESSAGE: 'NEW_MESSAGE',
 } as const;
 
+// для бэкэнда, что бы призма не ругалась
 export type NotificationType = keyof typeof NotificationTypeMap;

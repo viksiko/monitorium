@@ -12,6 +12,7 @@ import {
     CREATE_POST_VALIDATION_ERROR_RESPONSE,
     GET_ALL_POST_BY_USER,
     GET_ALL_POSTS_SUCCESS_RESPONSE,
+    GET_LATEST_POSTS,
     GET_POST_BY_ID,
     POST_NOT_FOUND_RESPONSE,
 } from '@src/constants/swagger/post-responses.swagger';
@@ -59,9 +60,11 @@ export class PostController {
         return this.postService.getPosts(!isNaN(parsedLimit) ? parsedLimit : undefined);
     }
 
+    // Получение последнии три последнии публикации
     @Get('latest')
     @Public()
     @ApiOperation({ summary: 'Получить последние 3 публикации (публичный доступ)' })
+    @ApiResponse(GET_LATEST_POSTS)
     getLatestPosts(): Promise<IPost[] | null> {
         return this.postService.getLatestPosts();
     }

@@ -19,6 +19,7 @@ import {
     CREATE_TASK_SUCCESS_RESPONSE,
     CREATE_TASK_VALIDATION_ERROR_RESPONSE,
     GET_ALL_TASKS_SUCCESS_RESPONSE,
+    GET_LATEST_TASKS,
     GET_TASK_BY_ID,
     GET_TASK_STAGES_BY_TASK,
     NO_TASK_ACCESS_RESPONSE,
@@ -54,13 +55,14 @@ export class TaskController {
         return await this.taskService.createTask(req.user.id, dto);
     }
 
+    // Получить все задания
     @Get()
     @ApiOperation({
         summary: 'Получить все задания',
     })
     @ApiResponse(GET_ALL_TASKS_SUCCESS_RESPONSE)
     @ApiResponse(FORBIDDEN_RESOURCE_RESPONSE)
-    getTasks(@Query('limit') limit?: string): Promise<TaskListItem[] | null> {
+    getTasks(@Body('limit') limit?: string): Promise<TaskListItem[] | null> {
         const parsedLimit = Number(limit);
         return this.taskService.getTasks(!isNaN(parsedLimit) ? parsedLimit : undefined);
     }
@@ -87,9 +89,11 @@ export class TaskController {
         return this.taskService.getTasksByFilter(query);
     }
 
+    // Получение последнии три задачи
     @Get('latest')
     @Public()
     @ApiOperation({ summary: 'Получить последние 3 задачи (публичный доступ)' })
+    @ApiResponse(GET_LATEST_TASKS)
     getLatestTasks(): Promise<TaskListItem[]> {
         return this.taskService.getLatestTasks();
     }

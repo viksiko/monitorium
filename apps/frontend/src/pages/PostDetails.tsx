@@ -24,7 +24,7 @@ const PostDetails = () => {
     const { postId } = useParams<{ postId: string }>();
     const { data: post, isLoading, isPending, error } = useGetPostById(postId);
 
-    const [commentsVisible, setDisplayComments] = useState(false);
+    const [commentsVisible, setDisplayComments] = useState(true);
 
     if (isLoading || isPending) {
         return (
@@ -100,7 +100,7 @@ const PostDetails = () => {
                                                 </span>
                                             </Button>
                                             <Button
-                                                className={`flex items-center group ${commentsVisible ? 'bg-slate-100' : 'bg-white'} hover:bg-slate-100`}
+                                                className={`flex items-center group ${!commentsVisible ? 'bg-slate-100' : 'bg-white'} hover:bg-slate-100`}
                                                 onClick={() => setDisplayComments(!commentsVisible)}>
                                                 <MessageSquare
                                                     size={20}

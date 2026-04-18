@@ -22,11 +22,11 @@ export const task = {
             data: dto,
         });
     },
-    getTasks: async (limit?: string) => {
+    getTasks: async (limit: string) => {
         return customInstance<TaskListItem[] | null>({
             url: `/api/v1/tasks`,
             method: 'GET',
-            params: { ...(limit != null ? { limit: limit } : {}) },
+            data: limit,
         });
     },
     getTasksByUser: async () => {
