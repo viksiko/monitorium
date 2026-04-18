@@ -1,4 +1,5 @@
 import { ApiResponseOptions } from '@nestjs/swagger';
+import { NOTIFICATION_MESSAGES } from '../api-messages.constants';
 
 export const NOTIFICATION_READ: ApiResponseOptions = {
     status: 200,
@@ -8,7 +9,7 @@ export const NOTIFICATION_READ: ApiResponseOptions = {
             success: true,
             statusCode: 200,
             data: {
-                message: 'Уведомление прочитано',
+                message: NOTIFICATION_MESSAGES.READ_SUCCESS,
             },
         },
     },
@@ -22,7 +23,7 @@ export const NOTIFICATIONS_READ_ALL: ApiResponseOptions = {
             success: true,
             statusCode: 200,
             data: {
-                message: 'Все уведомления прочитаны',
+                message: NOTIFICATION_MESSAGES.ALL_READ_SUCCESS,
             },
         },
     },
@@ -88,7 +89,7 @@ export const GET_ALL_NOTIFICATIONS: ApiResponseOptions = {
                     },
                 },
                 b: {
-                    summary: 'Увeдомления не найдены',
+                    summary: NOTIFICATION_MESSAGES.NOT_FOUND,
                     value: {
                         success: true,
                         statusCode: 200,
@@ -108,7 +109,7 @@ export const NOTIFICATION_ACCESS_FORBIDDEN: ApiResponseOptions = {
             success: false,
             statusCode: 403,
             data: {
-                message: 'Нет доступа к уведомлению',
+                message: NOTIFICATION_MESSAGES.ACCESS_DENIED,
             },
         },
     },
@@ -122,7 +123,7 @@ export const NOTIFICATION_NOT_FOUND: ApiResponseOptions = {
             success: false,
             statusCode: 404,
             data: {
-                message: 'Уведомление не найдено',
+                message: NOTIFICATION_MESSAGES.NOT_FOUND,
             },
         },
     },

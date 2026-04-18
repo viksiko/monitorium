@@ -52,7 +52,7 @@ export class NotificationController {
     @Patch('read-all')
     @ApiOperation({ summary: 'Отметить все уведомления как прочитанные' })
     @ApiResponse(NOTIFICATIONS_READ_ALL)
-    async readAllNotifications(@Req() @Req() req: Request & { user: User }): Promise<{ message: string }> {
+    async readAllNotifications(@Req() req: Request & { user: User }): Promise<{ message: string }> {
         return this.notificationService.readAllNotifications(req.user.id);
     }
 }

@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { UserStar, MapPin, Plus, LogIn, Bell, Ticket, Trash2, CircleX, X } from 'lucide-react';
+import { UserStar, MapPin, Plus, LogIn, Bell, Ticket, Trash2, CircleX, X, BookType, FilePen } from 'lucide-react';
 import {
     Dialog,
     DialogContent,
@@ -49,7 +49,7 @@ const Header = () => {
                     <nav className="hidden md:flex items-center space-x-6">
                         {user && (
                             <>
-                                <TaskCreateLink isShowIcon={true} />
+                                {/* <TaskCreateLink isShowIcon={true} /> */}
                                 <Link
                                     to="/map"
                                     className="flex items-center space-x-1 text-honor-text hover:text-honor-blue transition-colors">
@@ -61,6 +61,18 @@ const Header = () => {
                                     className="flex items-center space-x-1 text-honor-text hover:text-honor-blue transition-colors">
                                     <UserStar size={20} />
                                     <span>Представители</span>
+                                </Link>
+                                <Link
+                                    to="/tasks"
+                                    className="flex items-center space-x-1 text-honor-text hover:text-honor-blue transition-colors">
+                                    <BookType size={20} />
+                                    <span>Задачи</span>
+                                </Link>
+                                <Link
+                                    to="/posts"
+                                    className="flex items-center space-x-1 text-honor-text hover:text-honor-blue transition-colors">
+                                    <FilePen size={20} />
+                                    <span>Публикации</span>
                                 </Link>
                             </>
                         )}

@@ -13,6 +13,7 @@ import { TaskStatusBadge } from '@/components/ui/task-status-badge';
 import TaskCard from '@/components/task/TaskCard';
 import { useTasksFilters } from '@/hooks/useTasksFilters';
 import { useShowMore } from '@/hooks/useShowMore';
+import ItemCount from '@/components/ui/itemCount';
 
 const Tasks = () => {
     const { data: tasksData, isLoading, isPending, isError } = useGetTasks();
@@ -44,7 +45,10 @@ const Tasks = () => {
             <div className="honor-container py-12">
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
                     <div>
-                        <h1 className="text-3xl font-bold mb-2">Задачи и обращения</h1>
+                        <div className="flex gap-2 items-center">
+                            <h1 className="text-3xl font-bold mb-1">Задачи и обращения</h1>
+                            <ItemCount count={tasksData.length} />
+                        </div>
                         <p className="text-honor-darkGray mb-8">
                             Список всех публичных задач и обращений от избирателей
                         </p>

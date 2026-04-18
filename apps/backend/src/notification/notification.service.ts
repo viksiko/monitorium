@@ -1,5 +1,6 @@
 import { Notification, NotificationItem, NotificationType } from '@monorepo/types';
 import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { NOTIFICATION_MESSAGES } from '@src/constants/api-messages.constants';
 import { logger } from '@src/logger/winston.logger';
 import { PrismaService } from '@src/prisma/prisma.service';
 import { NotificationsGateway } from './notifications.gateway';
@@ -104,15 +105,22 @@ export class NotificationService {
             });
 
             if (!notification) {
-                throw new NotFoundException('Уведомление не найдено');
+                throw new NotFoundException(NOTIFICATION_MESSAGES.NOT_FOUND);
             }
 
             // защита — нельзя читать чужие уведомления
             if (notification.userId !== userId) {
-                throw new ForbiddenException('Нет доступа к уведомлению');
+                throw new ForbiddenException(NOTIFICATION_MESSAGES.ACCESS_DENIED);
             }
 
-            return { message: 'Уведомление прочитано' };
+            await this.prisma.notification.update({
+                where: { id: notificationId },
+                data: {
+                    isRead: true,
+                },
+            });
+
+            return { message: NOTIFICATION_MESSAGES.READ_SUCCESS };
         } catch (error) {
             logger.error('Failed read notification', {
                 category: 'NotificationService',
@@ -137,7 +145,7 @@ export class NotificationService {
                 },
             });
 
-            return { message: 'Все уведомления прочитаны' };
+            return { message: NOTIFICATION_MESSAGES.ALL_READ_SUCCESS };
         } catch (error) {
             logger.error('Failed read all notifications', {
                 category: 'NotificationService',

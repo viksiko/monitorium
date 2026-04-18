@@ -70,3 +70,10 @@ export const SUBSCRIPTION_MESSAGES = {
     INVALID_TARGET: 'Подписка возможна только на представителя власти',
     ALREADY_SUBSCRIBED: 'Вы уже подписаны на этого представителя',
 } as const;
+
+export const NOTIFICATION_MESSAGES = {
+    NOT_FOUND: 'Уведомление не найдено',
+    ACCESS_DENIED: 'Нет доступа к уведомлению',
+    READ_SUCCESS: 'Уведомление прочитано',
+    ALL_READ_SUCCESS: 'Все уведомления прочитаны',
+} as const;

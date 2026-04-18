@@ -62,9 +62,8 @@ export class TaskController {
     })
     @ApiResponse(GET_ALL_TASKS_SUCCESS_RESPONSE)
     @ApiResponse(FORBIDDEN_RESOURCE_RESPONSE)
-    getTasks(@Body('limit') limit?: string): Promise<TaskListItem[] | null> {
-        const parsedLimit = Number(limit);
-        return this.taskService.getTasks(!isNaN(parsedLimit) ? parsedLimit : undefined);
+    getTasks(): Promise<TaskListItem[] | null> {
+        return this.taskService.getTasks();
     }
 
     // Получение всех задач текущего пользователя
