@@ -1,235 +1,235 @@
 {
-  "seededAt": "2026-04-12T11:44:39.315Z",
+  "seededAt": "2026-04-19T11:17:54.966Z",
   "users": [
     {
-      "id": "cmnvp4um9003bb8mfnybpinua",
+      "id": "cmo5o9exa003bwcmfojx6mqlk",
       "name": "Главный Администратор",
       "email": "admin@monitorium.ru",
       "password": "Admin1234!",
       "role": "ADMIN"
     },
     {
-      "id": "cmnvp4upo003cb8mfmog0y4eh",
+      "id": "cmo5o9f1d003cwcmfpc940dab",
       "name": "Кирилл Гасанов",
       "email": "repsbro@gmail.com",
       "password": "mon22Zelda!",
       "role": "VOTER"
     },
     {
-      "id": "cmnvp4usx003db8mftjal9q2s",
+      "id": "cmo5o9f4m003dwcmf4vopgxqt",
       "name": "Андрей Заолотин",
       "email": "cimelexe@mailinator.com",
       "password": "mon22Zelda!",
       "role": "REPRESENTATIVE"
     },
     {
-      "id": "cmnvp4uw7003eb8mfl8fybavp",
+      "id": "cmo5o9f7w003ewcmfawng396v",
       "name": "Всеволод Кубаков",
       "email": "fubijad@mailinator.com",
       "password": "mon22Zelda!",
       "role": "REPRESENTATIVE"
     },
     {
-      "id": "cmnvp4uzl003fb8mfcclhji5e",
+      "id": "cmo5o9fb1003fwcmf8bopwk9r",
       "name": "Иван Петрович Соколов",
       "email": "deputy1@monitorium.ru",
       "password": "Deputy1234!",
       "role": "REPRESENTATIVE"
     },
     {
-      "id": "cmnvp4v2q003gb8mfdhdc565r",
+      "id": "cmo5o9fdv003gwcmf6aifl5cu",
       "name": "Ольга Николаевна Власова",
       "email": "deputy2@monitorium.ru",
       "password": "Deputy2234!",
       "role": "REPRESENTATIVE"
     },
     {
-      "id": "cmnvp4v5h003hb8mfpd3vxkxc",
+      "id": "cmo5o9fh0003hwcmfqpnywezy",
       "name": "Мария Андреевна Иванова",
       "email": "voter1@monitorium.ru",
       "password": "Voter1234!",
       "role": "VOTER"
     },
     {
-      "id": "cmnvp4v8b003ib8mfxy2jxi6f",
+      "id": "cmo5o9fjx003iwcmf5fwb63qu",
       "name": "Алексей Сергеевич Кузнецов",
       "email": "voter2@monitorium.ru",
       "password": "Voter2234!",
       "role": "VOTER"
     },
     {
-      "id": "cmnvp4vbr003jb8mft7j8p2ml",
-      "name": "Голубева Милица",
-      "email": "panteleimon56@gmail.com",
-      "password": "eosjMFvo3ehWA1!",
+      "id": "cmo5o9fmu003jwcmfom5ws5zs",
+      "name": "Филарет Белоусов",
+      "email": "ulukyana_fokina96@hotmail.com",
+      "password": "vFsrCnsnshQ6A1!",
       "role": "VOTER"
     },
     {
-      "id": "cmnvp4vei003kb8mfl832ax9v",
-      "name": "Кузьмин Глеб Ефимьевич",
-      "email": "yakub.baranov@yandex.ru",
-      "password": "_pSOj4rUX_1DA1!",
+      "id": "cmo5o9fq7003kwcmfyqkkkvyi",
+      "name": "Пахом Александрович Кондратьев",
+      "email": "sinklitikiya48@ya.ru",
+      "password": "kIRfMrwc_w3vA1!",
       "role": "VOTER"
     },
     {
-      "id": "cmnvp4vha003lb8mfh2mnhhxu",
-      "name": "Крюков Натан Ефимьевич",
-      "email": "vlas_trofimova44@ya.ru",
-      "password": "wzfxVB4CmeqlA1!",
+      "id": "cmo5o9fsx003lwcmfu2yy43sb",
+      "name": "Кир Носов",
+      "email": "ruslan.zuev@ya.ru",
+      "password": "nMm_sIN756uDA1!",
       "role": "VOTER"
     },
     {
-      "id": "cmnvp4vjz003mb8mf69vkzlhx",
-      "name": "Еремей Вячеславович Емельянов",
-      "email": "akulina24@yahoo.com",
-      "password": "IWVqgUEtOigMA1!",
+      "id": "cmo5o9fvp003mwcmfaohba9lj",
+      "name": "Козлов Пров",
+      "email": "maiya_kiselev@yandex.ru",
+      "password": "P4EPGlKiaAanA1!",
       "role": "VOTER"
     },
     {
-      "id": "cmnvp4vn8003nb8mfmaz8pfy1",
-      "name": "Элеонора Ефимовна Никифорова",
-      "email": "olimpiada_ryabova30@mail.ru",
-      "password": "fipaVZj0eZTAA1!",
+      "id": "cmo5o9fyw003nwcmfe2o7nlhs",
+      "name": "Демид Быков",
+      "email": "anastasiya.meluknikov44@yahoo.com",
+      "password": "uwe17f1L3wYBA1!",
       "role": "VOTER"
     },
     {
-      "id": "cmnvp4vqq003ob8mfy50rb89m",
-      "name": "Юлия Даниловна Ершова",
-      "email": "oktyabrina75@gmail.com",
-      "password": "LJ0Jedg6qDCpA1!",
+      "id": "cmo5o9g20003owcmfq54mlgur",
+      "name": "Валерий Юльевич Сафонов",
+      "email": "modest_fedotova41@hotmail.com",
+      "password": "uA52IZwCyN8EA1!",
       "role": "VOTER"
     },
     {
-      "id": "cmnvp4vte003pb8mfxjwaxfd0",
-      "name": "Харитонов Илья Арсенович",
-      "email": "maiya.ershova89@gmail.com",
-      "password": "oIFqzBgx4YHfA1!",
+      "id": "cmo5o9g4x003pwcmf6ejfbuew",
+      "name": "Гуляев Зосима",
+      "email": "mokei74@mail.ru",
+      "password": "QPp09YIIFERKA1!",
       "role": "VOTER"
     },
     {
-      "id": "cmnvp4vwk003qb8mfzuu2up8n",
-      "name": "Евпраксия Тимуровна Кулакова",
-      "email": "nikita.denisova@ya.ru",
-      "password": "y4mZs5VWKhQ7A1!",
+      "id": "cmo5o9g83003qwcmf8rum20k1",
+      "name": "Алина Гурьева",
+      "email": "ivanna_lavrentukev42@ya.ru",
+      "password": "NS04G6f7lqudA1!",
       "role": "VOTER"
     },
     {
-      "id": "cmnvp4vzh003rb8mfxkgabcza",
-      "name": "Валерия Афанасьева",
-      "email": "ladimir_isakova@mail.ru",
-      "password": "wPHcuoQPQialA1!",
+      "id": "cmo5o9gb5003rwcmfnfrchyqd",
+      "name": "Евсеева Синклитикия",
+      "email": "izmail51@hotmail.com",
+      "password": "JLLT0qunXeozA1!",
       "role": "VOTER"
     },
     {
-      "id": "cmnvp4w2i003sb8mfkbpwvz9v",
-      "name": "Зинаида Самсонова",
-      "email": "vera_vishnyakov69@hotmail.com",
-      "password": "joFEHehVHIFoA1!",
+      "id": "cmo5o9ge7003swcmfvg1eq36d",
+      "name": "Данилов Корнил Артемьевич",
+      "email": "nina.konstantinova10@yahoo.com",
+      "password": "UmiW8FuO4EiPA1!",
       "role": "VOTER"
     },
     {
-      "id": "cmnvp4w5p003tb8mft6vl553c",
-      "name": "Прохор Исаев",
-      "email": "fekla44@mail.ru",
-      "password": "0KnN8i4JrUQiA1!",
+      "id": "cmo5o9gh7003twcmf7v7tn219",
+      "name": "Рыбаков Спартак Александрович",
+      "email": "yuliya75@ya.ru",
+      "password": "xBkwjW82LzdAA1!",
       "role": "VOTER"
     },
     {
-      "id": "cmnvp4w8q003ub8mfjptr3y1d",
-      "name": "Андрей Рогов",
-      "email": "zinaida.nikitina36@yandex.ru",
-      "password": "jURktAR0LPEUA1!",
+      "id": "cmo5o9gjv003uwcmftf2r5xiz",
+      "name": "Потап Данилович Васильев",
+      "email": "samson39@hotmail.com",
+      "password": "FxzLqPWz1g8nA1!",
       "role": "VOTER"
     },
     {
-      "id": "cmnvp4wbs003vb8mf09ew9zez",
-      "name": "Исаев Исидор Васильевич",
-      "email": "olimpii70@mail.ru",
-      "password": "pWyjmm39cBFxA1!",
+      "id": "cmo5o9gmy003vwcmfcd2a6ve8",
+      "name": "Раиса Горшкова",
+      "email": "andron.egorova89@yandex.ru",
+      "password": "SdejCS3RhNLWA1!",
       "role": "VOTER"
     },
     {
-      "id": "cmnvp4wed003wb8mfaf20do2m",
-      "name": "Назарова Клавдия",
-      "email": "zinovii_belousov19@yahoo.com",
-      "password": "mJxEr3EBqIiuA1!",
+      "id": "cmo5o9gpv003wwcmf6zh96wyb",
+      "name": "Носов Ипатий",
+      "email": "vikentii_afanasukeva49@ya.ru",
+      "password": "CtPCyZRA2UglA1!",
       "role": "VOTER"
     },
     {
-      "id": "cmnvp4whh003xb8mf2m7rj0pp",
-      "name": "Щукина Иванна",
-      "email": "emmanuil97@yandex.ru",
-      "password": "R9lfd2QbkKe7A1!",
+      "id": "cmo5o9gt0003xwcmffh4z2wvw",
+      "name": "Клавдия Сергеевна Калашникова",
+      "email": "angelina.mikheeva@gmail.com",
+      "password": "5RcUF1TtEpOiA1!",
       "role": "VOTER"
     },
     {
-      "id": "cmnvp4wky003yb8mfp9pyssbb",
-      "name": "Юдин Гедеон",
-      "email": "akulina4@yandex.ru",
-      "password": "fUc3AkAd8hk5A1!",
+      "id": "cmo5o9gw8003ywcmfjqahc87q",
+      "name": "Емельянова Лора",
+      "email": "galina_maslov59@hotmail.com",
+      "password": "p42p9Brp8Yi2A1!",
       "role": "VOTER"
     },
     {
-      "id": "cmnvp4wo1003zb8mf69ripgob",
-      "name": "Клавдия Аксенова",
-      "email": "fevroniya_vorobukeva@mail.ru",
-      "password": "h8SJUUAbL0YRA1!",
+      "id": "cmo5o9gzd003zwcmf7jz970of",
+      "name": "Октябрина Белозерова",
+      "email": "anzhela45@ya.ru",
+      "password": "gfZVZ7lLXlHZA1!",
       "role": "VOTER"
     },
     {
-      "id": "cmnvp4wqm0040b8mf784xvncy",
-      "name": "Лукия Родионова",
-      "email": "valeriya_rusakova13@hotmail.com",
-      "password": "qEn_p8EEC15NA1!",
+      "id": "cmo5o9h1z0040wcmftqi26kas",
+      "name": "Мария Николаевна Яковлева",
+      "email": "tamara_voronov44@mail.ru",
+      "password": "yxUK0EWHJyb9A1!",
       "role": "VOTER"
     },
     {
-      "id": "cmnvp4wub0041b8mfeke9nan6",
-      "name": "Тамара Кулакова",
-      "email": "anzhelika0@yandex.ru",
-      "password": "5X0nydR5T5zwA1!",
+      "id": "cmo5o9h500041wcmf0w3x693h",
+      "name": "Модест Аксёнович Доронин",
+      "email": "natan.khokhlova@gmail.com",
+      "password": "aiIRYaYDPa7dA1!",
       "role": "VOTER"
     },
     {
-      "id": "cmnvp4wwz0042b8mfj67z8lr0",
-      "name": "Кабанов Владислав Елизарович",
-      "email": "lyubomir_bobyleva@gmail.com",
-      "password": "DMiH_sQ7vhpHA1!",
+      "id": "cmo5o9h8r0042wcmfu2jcwply",
+      "name": "Горбачев Николай Артёмович",
+      "email": "ladislav_mironova69@mail.ru",
+      "password": "n28f96FVn0WWA1!",
       "role": "VOTER"
     },
     {
-      "id": "cmnvp4x060043b8mfi21kf52k",
-      "name": "Синклитикия Кулакова",
-      "email": "dmitrii57@hotmail.com",
-      "password": "ifqErweep6gjA1!",
+      "id": "cmo5o9hbo0043wcmfg5rcswai",
+      "name": "Орлов Порфирий",
+      "email": "adrian_nikolaeva@yandex.ru",
+      "password": "_0M_Y5kNPUfpA1!",
       "role": "REPRESENTATIVE"
     },
     {
-      "id": "cmnvp4x2x0044b8mfnz5gdhzg",
-      "name": "Аверкий Игнатович Носков",
-      "email": "zoya_zhukov@gmail.com",
-      "password": "SRUyHqJSnewNA1!",
+      "id": "cmo5o9hej0044wcmf2l1o152y",
+      "name": "Рожков Кондрат",
+      "email": "avdei.gordeev26@hotmail.com",
+      "password": "Z9u97eXGOS1DA1!",
       "role": "REPRESENTATIVE"
     },
     {
-      "id": "cmnvp4x5y0045b8mfyp4lht9e",
-      "name": "Иванна Оскаровна Шарова",
-      "email": "valerii.zykov@yahoo.com",
-      "password": "KTgea3k7xMOxA1!",
+      "id": "cmo5o9hhk0045wcmflyxrngia",
+      "name": "Велимир Теймуразович Виноградов",
+      "email": "valentina_ignatov56@gmail.com",
+      "password": "qz_s1th88SnRA1!",
       "role": "REPRESENTATIVE"
     },
     {
-      "id": "cmnvp4x8y0046b8mfkuqhek65",
-      "name": "Максимильян Даниилович Новиков",
-      "email": "simon.rybakov@ya.ru",
-      "password": "Tt4fJPQDsX2qA1!",
+      "id": "cmo5o9hkb0046wcmfys5qjsbz",
+      "name": "Пелагея Дмитриевна Чернова",
+      "email": "panteleimon58@yahoo.com",
+      "password": "SKZMdFD7p4iRA1!",
       "role": "REPRESENTATIVE"
     },
     {
-      "id": "cmnvp4xbq0047b8mfivptxvz8",
-      "name": "Виноградов Алексей",
-      "email": "serafim42@ya.ru",
-      "password": "kq_6pTmvMf3GA1!",
+      "id": "cmo5o9hn50047wcmfgivggozi",
+      "name": "Эмилия Львовна Зуева",
+      "email": "yanuarii57@hotmail.com",
+      "password": "SCeFBqX4sDenA1!",
       "role": "REPRESENTATIVE"
     }
   ]
