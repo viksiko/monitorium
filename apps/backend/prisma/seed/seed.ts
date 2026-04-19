@@ -9,12 +9,13 @@ import { createCommentsForPost, createCommentsForTask } from './factories/commen
 import { createDialogsFromSubscriptions } from './factories/dialog.factory';
 import { seedDistricts } from './factories/district.factory';
 import { createMessagesForDialog } from './factories/message.factory';
+import { seedNotifications } from './factories/notification.factory';
 import { createPostsForRepresentatives } from './factories/post.factory';
 import { createRepresentativeProfiles } from './factories/representative-profile.factory';
 import { createSubscription, createSubscriptionsForVoters } from './factories/subscription.factory';
 import { createTaskStages } from './factories/task-stage.factory';
 import { createGuaranteedTasksForVoters, createTasksForVoters } from './factories/task.factory';
-import { createRepresentatives, createUser, createVoters } from './factories/user.factory';
+import { createRepresentatives, createVoters } from './factories/user.factory';
 import { createVoterProfiles } from './factories/voter-profile.factory';
 
 // ─── Конфигурация ────────────────────────────────────────────────────────────
@@ -90,28 +91,26 @@ async function main() {
         const hashedPassword = await bcrypt.hash(seedUser.password, 10);
         const isRepresentative = role === Role.REPRESENTATIVE;
 
-        // Upsert: если пользователь существует — обновляем пароль и флаги доступа.
-        // Это гарантирует что credentials из seed-data.json всегда актуальны в БД.
-        const user = await prisma.user.upsert({
-            where: { email: seedUser.email },
-            update: {
-                password: hashedPassword,
-                isVerified: true,
-                isActive: true,
-                isRepresentative,
-                ...(districtId ? { districtId } : {}),
-            },
-            create: {
-                name: seedUser.name,
-                email: seedUser.email,
-                password: hashedPassword,
-                role,
-                districtId: districtId ?? null,
-                isRepresentative,
-                isVerified: true,
-                isActive: true,
-            },
-        });
+        const existing = await prisma.user.findUnique({ where: { email: seedUser.email } });
+        let user: User;
+        if (existing) {
+            user = existing;
+            console.log(`   ⏭  Уже есть (не меняем пароль в БД): ${user.email} [${user.role}]`);
+        } else {
+            user = await prisma.user.create({
+                data: {
+                    name: seedUser.name,
+                    email: seedUser.email,
+                    password: hashedPassword,
+                    role,
+                    districtId: districtId ?? null,
+                    isRepresentative,
+                    isVerified: true,
+                    isActive: true,
+                },
+            });
+            console.log(`   ✓ Создан: ${user.email} [${user.role}]`);
+        }
 
         outputUsers.push({
             id: user.id,
@@ -120,7 +119,6 @@ async function main() {
             password: seedUser.password,
             role: user.role,
         });
-        console.log(`   ✓ Upsert: ${user.email} [${user.role}]`);
 
         if (user.role === Role.VOTER) preloadedVoters.push(user);
         if (user.role === Role.REPRESENTATIVE) preloadedRepresentatives.push(user);
@@ -323,7 +321,12 @@ async function main() {
     }
     console.log(`   ✓ Создано ${messagesTotal} сообщений\n`);
 
-    // ─── 16. Транзакции баланса (только VOTER) ──────────────────────────────
+    // ─── 16. Уведомления (демо под существующие сущности) ───────────────────
+    console.log('📬 Создаём демо-уведомления...');
+    const notificationRowsCount = await seedNotifications(prisma);
+    console.log(`   ✓ Создано ${notificationRowsCount} уведомлений\n`);
+
+    // ─── 17. Транзакции баланса (только VOTER) ──────────────────────────────
     console.log('💰 Создаём транзакции баланса для избирателей...');
     let txTotal = 0;
     for (const voter of allVoters) {
@@ -351,6 +354,7 @@ async function main() {
     );
     console.log(`  Посты:        ${posts.length}`);
     console.log(`  Диалоги:      ${dialogs.length}`);
+    console.log(`  Уведомления:  ${notificationRowsCount}`);
     console.log('───────────────────────────────────────────\n');
 }
 

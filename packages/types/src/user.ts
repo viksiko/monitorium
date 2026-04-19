@@ -1,12 +1,12 @@
 import { District } from './district';
-import { RegisterRoleEnum } from '@monorepo/types';
+import { RegisterRoleEnum } from './auth';
 
 export interface User {
     id: string;
     name: string;
     email: string;
     phone: string | null;
-    role: 'VOTER' | 'REPRESENTATIVE' | 'ADMIN';
+    role: Role;
     isRepresentative: boolean;
     isVerified: boolean;
     isActive: boolean;
@@ -119,3 +119,31 @@ export interface YearTasksData {
     comments: number;
     likes: number;
 }
+
+export interface SubscriptionUser {
+    id: string;
+    name: string;
+    email: string;
+    role: RoleType;
+
+    representativeProfile: {
+        position: string;
+        party: string | null;
+    } | null;
+}
+
+export interface SubscriberUser {
+    id: string;
+    name: string;
+    email: string;
+    role: RoleType;
+}
+
+export enum Role {
+    VOTER = 'VOTER',
+    REPRESENTATIVE = 'REPRESENTATIVE',
+    ADMIN = 'ADMIN',
+}
+
+// для бэкэнда, что бы призма не ругалась
+export type RoleType = keyof typeof Role;

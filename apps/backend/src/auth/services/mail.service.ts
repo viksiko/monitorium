@@ -19,13 +19,10 @@ export class MailService {
         });
     }
 
-    async sendVerificationCode(
-        recipientEmail: string,
-        code: string,
-    ): Promise<boolean> {
+    async sendVerificationCode(recipientEmail: string, code: string): Promise<boolean> {
         const mailOptions = {
             from: `"МОНИТОРИУМ" <${process.env.EMAIL_USER}>`,
-            to: `${process.env.EMAIL_USER}`, // заменить на recipientEmail
+            to: recipientEmail, // заменить на recipientEmail или в dev режиме ${process.env.EMAIL_USER}
             subject: 'Код подтверждения регистрации',
             html: `
             <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">

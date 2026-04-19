@@ -305,6 +305,84 @@ export const USER_STATISTICS_RESPONSE: ApiResponseOptions = {
     },
 };
 
+export const SUBSCRIBERS_LIST_RESPONSE: ApiResponseOptions = {
+    status: 200,
+    description: 'Получить список всех подписчиков',
+    content: {
+        'application/json': {
+            examples: {
+                a: {
+                    summary: 'Список подписчиков',
+                    value: {
+                        success: true,
+                        statusCode: 200,
+                        data: [
+                            {
+                                id: 'cmo2ujroo000jb0jflhobub4d',
+                                name: 'Андрей Иванов',
+                                email: 'bojosymy@mailinator.com',
+                                role: 'VOTER',
+                            },
+                            {
+                                id: 'cmo1unnre0000o4jfjvdoebjs',
+                                name: 'Николай Петров',
+                                email: 'sywaretica@mailinator.com',
+                                role: 'VOTER',
+                            },
+                        ],
+                    },
+                },
+                b: {
+                    summary: 'Подписчики не неайдены',
+                    value: {
+                        success: true,
+                        statusCode: 200,
+                        data: [],
+                    },
+                },
+            },
+        },
+    },
+};
+
+export const SUBSCRIPTIONS_LIST_RESPONSE: ApiResponseOptions = {
+    status: 200,
+    description: 'Получить список всех подписок',
+    content: {
+        'application/json': {
+            examples: {
+                a: {
+                    summary: 'Список подписок',
+                    value: {
+                        success: true,
+                        statusCode: 200,
+                        data: [
+                            {
+                                id: 'cmo2u7c8k000cb0jfz617zt7p',
+                                name: 'Иванов Сергей',
+                                email: 'facuwof@mailinator.com',
+                                role: 'REPRESENTATIVE',
+                                representativeProfile: {
+                                    position: 'Депутат городской думы',
+                                    party: 'kprf',
+                                },
+                            },
+                        ],
+                    },
+                },
+                b: {
+                    summary: 'Подписки не неайдены',
+                    value: {
+                        success: true,
+                        statusCode: 200,
+                        data: [],
+                    },
+                },
+            },
+        },
+    },
+};
+
 // export const USER_BAD_REQUEST_RESPONSE: ApiResponseOptions = {
 //     status: 400,
 //     description: 'Неверный параметр запроса',

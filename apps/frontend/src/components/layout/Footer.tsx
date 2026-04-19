@@ -1,8 +1,9 @@
 import { Link } from 'react-router-dom';
 import { HelpCircle } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
-import { RegisterRoleEnum } from '@monorepo/types';
+import { Role } from '@monorepo/types';
 import { useMemo } from 'react';
+import { TaskCreateLink } from '../ui/taskCreateLink';
 
 const Footer = () => {
     const { user } = useAuth();
@@ -15,8 +16,8 @@ const Footer = () => {
             };
         } else {
             return {
-                enableVoterBlock: user?.role === RegisterRoleEnum.VOTER,
-                enableRepresentativeBlock: user?.role === RegisterRoleEnum.REPRESENTATIVE,
+                enableVoterBlock: user?.role === Role.VOTER,
+                enableRepresentativeBlock: user?.role === Role.REPRESENTATIVE,
             };
         }
     }, [user]);
@@ -24,7 +25,12 @@ const Footer = () => {
     return (
         <footer className="bg-honor-gray mt-auto">
             <div className="honor-container py-8">
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div
+                    className={`grid grid-cols-1 gap-8 ${
+                        !enableVoterBlock || !enableRepresentativeBlock
+                            ? 'md:grid-cols-3 md:gap-20 justify-items-center'
+                            : 'md:grid-cols-4 gap-8'
+                    }`}>
                     <div>
                         <h3 className="text-lg font-bold mb-4">Платформа «Мониториум»</h3>
                         <p className="text-honor-darkGray">
@@ -51,11 +57,10 @@ const Footer = () => {
                                     </Link>
                                 </li>
                                 <li>
-                                    <Link
-                                        to="/tasks/create"
-                                        className="text-honor-darkGray hover:text-honor-blue">
-                                        Создать задание
-                                    </Link>
+                                    <TaskCreateLink
+                                        className={'text-honor-darkGray hover:text-honor-blue'}
+                                        isShowIcon={false}
+                                    />
                                 </li>
                                 <li>
                                     <Link
@@ -126,7 +131,7 @@ const Footer = () => {
                 </div>
 
                 <div className="border-t border-gray-200 mt-8 pt-6 text-center text-honor-darkGray">
-                    <p>© 2025 Платформа «Честь». Все права защищены.</p>
+                    <p>© 2025 Платформа «Мониториум». Все права защищены.</p>
                 </div>
             </div>
         </footer>

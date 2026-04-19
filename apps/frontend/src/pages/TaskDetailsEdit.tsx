@@ -51,7 +51,7 @@ const TaskDetailsEdit = () => {
     const [editingStageDateId, setEditingStageDateId] = useState<string | null>(null);
     const [deletedStageIds, setDeletedStageIds] = useState<string[]>([]);
     const [isSaving, setIsSaving] = useState(false);
-    const [commentsVisible, setDisplayComments] = useState(false);
+    const [commentsVisible, setDisplayComments] = useState(true);
 
     const [editedTask, setEditedTask] = useState({
         possibleSolutions: '',
@@ -625,7 +625,7 @@ const TaskDetailsEdit = () => {
                                                 <Button
                                                     type="button"
                                                     variant="ghost"
-                                                    className={`flex items-center group ${commentsVisible ? 'bg-slate-100' : 'bg-white'} hover:bg-slate-100`}
+                                                    className={`flex items-center group ${!commentsVisible ? 'bg-slate-100' : 'bg-white'} hover:bg-slate-100`}
                                                     onClick={() => setDisplayComments(!commentsVisible)}>
                                                     <MessageSquare
                                                         size={18}

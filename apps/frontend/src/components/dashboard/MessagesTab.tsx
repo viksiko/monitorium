@@ -9,6 +9,7 @@ import { Dialog } from '@monorepo/types';
 import { useApi } from '@/hooks/useApi';
 import { useAuth } from '@/context/AuthContext';
 import Loader from '@/components/ui/loader';
+import ItemCount from '../ui/itemCount';
 
 const MessagesTab = () => {
     const { user } = useAuth();
@@ -87,7 +88,10 @@ const MessagesTab = () => {
     return (
         <>
             <div className="flex justify-between items-center mb-4">
-                <h2 className="text-2xl font-bold">Новые сообщения</h2>
+                <div className="flex gap-2 items-center">
+                    <h2 className="text-2xl font-bold">Новые сообщения</h2>
+                    <ItemCount count={unreadDialogs.length} />
+                </div>
                 <div className="text-center">
                     <Link to="/messages">
                         <Button className="honor-button-primary flex items-center">
@@ -136,7 +140,7 @@ const MessagesTab = () => {
             {unreadDialogs.length === 0 && (
                 <div className="text-center py-10">
                     <MailCheck
-                        className="mx-auto mb-4 text-green-500"
+                        className="mx-auto mb-4 text-honor-darkGray"
                         size={64}
                     />
                     <p className="text-honor-darkGray">У вас пока нет новых сообщений</p>

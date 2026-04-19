@@ -30,7 +30,7 @@ const TaskDetails = () => {
     const accessToken = useAuthStore((state) => state.accessToken);
     const { taskId } = useParams<{ taskId: string }>();
     const { data: task, loading, error } = useAuthorizedFetch<Task>(`/api/v1/tasks/${taskId}`, accessToken);
-    const [commentsVisible, setDisplayComments] = useState(false);
+    const [commentsVisible, setDisplayComments] = useState(true);
 
     if (loading) {
         return (
@@ -171,7 +171,7 @@ const TaskDetails = () => {
                                                 <Button
                                                     type="button"
                                                     variant="ghost"
-                                                    className={`flex items-center group ${commentsVisible ? 'bg-slate-100' : 'bg-white'} hover:bg-slate-100`}
+                                                    className={`flex items-center group ${!commentsVisible ? 'bg-slate-100' : 'bg-white'} hover:bg-slate-100`}
                                                     onClick={() => setDisplayComments(!commentsVisible)}>
                                                     <MessageSquare
                                                         size={18}

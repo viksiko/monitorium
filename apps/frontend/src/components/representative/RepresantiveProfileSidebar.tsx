@@ -11,7 +11,7 @@ const RepresantiveProfileSidebar = () => {
     const { user } = useAuth();
 
     return (
-        <Card className="honor-card mb-6">
+        <Card className="honor-card mb-6 sticky top-6">
             <div className="flex flex-col items-center p-6">
                 <Avatar className="justify-center items-center h-24 w-24 mb-4">
                     <User size={48} />

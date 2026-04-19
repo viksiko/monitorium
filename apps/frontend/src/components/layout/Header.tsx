@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { UserStar, MapPin, Plus, LogIn, Bell, Ticket } from 'lucide-react';
+import { UserStar, MapPin, Plus, LogIn, Bell, Ticket, Trash2, CircleX, X, BookType, FilePen } from 'lucide-react';
 import {
     Dialog,
     DialogContent,
@@ -13,6 +13,11 @@ import { TestApiButton } from '../ui/testApiButton';
 import { useAuth } from '@/context/AuthContext';
 import { useLogout } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
+import { useGetNotification, useReadNotification } from '@/lib/query/notificateion.query';
+import { useMutation } from '@tanstack/react-query';
+import Loader from '../ui/loader';
+import NotificationsDialog from '../notification/NotificationsDialog';
+import { TaskCreateLink } from '../ui/taskCreateLink';
 
 const Header = () => {
     const navigate = useNavigate();
@@ -32,22 +37,19 @@ const Header = () => {
                         <Link
                             to="/"
                             className="flex items-center">
-                            <span className="text-2xl font-bold text-honor-blue whitespace-nowrap">Мониториум</span>
+                            <div className="flex items-center gap-[2px] whitespace-nowrap group">
+                                <div className="bg-honor-blue text-white text-xl font-bold w-7 h-7 flex items-center justify-center rounded transition-transform group-hover:scale-110">
+                                    М
+                                </div>
+                                <span className="text-2xl font-bold text-honor-blue">ониториум</span>
+                            </div>
                         </Link>
                     </div>
 
                     <nav className="hidden md:flex items-center space-x-6">
                         {user && (
                             <>
-                                {!user.isRepresentative && (
-                                    <Link
-                                        to="/tasks/create"
-                                        className="flex items-center space-x-1 text-honor-text hover:text-honor-blue transition-colors">
-                                        <Plus size={20} />
-                                        <span>Создать задание</span>
-                                    </Link>
-                                )}
-
+                                {/* <TaskCreateLink isShowIcon={true} /> */}
                                 <Link
                                     to="/map"
                                     className="flex items-center space-x-1 text-honor-text hover:text-honor-blue transition-colors">
@@ -60,12 +62,23 @@ const Header = () => {
                                     <UserStar size={20} />
                                     <span>Представители</span>
                                 </Link>
+                                <Link
+                                    to="/tasks"
+                                    className="flex items-center space-x-1 text-honor-text hover:text-honor-blue transition-colors">
+                                    <BookType size={20} />
+                                    <span>Задачи</span>
+                                </Link>
+                                <Link
+                                    to="/posts"
+                                    className="flex items-center space-x-1 text-honor-text hover:text-honor-blue transition-colors">
+                                    <FilePen size={20} />
+                                    <span>Публикации</span>
+                                </Link>
                             </>
                         )}
                     </nav>
 
                     <div className="flex items-center space-x-4">
-                        {/* Ticket indicator */}
                         {user && (
                             <>
                                 {!user.isRepresentative && (
@@ -83,70 +96,7 @@ const Header = () => {
                                         <span className="text-xs text-honor-darkGray"></span>
                                     </Link>
                                 )}
-
-                                <Dialog>
-                                    <DialogTrigger asChild>
-                                        <Button
-                                            variant="ghost"
-                                            size="icon"
-                                            className="relative">
-                                            <Bell size={20} />
-                                            <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full"></span>
-                                        </Button>
-                                    </DialogTrigger>
-                                    <DialogContent>
-                                        <DialogHeader>
-                                            <DialogTitle>Подписки и уведомления</DialogTitle>
-                                            <DialogDescription>
-                                                Управляйте подписками и просматривайте последние уведомления
-                                            </DialogDescription>
-                                        </DialogHeader>
-                                        <div className="py-4">
-                                            <div className="space-y-4">
-                                                <div>
-                                                    <h3 className="text-sm font-medium">
-                                                        Вы подписаны на следующие округа:
-                                                    </h3>
-                                                    <div className="mt-2 space-y-2">
-                                                        <div className="flex justify-between items-center p-2 bg-honor-gray rounded">
-                                                            <div className="flex items-center">
-                                                                <MapPin
-                                                                    size={16}
-                                                                    className="text-honor-blue mr-2"
-                                                                />
-                                                                <span>Округ №3</span>
-                                                            </div>
-                                                            <Button
-                                                                variant="ghost"
-                                                                size="sm">
-                                                                Отписаться
-                                                            </Button>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div>
-                                                    <h3 className="text-sm font-medium">Последние уведомления:</h3>
-                                                    <div className="mt-2 space-y-2">
-                                                        <div className="p-2 bg-honor-gray rounded">
-                                                            <p className="text-sm font-medium">
-                                                                Новое задание в Округе №3
-                                                            </p>
-                                                            <p className="text-xs text-honor-darkGray">
-                                                                15 минут назад
-                                                            </p>
-                                                        </div>
-                                                        <div className="p-2 bg-honor-gray rounded">
-                                                            <p className="text-sm font-medium">
-                                                                Встреча с жителями перенесена
-                                                            </p>
-                                                            <p className="text-xs text-honor-darkGray">2 часа назад</p>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </DialogContent>
-                                </Dialog>
+                                <NotificationsDialog />
                             </>
                         )}
                         {!user ? (
@@ -160,8 +110,13 @@ const Header = () => {
                             <div className="flex items-center space-x-3">
                                 <Link
                                     to="/dashboard"
-                                    className="text-sm font-medium text-gray-700 cursor-pointer hover:text-blue-600 hover:underline transition-all">
-                                    <span>{user.name}</span>
+                                    className="text-sm font-medium text-gray-700 cursor-pointer hover:underline transition-all">
+                                    <div className="flex flex-col gap-0">
+                                        <span className="text-[16px] font-bold text-gray-700 dark:text-gray-200">
+                                            {user.name}
+                                        </span>
+                                        <span className="text-xs text-gray-400 dark:text-gray-500">{user.email}</span>
+                                    </div>
                                 </Link>
 
                                 <Button

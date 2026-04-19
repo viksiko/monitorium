@@ -1,4 +1,4 @@
-import { RegisterRoleEnum, TASK_STATUSES, YearTasksData } from '@monorepo/types';
+import { RegisterRoleEnum, SubscriberUser, SubscriptionUser, TASK_STATUSES, YearTasksData } from '@monorepo/types';
 import {
     ConflictException,
     ForbiddenException,
@@ -487,6 +487,76 @@ export class UserService {
             operation: 'deleteUser',
             userId: userId,
         });
+    }
+
+    async getSubscribers(userId: string): Promise<SubscriberUser[]> {
+        try {
+            const user = await this.prisma.user.findUnique({
+                where: { id: userId },
+                include: {
+                    subscribers: {
+                        include: {
+                            subscriber: {
+                                select: {
+                                    id: true,
+                                    name: true,
+                                    email: true,
+                                    role: true,
+                                },
+                            },
+                        },
+                    },
+                },
+            });
+
+            return user?.subscribers.map((sub) => sub.subscriber) || [];
+        } catch (error) {
+            logger.error('Failed getting data about subscribers', {
+                category: 'database',
+                operation: 'getSubscribers',
+                error: error instanceof Error ? error.message : error,
+            });
+
+            throw error;
+        }
+    }
+
+    async getSubscriptions(userId: string): Promise<SubscriptionUser[]> {
+        try {
+            const user = await this.prisma.user.findUnique({
+                where: { id: userId },
+                include: {
+                    subscriptions: {
+                        include: {
+                            representative: {
+                                select: {
+                                    id: true,
+                                    name: true,
+                                    email: true,
+                                    role: true,
+                                    representativeProfile: {
+                                        select: {
+                                            position: true,
+                                            party: true,
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            });
+
+            return user?.subscriptions.map((sub) => sub.representative) || [];
+        } catch (error) {
+            logger.error('Failed getting data about subscriptions', {
+                category: 'database',
+                operation: 'getSubscriptions',
+                error: error instanceof Error ? error.message : error,
+            });
+
+            throw error;
+        }
     }
 
     async findUserByEmailOrPhone(email: string, phone: string): Promise<User | null> {

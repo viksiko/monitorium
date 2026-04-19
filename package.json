@@ -10,7 +10,7 @@
     "packages/*"
   ],
   "scripts": {
-    "install:all": "npm install && npm run types:build",
+    "install:all": "npm install && npm install --workspace=back && npm install --workspace=front && npm run types:build",
     
     "dev": "concurrently \"npm run types:watch\" \"dotenv -e ./.env -- npm run start:dev --workspace=back\" \"dotenv -e ./.env -- npm run dev --workspace=front\"",
     "dev:back": "concurrently \"npm run types:watch\" \"dotenv -e ./.env -- npm run start:dev --workspace=back\"",

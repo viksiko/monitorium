@@ -117,6 +117,72 @@ export const GET_POST_BY_ID: ApiResponseOptions = {
     },
 };
 
+export const GET_LATEST_POSTS: ApiResponseOptions = {
+    status: 200,
+    description: 'Получить последние публикации',
+    content: {
+        'application/json': {
+            examples: {
+                a: {
+                    summary: 'Список послдених публикаций',
+                    value: {
+                        success: true,
+                        statusCode: 200,
+                        data: [
+                            {
+                                id: 'cmo2p3lna0000tcjf0mm3p061',
+                                title: 'Отчёт о проделанной работе за январь',
+                                content: 'Vero quasi ea ex sin',
+                                publishedAt: '2026-04-17T09:17:56.939Z',
+                                authorId: 'cmo1upatm0004o4jf54u98ids',
+                                likesCount: 0,
+                                viewsCount: 0,
+                                createdAt: '2026-04-17T09:17:56.950Z',
+                                updatedAt: '2026-04-17T09:17:56.950Z',
+                                author: {
+                                    name: 'Ray Miller',
+                                    district: {
+                                        id: 'f86da90c-9073-4b7b-944d-4e79c44d9897',
+                                        name: 'Округ №1',
+                                    },
+                                },
+                                files: [],
+                            },
+                            {
+                                id: 'cmo2owpxe0000qgjf4nvmm2u5',
+                                title: 'Отчёт о проделанной работе за февраль',
+                                content: 'Rerum perferendis iu',
+                                publishedAt: '2026-04-17T09:12:35.893Z',
+                                authorId: 'cmo1upatm0004o4jf54u98ids',
+                                likesCount: 0,
+                                viewsCount: 0,
+                                createdAt: '2026-04-17T09:12:35.906Z',
+                                updatedAt: '2026-04-17T09:12:35.906Z',
+                                author: {
+                                    name: 'Ray Miller',
+                                    district: {
+                                        id: 'f86da90c-9073-4b7b-944d-4e79c44d9897',
+                                        name: 'Округ №1',
+                                    },
+                                },
+                                files: [],
+                            },
+                        ],
+                    },
+                },
+                b: {
+                    summary: 'Публикации не найдены',
+                    value: {
+                        success: true,
+                        statusCode: 200,
+                        data: [],
+                    },
+                },
+            },
+        },
+    },
+};
+
 export const CREATE_POST_SUCCESS_RESPONSE: ApiResponseOptions = {
     status: 201,
     description: 'Успешное создание публикации',

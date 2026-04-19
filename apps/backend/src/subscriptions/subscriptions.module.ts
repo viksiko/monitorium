@@ -1,10 +1,12 @@
 import { Module } from '@nestjs/common';
-import { BalanceService } from '@src/balance/balance.service';
-import { SubscriptionsController } from './subscriptions.controller';
-import { SubscriptionsService } from './subscriptions.service';
+import { BalanceModule } from '@src/balance/balance.module';
+import { NotificationModule } from '@src/notification/notification.module';
+import { SubscriptionController } from './subscriptions.controller';
+import { SubscriptionService } from './subscriptions.service';
 
 @Module({
-    controllers: [SubscriptionsController],
-    providers: [SubscriptionsService, BalanceService],
+    controllers: [SubscriptionController],
+    providers: [SubscriptionService],
+    imports: [NotificationModule, BalanceModule],
 })
-export class SubscriptionsModule {}
+export class SubscriptionModule {}

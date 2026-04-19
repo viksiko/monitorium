@@ -5,31 +5,17 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ProfileSidebar, TasksTab, MessagesTab } from '@/components/representative';
 import BlogTab from '@/components/representative/BlogTab';
 import { useAuth } from '@/context/AuthContext';
+import SubscribersTab from '@/components/representative/SubscribersTab';
 
 const RepresentativeDashboard = () => {
-    const { user, isLoading } = useAuth();
+    const { user } = useAuth();
     const navigate = useNavigate();
 
     useEffect(() => {
-        if (!isLoading && (!user || !user.isRepresentative)) {
+        if (!user || !user.isRepresentative) {
             navigate('/dashboard');
         }
-    }, [user, isLoading, navigate]);
-
-    if (isLoading) {
-        return (
-            <Layout>
-                <div className="honor-container py-12">
-                    <div className="flex justify-center items-center min-h-[400px]">
-                        <div className="text-center">
-                            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-honor-blue mx-auto mb-4"></div>
-                            <p className="text-honor-darkGray">Загрузка...</p>
-                        </div>
-                    </div>
-                </div>
-            </Layout>
-        );
-    }
+    }, [user, navigate]);
 
     if (!user || !user.isRepresentative) {
         return null; // Будет редирект
@@ -70,6 +56,11 @@ const RepresentativeDashboard = () => {
                                     className="flex-1">
                                     Блог
                                 </TabsTrigger>
+                                <TabsTrigger
+                                    value="subscribers"
+                                    className="flex-1">
+                                    Подписчики
+                                </TabsTrigger>
                             </TabsList>
 
                             <TabsContent value="tasks">
@@ -82,6 +73,10 @@ const RepresentativeDashboard = () => {
 
                             <TabsContent value="blog">
                                 <BlogTab />
+                            </TabsContent>
+
+                            <TabsContent value="subscribers">
+                                <SubscribersTab />
                             </TabsContent>
                         </Tabs>
                     </div>

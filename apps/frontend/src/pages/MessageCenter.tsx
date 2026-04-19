@@ -107,10 +107,10 @@ const MessageCenter = () => {
     const handleSendMessage = async () => {
         if (!messageText.trim()) return;
 
-        if (user.voterProfile.balance < TOKEN_PARAMS.MESSAGE_CREATION_PRICE) {
+        if (user.voterProfile !== null && user.voterProfile.balance < TOKEN_PARAMS.MESSAGE_CREATION_PRICE) {
             toast({
                 title: 'Ошибка',
-                description: 'Недостаточно средств на балансе',
+                description: 'Недостаточно билетов на балансе',
                 variant: 'destructive',
             });
 

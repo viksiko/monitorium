@@ -1,10 +1,11 @@
 import { Module } from '@nestjs/common';
-import { BalanceService } from '@src/balance/balance.service';
+import { BalanceModule } from '@src/balance/balance.module';
 import { DialogController } from './dialog.controller';
 import { DialogService } from './dialog.service';
 
 @Module({
+    imports: [BalanceModule],
     controllers: [DialogController],
-    providers: [DialogService, BalanceService],
+    providers: [DialogService],
 })
 export class DialogModule {}

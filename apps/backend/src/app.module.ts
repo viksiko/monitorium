@@ -9,9 +9,10 @@ import { BalanceModule } from './balance/balance.module';
 import { CommentModule } from './comment/comment.module';
 import { DialogModule } from './dialog/dialog.module';
 import { DistrictModule } from './district/district.module';
+import { NotificationModule } from './notification/notification.module';
 import { PostModule } from './post/post.module';
 import { PrismaModule } from './prisma/prisma.module';
-import { SubscriptionsModule } from './subscriptions/subscriptions.module';
+import { SubscriptionModule } from './subscriptions/subscriptions.module';
 import { TaskModule } from './task/task.module';
 import { UserModule } from './user/user.module';
 
@@ -29,11 +30,12 @@ import { UserModule } from './user/user.module';
         ]),
         TaskModule,
         CommentModule,
-        SubscriptionsModule,
+        SubscriptionModule,
         PostModule,
         DialogModule,
         DistrictModule,
         BalanceModule,
+        NotificationModule,
     ],
     controllers: [AppController],
     providers: [AppService],

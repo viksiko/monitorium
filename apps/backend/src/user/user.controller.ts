@@ -1,4 +1,4 @@
-import { YearTasksData } from '@monorepo/types';
+import { SubscriberUser, SubscriptionUser, YearTasksData } from '@monorepo/types';
 import { Controller, Get, Param, Patch, Query, Req, UseGuards } from '@nestjs/common';
 import { ApiHeader, ApiOperation, ApiParam, ApiQuery, ApiResponse } from '@nestjs/swagger';
 import { AdminGuard } from '@src/auth/guards/admin.guard';
@@ -13,6 +13,8 @@ import {
 import {
     DEACTIVATE_OWN_ACCOUNT_ERROR_RESPONSE,
     GET_CURRENT_USER_RESPONSE,
+    SUBSCRIBERS_LIST_RESPONSE,
+    SUBSCRIPTIONS_LIST_RESPONSE,
     USER_ACCOUNT_DEACTIVATED_RESPONSE,
     USER_BAD_REQUEST_RESPONSE,
     USER_FILTER_LIST_SUCCESS_RESPONSE,
@@ -92,6 +94,26 @@ export class UserController {
     @ApiResponse(USER_STATISTICS_RESPONSE)
     async getUserStatistics(@Req() req: Request & { user: { id: string } }): Promise<YearTasksData[]> {
         return this.userService.getUserStatistics(req.user.id);
+    }
+
+    // Получить список всех подписчиков
+    @Get('subscribers')
+    @ApiOperation({ summary: 'Получить список всех подписчиков' })
+    @ApiResponse(SUBSCRIBERS_LIST_RESPONSE)
+    @ApiResponse({
+        status: 200,
+        description: 'Список подписанных пользователей',
+    })
+    async getSubscribers(@Req() req: Request & { user: { id: string } }): Promise<SubscriberUser[]> {
+        return this.userService.getSubscribers(req.user.id);
+    }
+
+    // Получить список всех подписок
+    @Get('subscriptions')
+    @ApiOperation({ summary: 'Получить список всех подписок' })
+    @ApiResponse(SUBSCRIPTIONS_LIST_RESPONSE)
+    async getSubscriptions(@Req() req: Request & { user: { id: string } }): Promise<SubscriptionUser[]> {
+        return this.userService.getSubscriptions(req.user.id);
     }
 
     // Получить пользователя по id

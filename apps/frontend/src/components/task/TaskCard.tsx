@@ -9,11 +9,12 @@ import { TaskStatusBadge } from '../ui/task-status-badge';
 
 type Props = {
     task: TaskListItem;
+    isEdit?: boolean;
 };
 
-const TaskCard = ({ task }: Props) => {
+const TaskCard = ({ task, isEdit = true }: Props) => {
     return (
-        <Link to={`/tasks/${task.id}`}>
+        <Link to={isEdit ? `/tasks/${task.id}/edit` : `/tasks/${task.id}`}>
             <Card className="honor-card mb-4 hover:shadow-lg">
                 <div className="flex justify-between items-start mb-4">
                     <h3 className="text-xl font-bold">{task.title}</h3>

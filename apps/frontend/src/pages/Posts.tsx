@@ -15,6 +15,7 @@ import { usePostsFilters } from '@/hooks/usePostsFilters';
 import { useShowMore } from '@/hooks/useShowMore';
 import PostCard from '@/components/post/PostCard';
 import { useGetPosts } from '@/lib/query/post.query';
+import ItemCount from '@/components/ui/itemCount';
 
 const Posts = () => {
     const { data: postsData, isLoading, isPending, isError } = useGetPosts();
@@ -46,7 +47,10 @@ const Posts = () => {
             <div className="honor-container py-12">
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
                     <div>
-                        <h1 className="text-3xl font-bold mb-2">Публикации и статьи</h1>
+                        <div className="flex gap-2 items-center">
+                            <h1 className="text-3xl font-bold mb-1">Публикации и статьи</h1>
+                            <ItemCount count={postsData.length} />
+                        </div>
                         <p className="text-honor-darkGray mb-8">Список всех публикаций представителей власти</p>
                     </div>
                 </div>
@@ -92,7 +96,7 @@ const Posts = () => {
                                         size={18}
                                     />
                                     <Input
-                                        placeholder="Поиск задач..."
+                                        placeholder="Поиск публикаций..."
                                         className="honor-input pl-10 text-base"
                                         value={searchTerm}
                                         onChange={(e) => handleSearch(e.target.value)}

@@ -43,6 +43,7 @@ import TaskDetailsEdit from './pages/TaskDetailsEdit';
 import PostCreate from './components/representative/PostCreate';
 import PostDetails from './pages/PostDetails';
 import Posts from './pages/Posts';
+import { AuthSocketProvider } from './socket/AuthSocketProvider';
 
 const queryClient = new QueryClient();
 
@@ -50,160 +51,162 @@ const App = () => (
     <QueryClientProvider client={queryClient}>
         <TooltipProvider>
             <AuthProvider>
-                <ErrorBoundary>
-                    <Toaster />
-                    <Sonner />
-                    <div>
-                        <BrowserRouter>
-                            <ScrollToTop />
-                            <Routes>
-                                {/* ================== PUBLIC (доступны всем) ================== */}
-                                <Route
-                                    path="/"
-                                    element={<Index />}
-                                />
-                                <Route
-                                    path="/help"
-                                    element={<Help />}
-                                />
-                                <Route
-                                    path="/blog"
-                                    element={<Blog />}
-                                />
-                                <Route
-                                    path="/districts/:id"
-                                    element={<DistrictDetails />}
-                                />
+                <AuthSocketProvider>
+                    <ErrorBoundary>
+                        <Toaster />
+                        <Sonner />
+                        <div>
+                            <BrowserRouter>
+                                <ScrollToTop />
+                                <Routes>
+                                    {/* ================== PUBLIC (доступны всем) ================== */}
+                                    <Route
+                                        path="/"
+                                        element={<Index />}
+                                    />
+                                    <Route
+                                        path="/help"
+                                        element={<Help />}
+                                    />
+                                    <Route
+                                        path="/blog"
+                                        element={<Blog />}
+                                    />
+                                    <Route
+                                        path="/districts/:id"
+                                        element={<DistrictDetails />}
+                                    />
 
-                                {/* ================== PUBLIC ONLY (только для НЕавторизованных) ================== */}
-                                <Route element={<PublicRoute />}>
-                                    <Route
-                                        path="/login"
-                                        element={<Login />}
-                                    />
-                                    <Route
-                                        path="/register"
-                                        element={<Register />}
-                                    />
-                                    <Route
-                                        path="/register/representative"
-                                        element={<RepresentativeRegister />}
-                                    />
-                                </Route>
-
-                                {/* ================== PRIVATE (только для авторизованных) ================== */}
-                                <Route element={<PrivateRoute />}>
-                                    <Route
-                                        path="/map"
-                                        element={<Map />}
-                                    />
-                                    <Route
-                                        path="/dashboard"
-                                        element={<Dashboard />}
-                                    />
-                                    <Route
-                                        path="/messages"
-                                        element={<MessageCenter />}
-                                    />
-                                    <Route
-                                        path="/analytics"
-                                        element={<Analytics />}
-                                    />
-                                    <Route
-                                        path="/tasks"
-                                        element={<Tasks />}
-                                    />
-                                    <Route
-                                        path="/tasks/create"
-                                        element={<TaskCreate />}
-                                    />
-                                    <Route
-                                        path="/tasks/:taskId"
-                                        element={<TaskDetails />}
-                                    />
-                                    <Route element={<RoleRoute allowedRoles={['REPRESENTATIVE']} />}>
+                                    {/* ================== PUBLIC ONLY (только для НЕавторизованных) ================== */}
+                                    <Route element={<PublicRoute />}>
                                         <Route
-                                            path="/tasks/:taskId/edit"
-                                            element={<TaskDetailsEdit />}
+                                            path="/login"
+                                            element={<Login />}
+                                        />
+                                        <Route
+                                            path="/register"
+                                            element={<Register />}
+                                        />
+                                        <Route
+                                            path="/register/representative"
+                                            element={<RepresentativeRegister />}
                                         />
                                     </Route>
+
+                                    {/* ================== PRIVATE (только для авторизованных) ================== */}
+                                    <Route element={<PrivateRoute />}>
+                                        <Route
+                                            path="/map"
+                                            element={<Map />}
+                                        />
+                                        <Route
+                                            path="/dashboard"
+                                            element={<Dashboard />}
+                                        />
+                                        <Route
+                                            path="/messages"
+                                            element={<MessageCenter />}
+                                        />
+                                        <Route
+                                            path="/analytics"
+                                            element={<Analytics />}
+                                        />
+                                        <Route
+                                            path="/tasks"
+                                            element={<Tasks />}
+                                        />
+                                        <Route
+                                            path="/tasks/create"
+                                            element={<TaskCreate />}
+                                        />
+                                        <Route
+                                            path="/tasks/:taskId"
+                                            element={<TaskDetails />}
+                                        />
+                                        <Route element={<RoleRoute allowedRoles={['REPRESENTATIVE']} />}>
+                                            <Route
+                                                path="/tasks/:taskId/edit"
+                                                element={<TaskDetailsEdit />}
+                                            />
+                                        </Route>
+                                        <Route
+                                            path="/balance"
+                                            element={<Balance />}
+                                        />
+                                        {/* Representative */}
+                                        <Route
+                                            path="/representative/dashboard"
+                                            element={<RepresentativeDashboard />}
+                                        />
+                                        <Route
+                                            path="/representative/tasks"
+                                            element={<RepresentativeTasks />}
+                                        />
+                                        <Route
+                                            path="/representative/statistics"
+                                            element={<RepresentativeStatistics />}
+                                        />
+
+                                        <Route
+                                            path="/representatives"
+                                            element={<Representatives />}
+                                        />
+                                        <Route
+                                            path="/representative/profile/:id"
+                                            element={<RepresentativeProfile />}
+                                        />
+                                        <Route
+                                            path="/posts"
+                                            element={<Posts />}
+                                        />
+                                        <Route
+                                            path="/posts/create"
+                                            element={<PostCreate />}
+                                        />
+                                        <Route
+                                            path="/posts/:postId"
+                                            element={<PostDetails />}
+                                        />
+                                    </Route>
+
+                                    {/* ================== CALLBACKS (без guard’ов) ================== */}
                                     <Route
-                                        path="/balance"
-                                        element={<Balance />}
+                                        path="/gosuslugi/callback"
+                                        element={<GosuslugiCallback />}
                                     />
-                                    {/* Representative */}
                                     <Route
-                                        path="/representative/dashboard"
-                                        element={<RepresentativeDashboard />}
+                                        path="/sber/auth"
+                                        element={<SberCallback />}
                                     />
                                     <Route
-                                        path="/representative/tasks"
-                                        element={<RepresentativeTasks />}
-                                    />
-                                    <Route
-                                        path="/representative/statistics"
-                                        element={<RepresentativeStatistics />}
+                                        path="/tinkoff/auth"
+                                        element={<TinkoffCallback />}
                                     />
 
+                                    {/* ================== SERVICE ================== */}
                                     <Route
-                                        path="/representatives"
-                                        element={<Representatives />}
+                                        path="/confirm-registration"
+                                        element={<ConfirmRegistration />}
                                     />
                                     <Route
-                                        path="/representative/profile/:id"
-                                        element={<RepresentativeProfile />}
+                                        path="/confirm-registration-failed"
+                                        element={<ConfirmRegistrationFailed />}
                                     />
-                                    <Route
-                                        path="/posts"
-                                        element={<Posts />}
-                                    />
-                                    <Route
-                                        path="/posts/create"
-                                        element={<PostCreate />}
-                                    />
-                                    <Route
-                                        path="/posts/:postId"
-                                        element={<PostDetails />}
-                                    />
-                                </Route>
 
-                                {/* ================== CALLBACKS (без guard’ов) ================== */}
-                                <Route
-                                    path="/gosuslugi/callback"
-                                    element={<GosuslugiCallback />}
-                                />
-                                <Route
-                                    path="/sber/auth"
-                                    element={<SberCallback />}
-                                />
-                                <Route
-                                    path="/tinkoff/auth"
-                                    element={<TinkoffCallback />}
-                                />
-
-                                {/* ================== SERVICE ================== */}
-                                <Route
-                                    path="/confirm-registration"
-                                    element={<ConfirmRegistration />}
-                                />
-                                <Route
-                                    path="/confirm-registration-failed"
-                                    element={<ConfirmRegistrationFailed />}
-                                />
-
-                                {/* ================== ERRORS ================== */}
-                                <Route
-                                    path="/server-error"
-                                    element={<ServerError />}
-                                />
-                                <Route
-                                    path="*"
-                                    element={<NotFound />}
-                                />
-                            </Routes>
-                        </BrowserRouter>
-                    </div>
-                </ErrorBoundary>
+                                    {/* ================== ERRORS ================== */}
+                                    <Route
+                                        path="/server-error"
+                                        element={<ServerError />}
+                                    />
+                                    <Route
+                                        path="*"
+                                        element={<NotFound />}
+                                    />
+                                </Routes>
+                            </BrowserRouter>
+                        </div>
+                    </ErrorBoundary>
+                </AuthSocketProvider>
             </AuthProvider>
         </TooltipProvider>
     </QueryClientProvider>

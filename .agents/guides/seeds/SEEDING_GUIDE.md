@@ -2,6 +2,12 @@
 
 Этот документ предназначен для AI-агентов и разработчиков, которые создают, модифицируют или расширяют систему сидинга.
 
+## Используемые гайды
+
+| Гайд | Описание |
+|------|----------|
+| [GIT_GUIDE.MD](../git/GIT_GUIDE.MD) | Просмотр изменений ветки через git |
+
 ---
 
 ## Обзор архитектуры
@@ -23,6 +29,7 @@ prisma/seed/
     ├── subscription.factory.ts      # Подписки voter → representative
     ├── dialog.factory.ts            # Диалоги
     ├── message.factory.ts           # Сообщения в диалогах
+    ├── notification.factory.ts      # Демо-уведомления (по подпискам, задачам, постам и т.д.)
     └── balance-transaction.factory.ts  # Транзакции баланса
 ```
 
@@ -88,6 +95,8 @@ Subscription: VOTER → REPRESENTATIVE
 Dialog: VOTER ↔ REPRESENTATIVE (только при наличии Subscription)
 Message: Dialog + User (sender)
 BalanceTransaction: User (VOTER) + VoterProfile
+
+Notification: User + опционально Subscription | Task | Post | Comment | Message
 ```
 
 ---
@@ -242,6 +251,13 @@ export async function createMyModel(
 | Баланс не уходит ниже 0 | DEBIT-транзакция пропускается если средств недостаточно |
 | `VoterProfile.balance` | Синхронизируется с финальным `balanceAfter` |
 
+### Уведомления (Notification)
+| Поле / поведение | Правило |
+|------------------|---------|
+| Идемпотентность шага | Перед вставкой демо-данных выполняется `deleteMany` по таблице уведомлений — повторный seed даёт предсказуемый набор |
+| `userId` | Получатель уведомления (как в `NotificationService.createAndSendNotification`) |
+| Связи | `subscriptionId` / `taskId` / `postId` / `commentId` / `messageId` заполняются только там, где уместно по типу |
+
 ---
 
 ## Enums (Prisma)
@@ -253,6 +269,7 @@ BalanceTransactionType: REGISTRATION_BONUS | WATCH_AD | REPRESENTATIVE_SUBSCRIPT
                         CREATE_TASK | MESSAGE_REPRESENTATIVE | PURCHASE_TICKETS
 TransactionDirection:   CREDIT | DEBIT
 TokenType:              REFRESH | VERIFY_EMAIL | RESET_PASSWORD
+NotificationType:       NEW_SUBSCRIBER | NEW_TASK_ASSIGNED | TASK_STATUS_CHANGED | NEW_POST | NEW_COMMENT | NEW_MESSAGE
 ```
 
 ---
@@ -320,7 +337,8 @@ const CONFIG = {
 Если в `schema.prisma` добавлена или изменена модель:
 
 1. Прочитайте этот гайд полностью.
-2. Создайте или обновите соответствующую фабрику в `factories/`.
-3. Определите место модели в графе зависимостей и добавьте вызов в нужном месте `seed.ts`.
-4. Если у модели есть специфические бизнес-правила — уточните их у пользователя и зафиксируйте по схеме выше.
-5. Обновите раздел «Важные бизнес-правила» и граф зависимостей в этом документе.
+2. Изучите изменения ветки через **[GIT_GUIDE.MD](../git/GIT_GUIDE.MD)** — он описывает правильный способ просмотра diff'а относительно базовой ветки проекта (`dev`). Не сравнивай произвольное число коммитов и не используй `main`/`master` как базу, если пользователь не указал иное.
+3. Создайте или обновите соответствующую фабрику в `factories/`.
+4. Определите место модели в графе зависимостей и добавьте вызов в нужном месте `seed.ts`.
+5. Если у модели есть специфические бизнес-правила — уточните их у пользователя и зафиксируйте по схеме выше.
+6. Обновите раздел «Важные бизнес-правила» и граф зависимостей в этом документе.

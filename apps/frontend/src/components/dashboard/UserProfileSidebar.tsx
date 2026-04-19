@@ -5,6 +5,8 @@ import { Avatar } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { User, MapPin, Plus, Crown } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
+import { TaskCreateButton } from '../ui/taskCreateButton';
+import ItemCount from '../ui/itemCount';
 
 const UserProfileSidebar = () => {
     const { user } = useAuth();
@@ -55,7 +57,7 @@ const UserProfileSidebar = () => {
     };
 
     return (
-        <Card className="honor-card mb-6">
+        <Card className="honor-card mb-6 sticky top-6">
             <div className="flex flex-col items-center p-6">
                 <Avatar className="justify-center items-center h-24 w-24 mb-4 bg-honor-blue text-white text-xl font-bold">
                     {user.name ? getUserInitials() : <User size={48} />}
@@ -116,10 +118,13 @@ const UserProfileSidebar = () => {
             <div className="p-6">
                 {!user.isRepresentative && (
                     <>
-                        <h3 className="text-lg font-semibold mb-4">Мой представитель</h3>
+                        <div className="flex gap-2 items-center">
+                            <h3 className="text-lg font-semibold ">Мои представители</h3>
+                            <ItemCount count={user.subscriptions.length} />
+                        </div>
                         {user.subscriptions && user.subscriptions.length > 0 ? (
                             // Если подписки есть — выводим список
-                            <div className="space-y-3">
+                            <div className="space-y-3 mt-4">
                                 {user.subscriptions.map((sub) => (
                                     <Link
                                         to={`/representative/profile/${sub.representative.id}`}
@@ -191,17 +196,7 @@ const UserProfileSidebar = () => {
 
                 <h3 className="text-lg font-semibold mt-6 mb-4">Быстрые действия</h3>
                 <div className="flex flex-col space-y-3">
-                    {!user.isRepresentative && (
-                        <Link to="/tasks/create">
-                            <Button className="w-full honor-button-primary flex items-center justify-center">
-                                <Plus
-                                    size={18}
-                                    className="mr-2"
-                                />
-                                Создать задание
-                            </Button>
-                        </Link>
-                    )}
+                    {!user.isRepresentative && <TaskCreateButton />}
                     <Link to="/map">
                         <Button className="w-full honor-button-secondary flex items-center justify-center">
                             <MapPin

@@ -67,9 +67,9 @@ const Index: React.FC = () => {
                         </div>
                         <div className="lg:flex justify-center hidden">
                             <img
-                                src="/placeholder.svg"
-                                alt="Платформа Честь"
-                                className="max-w-full h-auto"
+                                src="../../public/images/main-banner.jpg"
+                                alt="Платформа Мониториум"
+                                className="max-w-full h-auto rounded-2xl border border-white/40"
                             />
                         </div>
                     </div>
@@ -256,7 +256,7 @@ const Index: React.FC = () => {
                 <div className="honor-container">
                     <h2 className="text-3xl font-bold text-center mb-4">Статистика платформы</h2>
                     <p className="text-honor-darkGray text-center max-w-2xl mx-auto mb-12">
-                        Актуальные данные о работе платформы «Честь»
+                        Актуальные данные о работе платформы «Мониториум»
                     </p>
 
                     <div className="grid grid-cols-2 md:grid-cols-5 gap-4 md:gap-6">
