@@ -19,7 +19,7 @@ import {
 import { useToast } from '@/components/ui/use-toast';
 import { useAuthStore } from '@/shared/stores/auth.store';
 import { useForm } from 'react-hook-form';
-import { createTaskSchema } from '@/zod/createTask.shema';
+import { createTaskSchema, CreateTaskFormValues } from '@/zod/createTask.shema';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { FormError, formInputClass } from '@/components/ui/formInputClass';
 import { add } from 'date-fns';
@@ -42,7 +42,7 @@ const TaskCreate = () => {
         reset,
         formState: { errors },
     } = useForm({
-        resolver: zodResolver(createTaskSchema),
+        resolver: zodResolver(createTaskSchema(!!user?.isRepresentative)),
         defaultValues: {
             assigneeId: '',
             title: '',
@@ -71,8 +71,8 @@ const TaskCreate = () => {
         }
     };
 
-    const onSubmit = async (data) => {
-        if (user.voterProfile.balance < TOKEN_PARAMS.TASK_CREATION_PRICE) {
+    const onSubmit = async (data: CreateTaskFormValues) => {
+        if (!user?.isRepresentative && user.voterProfile.balance < TOKEN_PARAMS.TASK_CREATION_PRICE) {
             toast({
                 title: 'Ошибка',
                 description: 'Недостаточно средств на балансе',
@@ -85,7 +85,7 @@ const TaskCreate = () => {
         const createTaskDto: CreateTaskDtoModel = {
             title: data.title,
             address: data.address,
-            assigneeId: data.assigneeId,
+            assigneeId: user?.isRepresentative ? user.id : data.assigneeId,
             problemDescription: data.description,
             possibleSolutions: data.solution,
             desiredResolutionDate: new Date(data.endDate),
@@ -126,33 +126,35 @@ const TaskCreate = () => {
                     <form
                         onSubmit={handleSubmit(onSubmit)}
                         className="honor-card">
-                        <div className="mb-6">
-                            <Label
-                                htmlFor="assignee"
-                                className="block mb-2">
-                                Представитель власти
-                            </Label>
-                            <div className="relative">
-                                <User
-                                    className="absolute left-3 top-1/2 transform -translate-y-1/2 text-honor-darkGray"
-                                    size={18}
-                                />
-                                <select
-                                    id="assignee"
-                                    {...register('assigneeId')}
-                                    className={formInputClass(errors.assigneeId)}>
-                                    <option value="">Выберите представителя</option>
-                                    {user?.subscriptions?.map((sub) => (
-                                        <option
-                                            key={sub.id}
-                                            value={sub.representative.id}>
-                                            {sub.representative.name}
-                                        </option>
-                                    ))}
-                                </select>
+                        {!user?.isRepresentative && (
+                            <div className="mb-6">
+                                <Label
+                                    htmlFor="assignee"
+                                    className="block mb-2">
+                                    Представитель власти
+                                </Label>
+                                <div className="relative">
+                                    <User
+                                        className="absolute left-3 top-1/2 transform -translate-y-1/2 text-honor-darkGray"
+                                        size={18}
+                                    />
+                                    <select
+                                        id="assignee"
+                                        {...register('assigneeId')}
+                                        className={formInputClass(errors.assigneeId)}>
+                                        <option value="">Выберите представителя</option>
+                                        {user?.subscriptions?.map((sub) => (
+                                            <option
+                                                key={sub.id}
+                                                value={sub.representative.id}>
+                                                {sub.representative.name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <FormError error={errors.assigneeId} />
                             </div>
-                            <FormError error={errors.assigneeId} />
-                        </div>
+                        )}
 
                         <div className="mb-6">
                             <Label
@@ -340,7 +342,9 @@ const TaskCreate = () => {
                             className="w-full honor-button-primary"
                             // disabled={!user || user.voterProfile.balance < TOKEN_PARAMS.TASK_CREATION_PRICE}
                         >
-                            Создать задание ({TOKEN_PARAMS.TASK_CREATION_PRICE} билетов)
+                            {user?.isRepresentative
+                                ? 'Создать задание'
+                                : `Создать задание (${TOKEN_PARAMS.TASK_CREATION_PRICE} билетов)`}
                         </Button>
                     </form>
                 </div>

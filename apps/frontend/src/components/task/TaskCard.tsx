@@ -6,18 +6,24 @@ import { Button } from '@/components/ui/button';
 import { MapPin, Calendar, Clock, ThumbsUp, MessageSquare, UserStar } from 'lucide-react';
 import { TaskListItem } from '@monorepo/types';
 import { TaskStatusBadge } from '../ui/task-status-badge';
+import OwnTaskBadge from '../ui/ownTaskBadge';
 
 type Props = {
     task: TaskListItem;
     isEdit?: boolean;
+    isOwnTask?: boolean;
 };
 
-const TaskCard = ({ task, isEdit = true }: Props) => {
+const TaskCard = ({ task, isEdit = true, isOwnTask = false }: Props) => {
     return (
         <Link to={isEdit ? `/tasks/${task.id}/edit` : `/tasks/${task.id}`}>
-            <Card className="honor-card mb-4 hover:shadow-lg">
+            <Card className="honor-card mb-4 hover:shadow-lg relative">
+                {isOwnTask && <OwnTaskBadge text="Ваша задача" />}
                 <div className="flex justify-between items-start mb-4">
-                    <h3 className="text-xl font-bold">{task.title}</h3>
+                    <div className="flex items-center gap-2 flex-wrap">
+                        <h3 className="text-xl font-bold">{task.title}</h3>
+                    </div>
+
                     <TaskStatusBadge status={task.status} />
                 </div>
 

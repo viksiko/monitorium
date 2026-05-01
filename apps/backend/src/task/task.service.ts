@@ -30,14 +30,6 @@ export class TaskService {
             }
 
             const task = await this.prisma.$transaction(async (tx) => {
-                // Списание билеты у пользователя
-                await this.balanceService.withdrawBalanceTx(
-                    tx,
-                    authorId,
-                    TOKEN_PARAMS.TASK_CREATION_PRICE,
-                    BalanceTransactionType.CREATE_TASK,
-                );
-
                 let assigneeDistrictId: string | null = null;
 
                 // Если указан исполнитель — проверяем, что это представитель
@@ -57,6 +49,20 @@ export class TaskService {
 
                     if (!assignee.districtId) {
                         throw new Error('У представителя не указан округ');
+                    }
+
+                    // Если автор назначает задачу самому себе и он представитель, баланс не списываем
+                    const isRepresentativeSelfAssignedTask =
+                        authorId === assigneeId && assignee.role === 'REPRESENTATIVE';
+
+                    // Списание билеты у пользователя
+                    if (!isRepresentativeSelfAssignedTask) {
+                        await this.balanceService.withdrawBalanceTx(
+                            tx,
+                            authorId,
+                            TOKEN_PARAMS.TASK_CREATION_PRICE,
+                            BalanceTransactionType.CREATE_TASK,
+                        );
                     }
 
                     assigneeDistrictId = assignee.districtId;
@@ -105,7 +111,7 @@ export class TaskService {
             });
 
             // создаём уведомление представителю по websocket
-            if (task.assigneeId) {
+            if (task.assigneeId && task.assigneeId !== authorId) {
                 await this.notificationService.createAndSendNotification({
                     userId: task.assigneeId,
                     type: 'NEW_TASK_ASSIGNED',

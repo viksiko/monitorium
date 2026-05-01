@@ -5,15 +5,18 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ThumbsUp, MessageSquare, Clock, MapPin, UserStar } from 'lucide-react';
 import { Post } from '@monorepo/types'; // поправь тип если нужно
+import OwnTaskBadge from '../ui/ownTaskBadge';
 
 type Props = {
     post: Post;
+    isOwnTask?: boolean;
 };
 
-const PostCard = ({ post }: Props) => {
+const PostCard = ({ post, isOwnTask = false }: Props) => {
     return (
         <Link to={`/posts/${post.id}`}>
-            <Card className="honor-card mb-4 hover:shadow-lg">
+            <Card className="honor-card mb-4 hover:shadow-lg relative">
+                {isOwnTask && <OwnTaskBadge text="Ваша публикация" />}
                 <div className="flex justify-between items-start mb-4">
                     <div className="flex flex-col w-full">
                         <h3 className="text-xl font-bold mb-4">{post.title}</h3>

@@ -80,7 +80,7 @@ export const CommentHeader = () => {
 
 export const CommentContent = () => {
     const { comment } = useCommentComponentContext();
-    return <p className="mb-3 rounded-md text-sm leading-relaxed text-foreground">{comment.content}</p>;
+    return <p className="mb-3 rounded-md text-sm leading-relaxed text-foreground italic">{comment.content}</p>;
 };
 
 export const CommentComponent = Object.assign(CommentRoot, {
