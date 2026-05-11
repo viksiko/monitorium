@@ -122,7 +122,9 @@ const TaskDetails = () => {
                                         </div>
 
                                         <div className="mb-4">
-                                            <p className="text-honor-darkGray mb-2">{task.problemDescription}</p>
+                                            <p className="text-honor-darkGray mb-4 font-medium">
+                                                {task.problemDescription}
+                                            </p>
                                             <p className="text-sm font-medium">Решение: {task.possibleSolutions}</p>
                                         </div>
 

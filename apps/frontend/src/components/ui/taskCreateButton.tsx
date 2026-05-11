@@ -23,17 +23,15 @@ export const TaskCreateButton = ({
 
     return (
         <>
-            {user && !user.isRepresentative && (
-                <Button
-                    className={className}
-                    onClick={handleCreatTask}>
-                    <Plus
-                        size={iconSize}
-                        className="mr-2"
-                    />
-                    {children || 'Создать задание'}
-                </Button>
-            )}
+            <Button
+                className={className}
+                onClick={handleCreatTask}>
+                <Plus
+                    size={iconSize}
+                    className="mr-2"
+                />
+                {children || 'Создать задание'}
+            </Button>
         </>
     );
 };

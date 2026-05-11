@@ -13,6 +13,7 @@ import { Task } from '@monorepo/types';
 import { useShowMore } from '@/hooks/useShowMore';
 import TaskCard from '../task/TaskCard';
 import ItemCount from '../ui/itemCount';
+import { TaskCreateButton } from '../ui/taskCreateButton';
 
 const TasksTab = () => {
     const [loading, setLoading] = useState(true);
@@ -74,16 +75,17 @@ const TasksTab = () => {
                         Создать задачу
                     </Button>
                 </Link> */}
-                <Button
-                    className="honor-button-primary flex items-center"
-                    onClick={handleRefresh}
-                    disabled={loading}>
-                    <RefreshCw
-                        size={18}
-                        className="mr-2"
-                    />
-                    Обновить список
-                </Button>
+                <div className="flex gap-2">
+                    {tasks.length > 0 && (
+                        <Button
+                            className="honor-button-primary flex items-center"
+                            onClick={handleRefresh}
+                            disabled={loading}>
+                            <RefreshCw size={18} />
+                        </Button>
+                    )}
+                    <TaskCreateButton />
+                </div>
             </div>
 
             <div className="max-w-5xl mx-auto">

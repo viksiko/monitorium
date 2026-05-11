@@ -16,8 +16,10 @@ import { useShowMore } from '@/hooks/useShowMore';
 import PostCard from '@/components/post/PostCard';
 import { useGetPosts } from '@/lib/query/post.query';
 import ItemCount from '@/components/ui/itemCount';
+import { useAuth } from '@/context/AuthContext';
 
 const Posts = () => {
+    const { user } = useAuth();
     const { data: postsData, isLoading, isPending, isError } = useGetPosts();
     const {
         filteredData: filteredPosts,
@@ -116,6 +118,7 @@ const Posts = () => {
                                             <PostCard
                                                 key={post.id}
                                                 post={post}
+                                                isOwnTask={!!user && user.isRepresentative && post.authorId === user.id}
                                             />
                                         ))}
 

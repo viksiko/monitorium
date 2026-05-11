@@ -14,8 +14,10 @@ import TaskCard from '@/components/task/TaskCard';
 import { useTasksFilters } from '@/hooks/useTasksFilters';
 import { useShowMore } from '@/hooks/useShowMore';
 import ItemCount from '@/components/ui/itemCount';
+import { useAuth } from '@/context/AuthContext';
 
 const Tasks = () => {
+    const { user } = useAuth();
     const { data: tasksData, isLoading, isPending, isError } = useGetTasks();
     const {
         filteredData: filteredTasks,
@@ -127,6 +129,12 @@ const Tasks = () => {
                                             <TaskCard
                                                 key={task.id}
                                                 task={task}
+                                                isOwnTask={
+                                                    !!user &&
+                                                    (user.isRepresentative
+                                                        ? task.assignee?.id === user.id
+                                                        : task.author.id === user.id)
+                                                }
                                             />
                                         ))}
 

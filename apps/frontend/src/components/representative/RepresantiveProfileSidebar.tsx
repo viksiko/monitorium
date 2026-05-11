@@ -51,13 +51,13 @@ const RepresantiveProfileSidebar = () => {
                 <h3 className="text-lg font-semibold mb-4">Быстрые действия</h3>
                 <div className="flex flex-col space-y-3">
                     <Link to="/tasks/create">
-                        {/* <Button className="w-full honor-button-primary flex items-center justify-center">
+                        <Button className="w-full honor-button-primary flex items-center justify-center">
                             <Plus
                                 size={18}
                                 className="mr-2"
                             />
                             Создать новую задачу
-                        </Button> */}
+                        </Button>
                     </Link>
                     <Link to="/messages">
                         <Button className="w-full flex items-center justify-center bg-gray-100 hover:bg-gray-200 text-honor-darkGray">

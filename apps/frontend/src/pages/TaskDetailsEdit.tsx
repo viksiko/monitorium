@@ -455,7 +455,9 @@ const TaskDetailsEdit = () => {
                                             )}
                                         </div>
                                         <div className="mb-4">
-                                            <p className="text-honor-darkGray mb-2">{task.problemDescription}</p>
+                                            <p className="text-honor-darkGray mb-4 font-medium">
+                                                {task.problemDescription}
+                                            </p>
 
                                             <div className="flex items-start gap-2">
                                                 <p className="text-sm font-medium">Решение:</p>

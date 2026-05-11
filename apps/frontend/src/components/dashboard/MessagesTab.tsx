@@ -105,47 +105,49 @@ const MessagesTab = () => {
                 </div>
             </div>
 
-            {unreadDialogs.map((dialog) => {
-                const lastMessage = dialog.messages[0];
-                const companion = dialog.voterId === currentUserId ? dialog.representative : dialog.voter;
+            <div className="space-y-4">
+                {unreadDialogs.map((dialog) => {
+                    const lastMessage = dialog.messages[0];
+                    const companion = dialog.voterId === currentUserId ? dialog.representative : dialog.voter;
 
-                return (
-                    <Card
-                        key={dialog.id}
-                        className="p-4 bg-blue-50">
-                        <div className="flex items-start">
-                            <Avatar className="justify-center items-centerh-10 w-10 mr-3 mt-1">
-                                <User size={20} />
-                            </Avatar>
+                    return (
+                        <Card
+                            key={dialog.id}
+                            className="p-4 bg-blue-50">
+                            <div className="flex items-start">
+                                <Avatar className="justify-center items-centerh-10 w-10 mr-3 mt-1">
+                                    <User size={20} />
+                                </Avatar>
 
-                            <div className="flex-1">
-                                <div className="flex justify-between items-center">
-                                    <h3 className="font-medium">
-                                        {companion.name}
-                                        <Badge className="ml-2 bg-honor-blue text-white text-xs">Новое</Badge>
-                                    </h3>
+                                <div className="flex-1">
+                                    <div className="flex justify-between items-center">
+                                        <h3 className="font-medium">
+                                            {companion.name}
+                                            <Badge className="ml-2 bg-honor-blue text-white text-xs">Новое</Badge>
+                                        </h3>
 
-                                    <span className="text-xs text-honor-darkGray">
-                                        {new Date(lastMessage.createdAt).toLocaleDateString('ru-RU')}
-                                    </span>
+                                        <span className="text-xs text-honor-darkGray">
+                                            {new Date(lastMessage.createdAt).toLocaleDateString('ru-RU')}
+                                        </span>
+                                    </div>
+
+                                    <p className="text-sm mt-1 italic">{lastMessage.text}</p>
                                 </div>
-
-                                <p className="text-sm mt-1 italic">{lastMessage.text}</p>
                             </div>
-                        </div>
-                    </Card>
-                );
-            })}
+                        </Card>
+                    );
+                })}
 
-            {unreadDialogs.length === 0 && (
-                <div className="text-center py-10">
-                    <MailCheck
-                        className="mx-auto mb-4 text-honor-darkGray"
-                        size={64}
-                    />
-                    <p className="text-honor-darkGray">У вас пока нет новых сообщений</p>
-                </div>
-            )}
+                {unreadDialogs.length === 0 && (
+                    <div className="text-center py-10">
+                        <MailCheck
+                            className="mx-auto mb-4 text-honor-darkGray"
+                            size={64}
+                        />
+                        <p className="text-honor-darkGray">У вас пока нет новых сообщений</p>
+                    </div>
+                )}
+            </div>
         </>
     );
 };
