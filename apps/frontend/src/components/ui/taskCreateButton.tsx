@@ -2,6 +2,7 @@ import { Button } from '@/components/ui/button';
 import { useAuth } from '@/context/AuthContext';
 import { useTaskCreationGuard } from '@/hooks/useCheckSubscriptions';
 import { Plus } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 interface TaskCreateButtonProps {
     className?: string;
@@ -16,9 +17,11 @@ export const TaskCreateButton = ({
 }: TaskCreateButtonProps) => {
     const { user } = useAuth();
     const { navigateToTaskCreate } = useTaskCreationGuard();
+    const navigate = useNavigate();
 
     const handleCreatTask = () => {
-        navigateToTaskCreate(user);
+        navigate('/tasks/create');
+        // navigateToTaskCreate(user); // Временно отключаем проверку подписок для создания заданий
     };
 
     return (

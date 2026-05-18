@@ -27,7 +27,8 @@ import { useAuth } from '@/context/AuthContext';
 import { api } from '@/lib/api';
 import { TOKEN_PARAMS } from '@/constants/tokens-params';
 import { useCreateTaskMutation } from '@/lib/query/task.query';
-import { CreateTaskDtoModel } from '@/lib/generated/models';
+import { CreateTaskDtoModel, UserWithRepresentativeProfileDtoModel } from '@/lib/generated/models';
+import { useGetRepresentatives } from '@/lib/query/user.query';
 
 const TaskCreate = () => {
     const accessToken = useAuthStore((state) => state.accessToken);
@@ -35,6 +36,7 @@ const TaskCreate = () => {
     const [stages, setStages] = useState([{ title: '', date: '' }]);
     const { user, refreshUser } = useAuth();
     const { mutate } = useCreateTaskMutation();
+    const { data: representatives = [], isLoading, isPending, isError } = useGetRepresentatives();
 
     const {
         register,
@@ -82,6 +84,8 @@ const TaskCreate = () => {
             return;
         }
 
+        console.log('stages', stages);
+
         const createTaskDto: CreateTaskDtoModel = {
             title: data.title,
             address: data.address,
@@ -90,10 +94,12 @@ const TaskCreate = () => {
             possibleSolutions: data.solution,
             desiredResolutionDate: new Date(data.endDate),
             stages:
-                stages?.map((stage) => ({
-                    title: stage.title,
-                    date: new Date(stage.date).toISOString(),
-                })) || [],
+                stages
+                    ?.filter((stage) => stage.date)
+                    .map((stage) => ({
+                        title: stage.title,
+                        date: new Date(stage.date).toISOString(),
+                    })) || [],
         };
 
         mutate(createTaskDto, {
@@ -117,6 +123,15 @@ const TaskCreate = () => {
             },
         });
     };
+
+    console.log('Representatives:', representatives);
+
+    // ⚠️ Фильтруем представителей, чтобы оставить только депутатов. Надо будет сделать таблцицу должностей и связывать с профилем представителя, чтобы не полагаться на строку в названии должности
+    const deputies = representatives.filter((rep): rep is UserWithRepresentativeProfileDtoModel => {
+        return 'representativeProfile' in rep && rep.representativeProfile?.position?.toLowerCase().includes('депутат');
+    });
+
+    // console.log('Deputies:', deputies);
 
     return (
         <Layout>
@@ -142,14 +157,21 @@ const TaskCreate = () => {
                                         id="assignee"
                                         {...register('assigneeId')}
                                         className={formInputClass(errors.assigneeId)}>
-                                        <option value="">Выберите представителя</option>
-                                        {user?.subscriptions?.map((sub) => (
-                                            <option
-                                                key={sub.id}
-                                                value={sub.representative.id}>
-                                                {sub.representative.name}
-                                            </option>
-                                        ))}
+                                        {isLoading || isPending ? (
+                                            <option value="">Загрузка депутатов...</option>
+                                        ) : (
+                                            <>
+                                                <option value="">Выберите представителя</option>
+
+                                                {deputies?.map((deputie) => (
+                                                    <option
+                                                        key={deputie.id}
+                                                        value={deputie.id}>
+                                                        {deputie.name} — {deputie.representativeProfile.position}
+                                                    </option>
+                                                ))}
+                                            </>
+                                        )}
                                     </select>
                                 </div>
                                 <FormError error={errors.assigneeId} />
@@ -267,62 +289,64 @@ const TaskCreate = () => {
                             </div>
                         </div>
 
-                        <div className="mb-6">
-                            <div className="flex justify-between items-center mb-2">
-                                <Label>Этапы решения</Label>
-                                <Button
-                                    type="button"
-                                    onClick={addStage}
-                                    variant="outline"
-                                    size="sm"
-                                    className="flex items-center text-honor-blue">
-                                    <Plus
-                                        size={16}
-                                        className="mr-1"
-                                    />
-                                    Добавить этап
-                                </Button>
-                            </div>
+                        {user?.isRepresentative && (
+                            <div className="mb-6">
+                                <div className="flex justify-between items-center mb-2">
+                                    <Label>Этапы решения</Label>
+                                    <Button
+                                        type="button"
+                                        onClick={addStage}
+                                        variant="outline"
+                                        size="sm"
+                                        className="flex items-center text-honor-blue">
+                                        <Plus
+                                            size={16}
+                                            className="mr-1"
+                                        />
+                                        Добавить этап
+                                    </Button>
+                                </div>
 
-                            {stages.map((stage, index) => (
-                                <div
-                                    key={index}
-                                    className="flex gap-2 mb-3">
-                                    <div className="flex-1">
-                                        <div className="relative">
-                                            <ClipboardCheck
-                                                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-honor-darkGray"
-                                                size={18}
-                                            />
+                                {stages.map((stage, index) => (
+                                    <div
+                                        key={index}
+                                        className="flex gap-2 mb-3">
+                                        <div className="flex-1">
+                                            <div className="relative">
+                                                <ClipboardCheck
+                                                    className="absolute left-3 top-1/2 transform -translate-y-1/2 text-honor-darkGray"
+                                                    size={18}
+                                                />
+                                                <Input
+                                                    value={stage.title}
+                                                    onChange={(e) => handleStageChange(index, 'title', e.target.value)}
+                                                    className="honor-input pl-10"
+                                                    placeholder="Название этапа"
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="w-40">
                                             <Input
-                                                value={stage.title}
-                                                onChange={(e) => handleStageChange(index, 'title', e.target.value)}
-                                                className="honor-input pl-10"
-                                                placeholder="Название этапа"
+                                                type="date"
+                                                value={stage.date}
+                                                onChange={(e) => handleStageChange(index, 'date', e.target.value)}
+                                                className="honor-input"
                                             />
                                         </div>
+                                        {stages.length > 1 && (
+                                            <Button
+                                                type="button"
+                                                onClick={() => removeStage(index)}
+                                                variant="ghost"
+                                                size="icon"
+                                                className="text-honor-darkGray hover:text-red-500">
+                                                <X size={18} />
+                                            </Button>
+                                        )}
                                     </div>
-                                    <div className="w-40">
-                                        <Input
-                                            type="date"
-                                            value={stage.date}
-                                            onChange={(e) => handleStageChange(index, 'date', e.target.value)}
-                                            className="honor-input"
-                                        />
-                                    </div>
-                                    {stages.length > 1 && (
-                                        <Button
-                                            type="button"
-                                            onClick={() => removeStage(index)}
-                                            variant="ghost"
-                                            size="icon"
-                                            className="text-honor-darkGray hover:text-red-500">
-                                            <X size={18} />
-                                        </Button>
-                                    )}
-                                </div>
-                            ))}
-                        </div>
+                                ))}
+                            </div>
+                        )}
 
                         <div className="mb-6">
                             <Label className="block mb-2">Приложенные файлы</Label>

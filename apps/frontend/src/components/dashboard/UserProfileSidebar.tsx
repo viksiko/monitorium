@@ -118,8 +118,8 @@ const UserProfileSidebar = () => {
             <div className="p-6">
                 {!user.isRepresentative && (
                     <>
-                        <div className="flex gap-2 items-center">
-                            <h3 className="text-lg font-semibold ">Мои представители</h3>
+                        <div className="flex gap-2 items-center mb-2">
+                            <h3 className="text-lg font-semibold">Мои представители</h3>
                             <ItemCount count={user.subscriptions.length} />
                         </div>
                         {user.subscriptions && user.subscriptions.length > 0 ? (
