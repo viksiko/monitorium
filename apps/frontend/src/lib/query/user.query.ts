@@ -28,3 +28,10 @@ export function useGetSubscriptions() {
         queryFn: () => user.getSubscriptions(),
     });
 }
+
+export function useGetRepresentatives() {
+    return useQuery({
+        queryKey: ['userRepresentatives'],
+        queryFn: () => user.getUsersByFilter({ role: 'representative' }),
+    });
+}

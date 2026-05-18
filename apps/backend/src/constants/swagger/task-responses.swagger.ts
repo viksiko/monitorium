@@ -373,6 +373,20 @@ export const NO_TASK_ACCESS_RESPONSE: ApiResponseOptions = {
     },
 };
 
+export const STAGES_ONLY_FOR_REPRESENTATIVE_RESPONSE: ApiResponseOptions = {
+    status: 403,
+    description: 'Этапы может создавать только представитель власти',
+    schema: {
+        example: {
+            success: false,
+            statusCode: 403,
+            data: {
+                message: TASK_MESSAGES.STAGES_ONLY_FOR_REPRESENTATIVE,
+            },
+        },
+    },
+};
+
 export const TASK_NOT_FOUND_RESPONSE: ApiResponseOptions = {
     status: 404,
     description: 'Задание не найдено',
@@ -382,6 +396,20 @@ export const TASK_NOT_FOUND_RESPONSE: ApiResponseOptions = {
             statusCode: 404,
             data: {
                 message: TASK_MESSAGES.NOT_FOUND,
+            },
+        },
+    },
+};
+
+export const TASK_ASSIGNEE_NOT_FOUND_RESPONSE: ApiResponseOptions = {
+    status: 404,
+    description: 'Не найден исполнитель для задания',
+    schema: {
+        example: {
+            success: false,
+            statusCode: 404,
+            data: {
+                message: TASK_MESSAGES.ASSIGNEE_NOT_FOUND,
             },
         },
     },

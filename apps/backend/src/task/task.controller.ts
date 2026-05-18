@@ -23,6 +23,8 @@ import {
     GET_TASK_BY_ID,
     GET_TASK_STAGES_BY_TASK,
     NO_TASK_ACCESS_RESPONSE,
+    STAGES_ONLY_FOR_REPRESENTATIVE_RESPONSE,
+    TASK_ASSIGNEE_NOT_FOUND_RESPONSE,
     TASK_BAD_REQUEST_RESPONSE,
     TASK_DELETE_SUCCESS_RESPONSE,
     TASK_FILTER_LIST_SUCCESS_RESPONSE,
@@ -51,8 +53,10 @@ export class TaskController {
     @ApiOperation({ summary: 'Создать новое задание' })
     @ApiResponse(CREATE_TASK_SUCCESS_RESPONSE)
     @ApiResponse(CREATE_TASK_VALIDATION_ERROR_RESPONSE)
+    @ApiResponse(STAGES_ONLY_FOR_REPRESENTATIVE_RESPONSE)
+    @ApiResponse(TASK_ASSIGNEE_NOT_FOUND_RESPONSE)
     async createTask(@Req() req: Request & { user: User }, @Body() dto: CreateTaskDto): Promise<Task> {
-        return await this.taskService.createTask(req.user.id, dto);
+        return await this.taskService.createTask(req.user, dto);
     }
 
     // Получить все задания
@@ -153,8 +157,12 @@ export class TaskController {
     @ApiResponse(TASK_NOT_FOUND_RESPONSE)
     @ApiResponse(CREATE_TASK_STAGES_VALIDATION_ERROR_RESPONSE)
     @ApiResponse(CREATE_TASK_STAGES_SUCCESS_RESPONSE)
-    async addStage(@Param('taskId') taskId: string, @Body() dto: CreateTaskStageDto): Promise<TaskStage> {
-        return await this.taskService.addStage(taskId, dto);
+    async addStage(
+        @Param('taskId') taskId: string,
+        @Body() dto: CreateTaskStageDto,
+        @Req() req: Request & { user: User },
+    ): Promise<TaskStage> {
+        return await this.taskService.addStage(taskId, dto, req.user);
     }
 
     // Получение всех этапов задания

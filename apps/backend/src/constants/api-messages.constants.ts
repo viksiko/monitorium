@@ -50,6 +50,7 @@ export const TASK_MESSAGES = {
     INVALID_STATUS: 'Неверный статус задания',
     ASSIGNEE_NOT_FOUND: 'Исполнитель не найден',
     TASK_ASSIGNEE_MUST_BE_REPRESENTATIVE: 'Исполнитель должен быть представителем',
+    STAGES_ONLY_FOR_REPRESENTATIVE: 'Этапы может создавать только представитель власти',
 } as const;
 
 export const VERIFICATION_MESSAGES = {

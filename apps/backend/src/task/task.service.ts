@@ -21,12 +21,17 @@ export class TaskService {
         private readonly notificationService: NotificationService,
     ) {}
 
-    async createTask(authorId: string, dto: CreateTaskDto): Promise<Task> {
+    async createTask(user: User, dto: CreateTaskDto): Promise<Task> {
         try {
             const { stages, assigneeId, ...taskData } = dto;
 
             if (!assigneeId) {
-                throw new Error(TASK_MESSAGES.ASSIGNEE_NOT_FOUND);
+                throw new NotFoundException(TASK_MESSAGES.ASSIGNEE_NOT_FOUND);
+            }
+
+            // Проверяем, что если указаны этапы, то пользователь является представителем
+            if (!user.isRepresentative && stages?.length) {
+                throw new ForbiddenException(TASK_MESSAGES.STAGES_ONLY_FOR_REPRESENTATIVE);
             }
 
             const task = await this.prisma.$transaction(async (tx) => {
@@ -40,7 +45,7 @@ export class TaskService {
                     });
 
                     if (!assignee) {
-                        throw new Error(TASK_MESSAGES.ASSIGNEE_NOT_FOUND);
+                        throw new NotFoundException(TASK_MESSAGES.ASSIGNEE_NOT_FOUND);
                     }
 
                     if (assignee.role !== 'REPRESENTATIVE') {
@@ -53,13 +58,13 @@ export class TaskService {
 
                     // Если автор назначает задачу самому себе и он представитель, баланс не списываем
                     const isRepresentativeSelfAssignedTask =
-                        authorId === assigneeId && assignee.role === 'REPRESENTATIVE';
+                        user.id === assigneeId && assignee.role === 'REPRESENTATIVE';
 
                     // Списание билеты у пользователя
                     if (!isRepresentativeSelfAssignedTask) {
                         await this.balanceService.withdrawBalanceTx(
                             tx,
-                            authorId,
+                            user.id,
                             TOKEN_PARAMS.TASK_CREATION_PRICE,
                             BalanceTransactionType.CREATE_TASK,
                         );
@@ -79,7 +84,7 @@ export class TaskService {
 
                         // автор
                         author: {
-                            connect: { id: authorId },
+                            connect: { id: user.id },
                         },
 
                         // исполнитель (опционально)
@@ -111,7 +116,7 @@ export class TaskService {
             });
 
             // создаём уведомление представителю по websocket
-            if (task.assigneeId && task.assigneeId !== authorId) {
+            if (task.assigneeId && task.assigneeId !== user.id) {
                 await this.notificationService.createAndSendNotification({
                     userId: task.assigneeId,
                     type: 'NEW_TASK_ASSIGNED',
@@ -126,7 +131,7 @@ export class TaskService {
             logger.error(
                 'Failed create task' +
                     '\nauthorId: ' +
-                    authorId +
+                    user.id +
                     '\ndto: ' +
                     JSON.stringify(dto) +
                     '\nerror: ' +
@@ -330,8 +335,13 @@ export class TaskService {
 
     /**Этапы заданий**/
     // Проверка, существует ли задача и добавление этапа
-    async addStage(taskId: string, dto: CreateTaskStageDto): Promise<TaskStage> {
+    async addStage(taskId: string, dto: CreateTaskStageDto, user: User): Promise<TaskStage> {
         try {
+            // Только представитель власти может создавать этапы
+            if (!user.isRepresentative) {
+                throw new ForbiddenException(TASK_MESSAGES.STAGES_ONLY_FOR_REPRESENTATIVE);
+            }
+
             // Проверяем, что задача существует
             const task = await this.prisma.task.findUnique({
                 where: { id: taskId },
